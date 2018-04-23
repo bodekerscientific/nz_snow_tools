@@ -17,7 +17,7 @@ from nz_snow_tools.util.utils import convert_dt_to_hourdec, convert_datetime_jul
 #     return melt
 
 
-def calc_melt_Clark2009(ta, precip, d_snow, doy, acc, tmelt=274.16):
+def calc_melt_Clark2009(ta, precip, d_snow, doy, acc, tmelt=274.16, **config):
     """
     calculate the melt rate (mm day^-1) at current timestep according to Clark 2009
     :param ta: grid of current temperature (K)
@@ -30,14 +30,15 @@ def calc_melt_Clark2009(ta, precip, d_snow, doy, acc, tmelt=274.16):
     """
 
     # determine melt factor
-    mf = calc_melt_factor_Clark2009(doy, d_snow, precip, acc)
+    mf = calc_melt_factor_Clark2009(doy, d_snow, precip, acc,
+                                    **config)  # mf_mean=config['mf_mean'], mf_amp=config['mf_amp'], mf_alb=config['mf_alb'],                                    mf_alb_decay=config['mf_alb_decay'], mf_ros=config['mf_ros']
     melt_rate = mf * (ta - tmelt)
     melt_rate[(ta < tmelt)] = 0
     return melt_rate
 
 
 def calc_melt_factor_Clark2009(doy, d_snow, precip, acc, mf_mean=5.0, mf_amp=5.0, mf_alb=2.5, mf_alb_decay=5.0,
-                               mf_ros=2.5, hemis='south'):
+                               mf_ros=2.5, hemis='south', **config):
     """
     calculate the grid melt factor according to Clark 2009. Depends on day of year, time since snowfall and rain on snow.
     :param doy: current day of year
@@ -59,7 +60,7 @@ def calc_melt_factor_Clark2009(doy, d_snow, precip, acc, mf_mean=5.0, mf_amp=5.0
     elif hemis == 'north':
         dmf_seas = mf_amp * -1 * np.sin(doy * 2 * np.pi / 366 + 0.551 * np.pi)
     else:
-        print 'incorrect hemisphere chosen, defaulting to southern hemisphere'
+        print('incorrect hemisphere chosen, defaulting to southern hemisphere')
         dmf_seas = mf_amp * np.sin(doy * 2 * np.pi / 366 + 0.551 * np.pi)
 
     # compute change in melt factor due to increased albedo after snowfall
@@ -75,7 +76,7 @@ def calc_melt_factor_Clark2009(doy, d_snow, precip, acc, mf_mean=5.0, mf_amp=5.0
     return mf
 
 
-def calc_acc(ta, precip, tacc=274.16):
+def calc_acc(ta, precip, tacc=274.16,**config):
     """
     calculate accumulation when precip is below threshold
     :param ta: grid of current temperature (K)
@@ -89,31 +90,32 @@ def calc_acc(ta, precip, tacc=274.16):
     return acc
 
 
-def calc_melt_dsc_snow(ta, sw, d_snow, tmelt=274.16, tf=1, rf=1):
+def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04, rf=0.0157, **config):
     """
     calculate the melt rate (mm day^-1) at current timestep according to dsc_snow model
     :param ta: grid of current temperature (K)
     :param precip: grid of current precipitation (mm)
     :param sw: grid of current incoming shortwave rad (W m^-2)
     :param d_snow: grid with current days since last snowfall (days)
-    :param doy: current day of year (can be decimal)
-    :param acc: grid of accumulation in current timestep (mm)
+    :param swe: grid with current swe (mm w.e.)
     :param tmelt: temperature threshold for melt (K)
     :return: grid of melt rate at current timestep (mm day^-1)
     """
-    alb = calc_albedo_snow(d_snow)
+    #
+    alb = calc_albedo_snow(d_snow, swe,
+                           **config)  # dc=config['dc'], tc=config['tc'], a_ice=config['a_ice'], a_freshsnow=config['a_freshsnow'], a_firn=config['a_firn']
     sw_net = sw * alb
     melt_rate = tf * (ta - tmelt) + rf * sw_net
     melt_rate[(ta < tmelt)] = 0
     return melt_rate
 
 
-def calc_albedo_snow(ts, snow=1., dc=11.0, tc=21.9, a_ice=0.34, a_freshsnow=0.9, a_firn=0.53):
+def calc_albedo_snow(ts, snow, dc=11.0, tc=21.9, a_ice=0.34, a_freshsnow=0.9, a_firn=0.53, **config):
     """
     !   albedo calculated using 'time' - based on time since last snowfall(Oerlemans + Knap 1998)
     !   albedo = albedo    output    grid
-    !   snow = grid    of    snow    thickness( in mm    w.e.)
     !   ts = time(days)    since    last    snowfall
+    !   snow = grid    of    snow    thickness( in mm    w.e.)
     !   dc = 'characteristic depth'(11    mm    w.e.)
     !   tc = 'characterstic time scale'(21.9    days)
     !   a_ice = albedo    of    ice    surface(0.34)
@@ -125,7 +127,7 @@ def calc_albedo_snow(ts, snow=1., dc=11.0, tc=21.9, a_ice=0.34, a_freshsnow=0.9,
     return albedo
 
 
-def calc_dswe(swe, d_snow, ta, precip, doy, dtstep, sw=None, which_melt='clark2009'):
+def calc_dswe(swe, d_snow, ta, precip, doy, dtstep, sw=None, which_melt='clark2009', **config):
     """
     calculate the change in swe for a given timestep (mm water equivalent)
     :param swe: grid with current state of SWE (mm water equivalent)
@@ -135,13 +137,13 @@ def calc_dswe(swe, d_snow, ta, precip, doy, dtstep, sw=None, which_melt='clark20
     :param doy: current day of year (can be decimal)
     :return: swe: updated grid of swe at end of current timestep (mm w.e.)
     """
-    acc = calc_acc(ta, precip)
+    acc = calc_acc(ta, precip, **config)
     swe = swe + acc  # Precip is in mm. so doesn't need time dependence
     d_snow[(acc > 0)] = 0  # reset days since snowfall when is new snow
     if which_melt == 'clark2009':
-        melt_rate = calc_melt_Clark2009(ta, precip, d_snow, doy, acc)
+        melt_rate = calc_melt_Clark2009(ta, precip, d_snow, doy, acc, **config)  # tmelt=config['tmelt'],
     elif which_melt == 'dsc_snow':
-        melt_rate = calc_melt_dsc_snow(ta, sw, d_snow, tmelt=274.16, tf=0.04, rf=0.0157)
+        melt_rate = calc_melt_dsc_snow(ta, sw, d_snow, swe, **config)  # tmelt=config['tmelt'], tf=config['tf'], rf=config['rf'],
     melt = melt_rate * dtstep / 86400.0
     melt[(melt >= swe)] = swe[(melt >= swe)]  # limit melt to total swe
     swe = swe - melt
@@ -151,7 +153,7 @@ def calc_dswe(swe, d_snow, ta, precip, doy, dtstep, sw=None, which_melt='clark20
 
 
 def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=None, init_d_snow=None,
-                     read_on_timestep=False, n_tsteps_read=None, shape_xy=None, inp_file=None):
+                     read_on_timestep=False, n_tsteps_read=None, shape_xy=None, inp_file=None, **config):
     """
     main snow model loop. handles timestepping and storage of output.
     assumes input data is at same temporal and spatial resolution as model time step (dtstep). Output is writen at the end of each day, then passed out
@@ -166,6 +168,7 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
     :param inp_file: full path to netCDF input file
     :param n_tsteps_read: integer giving the number of timesteps to read from the netCDF file
     :param out_shape_xy: list giving the shape of the xy grid
+    :param  **config: configuration dictionary
     :return: st_swe - calculated SWE (mm w.e.) at the end of each day. (n = number of days + 1)
     """
     if read_on_timestep:
@@ -208,9 +211,9 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
         d_snow += dtstep / 86400.0
         if read_on_timestep == True:
             inp_ta, inp_precip, inp_doy = read_met_input(inp_file, i)
-            swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta, inp_precip, inp_doy, dtstep)
+            swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta, inp_precip, inp_doy, dtstep, **config)
         else:
-            swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta[i, :], inp_precip[i, :], inp_doy[i], dtstep)
+            swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta[i, :], inp_precip[i, :], inp_doy[i], dtstep, **config)
 
         # print swe[0]
         bucket_melt = bucket_melt + melt
@@ -226,7 +229,7 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
     return st_swe, st_melt, st_acc
 
 
-def snow_main(inp_file, init_swe=None, init_d_snow=None, which_melt='clark2009'):
+def snow_main(inp_file, init_swe=None, init_d_snow=None, which_melt='clark2009', **config):
     """
     main snow model loop. handles timestepping and storage of output.
     assumes all the input data is on the same spatial and temporal grid.
@@ -282,13 +285,12 @@ def snow_main(inp_file, init_swe=None, init_d_snow=None, which_melt='clark2009')
         d_snow += dtstep / 86400.0
 
         inp_ta, inp_precip, inp_sw = read_met_input(inp_nc_file, i)
-        swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta, inp_precip, inp_doy[i], dtstep, sw=inp_sw,
-                                           which_melt=which_melt)
+        swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta, inp_precip, inp_doy[i], dtstep, sw=inp_sw, which_melt=which_melt, **config)
 
         # print swe[0]
         bucket_melt = bucket_melt + melt
         bucket_acc = bucket_acc + acc
-        if inp_hourdec[i] == 0 or inp_hourdec[i] == 24:  # output daily
+        if i != 0 and inp_hourdec[i] == 0 or inp_hourdec[i] == 24:  # output daily don't store if
             st_swe[ii, :] = swe
             st_melt[ii, :] = bucket_melt
             st_acc[ii, :] = bucket_acc
@@ -312,7 +314,6 @@ def read_met_input(inp_nc_file, i):
     inp_sw = inp_nc_file.get_variables_by_attributes(standard_name='surface_downwelling_shortwave_flux_in_air')[0][i, :]
 
     return inp_ta, inp_p, inp_sw
-
 
 # if __name__ == '__main__':
 # create fake input data

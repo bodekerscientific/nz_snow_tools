@@ -18,3 +18,8 @@ Getting Started
 How to use the package....
 
 The package has been tested in Python 2.7
+
+
+the snow model is called from run_snow_model
+
+a configuration dictionary is required. THis dictionary specifies the parameter values, which will override the default values specified in the functions.
