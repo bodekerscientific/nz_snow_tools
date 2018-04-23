@@ -1,0 +1,321 @@
+"""
+Generate hourly temperature and precipitation data for use in the snow model
+
+The daily gridded fields (e.g. from VCSN) are downscaled using the same methods given in "Simulations of seasonal snow for the South Island, New Zealand"
+Clark et al, 2009
+
+"""
+
+from __future__ import division
+
+import datetime as dt
+import netCDF4 as nc
+import numpy as np
+import pickle
+import mpl_toolkits.basemap as basemap
+
+from nz_snow_tools.util.utils import process_precip, process_temp, create_mask_from_shpfile, make_regular_timeseries, calc_toa, trim_lat_lon_bounds, \
+    setup_clutha_dem_250m
+
+from nz_snow_tools.util.write_fsca_to_netcdf import write_nztm_grids_to_netcdf, setup_nztm_grid_netcdf
+
+
+# def get_elevation_data(ravel_idxs):
+#     ds = nc.Dataset(env.data('/RCMData/Version6/RCP2.6/BCC-CSM1.1/MaxTempCorr_VCSN_BCC-CSM1.1_2006-2010_RCP2.6.nc'))
+#     return ds.variables['elevation'][:].ravel()[ravel_idxs]
+#
+#
+# def get_vscn_elevation_data(ravel_idxs):
+#     ds = nc.Dataset(env.data('/RCMData/Version6/RCP2.6/BCC-CSM1.1/MaxTempCorr_VCSN_BCC-CSM1.1_2006-2010_RCP2.6.nc'))
+#     return np.flipud(ds.variables['elevation'][:]).ravel()[ravel_idxs]
+
+#
+# def get_ravel_idxs(mask):
+#     existing_landpoints = np.load(get_subset_landpoints_fname())
+#     masked_landpoints = ravel.calc_ravel_idxs(mask, False)
+#
+#     # Only include the points in the subsetted data
+#     masked_landpoints = np.array(filter(lambda x: x in existing_landpoints, masked_landpoints))
+#
+#     return masked_landpoints
+#
+#
+# def get_masks():
+#     shp_file = shapefile.Reader(mask_shpfile)
+#     res = []
+#     # first field is id and the second is the name
+#     for idx, sr in enumerate(shp_file.shapeRecords()):
+#         mask = create_mask_from_shpfile(VCSN_file.latitudes(), VCSN_file.longitudes(), mask_shpfile, idx)
+#         res.append((sr.record[1], mask))
+#     return res
+#
+#
+# def subset_mask(mask, data):
+#     """
+#     Obtain the subset defined by the mask
+#
+#     Since the data array is already ravelled, it cannot be masked easily. Instead the overlapping ravelled indexs must be calculated and
+#     then extracted
+#     :param mask:
+#     :param data:
+#     :return: The subsetted data
+#     """
+#     existing_landpoints = np.load(get_subset_landpoints_fname())
+#     masked_landpoints = get_ravel_idxs(mask)
+#
+#     # Find the overlapping points
+#     overlap = np.array([idx in masked_landpoints for idx in existing_landpoints])
+#
+#     return data[:, overlap]
+
+
+def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, out_elev, lapse=-0.005):
+    """
+    interpolate met data for one timestep from coarse (vcsn) grid onto higher-resolution grid using bilinear interpolation.
+
+    Air temperatures are first lapsed to sea level using default lapse rate of 0.005 K per m, interpolated, then lapsed to elevation of new grid
+
+    :param in_dat: 3D array with data to be interpolated. has matrix [i,j] coordinates i.e. dimensions [time, in_lats, in_lons]
+    :param var: name of variable to be interpolated. if 't_max', or 't_min'  will lapse to sea level before interpolation
+    :param in_lons: 1D or 2D array containing longitudes of input data
+    :param in_lats: 1D or 2Darray containing latitudes of input data
+    :param in_elev: 2D array containing elevation of input data, dimesions [in_lats, in_lons] or same as in_lons
+    :param out_lons: 1D array containing longitudes of output data
+    :param out_lats: 1D array containing latitudes of output data
+    :param out_elev: 2D array containing elevation of output data, dimension [out_lats, out_lons]
+    :param lapse: lapse rate used to reduce data to sea level before interpolation
+    :return: out_dat: 3D array with interpolated data has dimensions [time, out_lats, out_lons]
+    """
+
+    # X, Y = np.meshgrid(vcsn_lons, vcsn_lats)
+    if out_lons.ndim == 1 and out_lats.ndim == 1:
+        # y_array, x_array = np.meshgrid(y_centres, x_centres, indexing='ij')
+        YI, XI, = np.meshgrid(out_lats, out_lons,
+                              indexing='ij')  # the input grid must have i,j ordering with y(lats) being the first dimension.
+        num_out_lats = len(out_lats)
+        num_out_lons = len(out_lons)
+    else:
+        num_out_lats = out_lons.shape[0]
+        num_out_lons = out_lons.shape[1]
+        XI = out_lons
+        YI = out_lats
+
+    out_dat = np.empty([in_dat.shape[0], num_out_lats, num_out_lons], dtype=np.float32) * np.nan
+
+    for i in range(in_dat.shape[0]):
+
+        in_dat1 = in_dat[i, :, :] * 1.0
+
+        if var in ['t_max', 't_min']:  # lapse to sea level
+            in_t_offset = in_elev * lapse
+            in_dat1 = in_dat1 - in_t_offset
+
+        out_dat1 = basemap.interp(in_dat1, in_lons, in_lats, XI, YI, checkbounds=False, masked=False,
+                                  order=1)
+        # mask data at sea level
+        # out_dat1[out_elev.data < 1.0] = np.nan # no longer send in a masked array
+
+        if var in ['t_max', 't_min']:  # lapse back to new elevations
+            out_t_offset = out_elev * lapse
+            out_dat1 = out_dat1 + out_t_offset
+
+        out_dat[i, :, :] = out_dat1
+
+    return out_dat
+
+
+def daily_to_hourly_temp_grids(max_temp_grid, min_temp_grid, single_dt=False):
+    """
+    run through and process daily data into hourly, one slice at a time.
+    :param max_temp_grid: input data with dimension [time,y,x]
+    :param min_temp_grid: input data with dimension [time,y,x]
+    :return: hourly data with dimension [time*24,y,x]
+    """
+    if single_dt == True:  # assume is 2d and add a time dimension on the start
+        max_temp_grid = max_temp_grid.reshape([1, max_temp_grid.shape[0], max_temp_grid.shape[1]])
+        min_temp_grid = min_temp_grid.reshape([1, min_temp_grid.shape[0], min_temp_grid.shape[1]])
+    hourly_grid = np.empty([max_temp_grid.shape[0] * 24, max_temp_grid.shape[1], max_temp_grid.shape[2]], dtype=np.float32) * np.nan
+    for i in range(max_temp_grid.shape[1]):
+        hourly_grid[:, i, :] = process_temp(max_temp_grid[:, i, :], min_temp_grid[:, i, :])
+    return hourly_grid
+
+
+def daily_to_hourly_swin_grids(swin_grid, lats, lons, hourly_dt, single_dt=False):
+    """
+    converts daily mean SW into hourly using TOA rad, applying
+
+    :param hi_res_sw_rad: daily sw in data with dimension [time,y,x]
+    :return:
+    """
+    if single_dt == True:  # assume is 2d and add a time dimension on the start
+        swin_grid = swin_grid.reshape([1, swin_grid.shape[0], swin_grid.shape[1]])
+
+    num_steps_in_day = int(86400. / (hourly_dt[1] - hourly_dt[0]).total_seconds())
+    hourly_grid = np.ones([swin_grid.shape[0] * num_steps_in_day, swin_grid.shape[1], swin_grid.shape[2]])
+
+    lon_ref = np.mean(lons)
+    lat_ref = np.mean(lats)
+    # compute hourly TOA for reference in middle of domain #TODO explicit cacluation for each grid point?
+    toa_ref = calc_toa(lat_ref, lon_ref, hourly_dt)
+    # compute daily average TOA and atmospheric transmissivity
+    daily_av_toa = []
+    for i in range(0, len(toa_ref), num_steps_in_day):
+        daily_av_toa.append(np.mean(toa_ref[i:i + num_steps_in_day]))
+    daily_trans = swin_grid / np.asarray(daily_av_toa)[:, np.newaxis, np.newaxis]
+    # calculate hourly sw from daily average transmisivity and hourly TOA
+    for ii, i in enumerate(range(0, len(toa_ref), num_steps_in_day)):
+        hourly_grid[i:i + num_steps_in_day] = hourly_grid[i:i + num_steps_in_day] * toa_ref[i:i + num_steps_in_day, np.newaxis, np.newaxis] * daily_trans[ii]
+
+    return hourly_grid
+
+
+def load_new_vscn(variable, dt_out, nc_file_in):
+    """
+    load vcsn data from file for specified datetimes. transforms spatial dimensions so that latitude and longitude are increasing
+    :param variable: string describing the field to take. options for newVCSN data are 'rain', 'tmax', 'tmin', 'srad'
+    :param dt_out: array of datetimes requested
+    :param nc_file_in: string describing full path to netCDF file with VCSN data
+    :return: array containing VCSN data with dimensions [time, lat, lon]
+    """
+    nc_file = nc.Dataset(nc_file_in)
+    nc_datetimes = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
+    # nc dts are in UTC, and recorded at 9am. To get record relevant to NZST day (at 00:00), need to subtract 3 hours (12 hour offset, plus 9 hours)
+    index = np.where(np.logical_and(nc_datetimes >= (dt_out[0] - dt.timedelta(hours=3)),
+                                    nc_datetimes <= (dt_out[-1] - dt.timedelta(hours=3))))
+    start_idx = index[0][0]
+    end_idx = index[0][-1]
+    if variable == 'tmax' or variable == 'rain' or variable == 'srad':  # take measurement (max or sum) to 9am next day
+        start_idx = start_idx + 1
+        end_idx = end_idx + 1
+    data = np.fliplr(nc_file.variables[variable][start_idx:end_idx + 1, :,
+                     :])  # flip so latitude and longitude is increasing. i.e. origin at bottom left.
+    # fliplr flips second dimension
+
+    return data
+
+
+if __name__ == '__main__':
+
+    # dem control
+    output_dem = 'nztm250m'  # identifier for output dem
+    dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
+    # mask control
+    mask_dem = True  # boolean to set whether or not to mask the output dem
+    catchment = 'Clutha'
+    mask_created = True  # boolean to set whether or not the mask has already been created
+    mask_folder = 'Y:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
+    mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
+        catchment)  # shapefile containing polyline or polygon of catchment in WGS84. Not needed if mask_created==True
+    # time control
+    hydro_years_to_take = range(2001, 2012 + 1)  # range(2001, 2013 + 1)
+    save_by_timestep = False  # save one timestep per file? Needed for Fortran version of dsc_snow
+    compute_by_day = True  # only compute hourly values one day at a time? Useful for large grids, as not enough memory to compute for whole grid at once.
+    # input met data
+    nc_file_rain = 'T:/newVCSN/rain_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    nc_file_tmax = 'T:/newVCSN/tmax_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    nc_file_tmin = 'T:/newVCSN/tmin_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    nc_file_srad = 'T:/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    # output met data
+    met_out_folder = 'Y:/DSC-Snow/input_data_hourly'
+
+    ####
+
+    # set up input and output DEM for processing
+    # output DEM
+    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_clutha_dem_250m(dem_file)
+    data_id = '{}_{}'.format(catchment, output_dem)  # name to identify the output data
+    if mask_dem == True:
+        # Get the masks for the individual regions of interest
+        if mask_created == True:  # load precalculated mask
+            mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, output_dem))
+        else:  # create mask and save to npy file
+            # masks = get_masks() #TODO set up for multiple masks
+            mask = create_mask_from_shpfile(lat_array, lon_array, mask_shpfile)
+            np.save(mask_folder + '/{}_{}.npy'.format(catchment, output_dem), mask)
+        # Trim down the number of latitudes requested so it all stays in memory
+        lats, lons, elev, northings, eastings = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
+    else:
+        mask = None
+        lats = lat_array
+        lons = lon_array
+        elev = nztm_dem
+        northings = y_centres
+        eastings = x_centres
+
+    for hydro_year_to_take in hydro_years_to_take:
+        # load data
+        # create timestamp to get
+        dts_to_take = np.asarray(make_regular_timeseries(dt.datetime(hydro_year_to_take - 1, 4, 1), dt.datetime(hydro_year_to_take, 3, 31), 86400))
+        # pull only data needed.
+        precip_daily = load_new_vscn('rain', dts_to_take, nc_file_rain)
+        max_temp_daily = load_new_vscn('tmax', dts_to_take, nc_file_tmax)
+        min_temp_daily = load_new_vscn('tmin', dts_to_take, nc_file_tmin)
+        sw_rad_daily = load_new_vscn('srad', dts_to_take, nc_file_srad)
+        # load grid (assume same for all input data)
+        ds = nc.Dataset(nc_file_rain)
+        vcsn_elev = np.flipud(ds.variables['elevation'][:])
+        vcsn_lats = ds.variables['latitude'][::-1]
+        vcsn_lons = ds.variables['longitude'][:]
+        hy_index = np.ones(dts_to_take.shape, dtype='int')
+
+        # check dimensions and projection of the new data
+        # nztm_elev_check = interpolate_met(np.asarray([vcsn_elev]), Precip, vcsn_lons, vcsn_lats, vcsn_elev, lons,
+        #                                     lats, elev)
+        # plt.imshow(nztm_elev_check[0], origin=0)
+        # plt.imshow(elev, origin=0)
+        start_dt = dts_to_take[0]
+        finish_dt = dts_to_take[-1]
+
+        # interpolate data to fine grid
+        hi_res_precip = interpolate_met(precip_daily, 'rain', vcsn_lons, vcsn_lats, np.ma.fix_invalid(vcsn_elev).data, lons, lats, elev)
+        hi_res_max_temp = interpolate_met(max_temp_daily, 'tmax', vcsn_lons, vcsn_lats, np.ma.fix_invalid(vcsn_elev).data, lons, lats, elev)
+        hi_res_min_temp = interpolate_met(min_temp_daily, 'tmin', vcsn_lons, vcsn_lats, np.ma.fix_invalid(vcsn_elev).data, lons, lats, elev)
+        hi_res_sw_rad = interpolate_met(sw_rad_daily, 'srad', vcsn_lons, vcsn_lats, np.ma.fix_invalid(vcsn_elev).data, lons, lats, elev)
+
+        # process and write
+        if compute_by_day == True:  # process and write one day at a time.
+            hourly_dt = np.asarray(make_regular_timeseries(start_dt, finish_dt + dt.timedelta(days=1), 3600))
+            out_nc_file = setup_nztm_grid_netcdf(met_out_folder + '/met_inp_{}_hy{}.nc'.format(data_id, hydro_year_to_take),
+                                                 None, ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
+                                                 hourly_dt, northings, eastings, lats, lons, elev)
+            day_weightings = []
+            for i in range(hi_res_precip.shape[0]):
+                # Do the temporal downsampling for one day
+                # precip is random cascade for each day. NOTE original VCSN data has almost correct timestamp - ie. total from 9am.
+                hourly_precip, day_weightings_1 = process_precip(hi_res_precip[i], one_day=True)  # TODO: align to 9am-9am
+                # air temperature is three part sinusoidal between min at 8am and max at 2pm. NOTE original VCSN data has correct timestamp - ie. minimum to 9am, maximum from 9am.
+                hourly_temp = daily_to_hourly_temp_grids(hi_res_max_temp[i], hi_res_min_temp[i], single_dt=True)  # TODO: check how data
+                hourly_swin = daily_to_hourly_swin_grids(hi_res_sw_rad[i], lats, lons, hourly_dt[i * 24: (i + 1) * 24], single_dt=True)
+
+                for var, data in zip(['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
+                                     [hourly_temp, hourly_precip, hourly_swin]):
+                    out_nc_file.variables[var][i * 24: (i + 1) * 24, :, :] = data
+                day_weightings.extend(day_weightings_1)
+            out_nc_file.close()
+
+            pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_hy{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
+
+        else:  # compute all the values then write (takes too much memory for large grids)
+            # Do the temporal downsampling
+            # precip is random cascade for each day. # NOTE original VCSN data has almost correct timestamp - ie. total from 9am.
+            hourly_precip, day_weightings = process_precip(hi_res_precip)  # TODO: align to 9am-9am
+            # air temperature is three part sinusoidal between min at 8am and max at 2pm. # NOTE original VCSN data has correct timestamp - ie. minimum to 9am, maximum from 9am.
+            hourly_temp = daily_to_hourly_temp_grids(hi_res_max_temp, hi_res_min_temp)  # TODO: check how data is selected to ensure correct
+            hourly_dt = np.asarray(make_regular_timeseries(start_dt, finish_dt + dt.timedelta(days=1), 3600))
+            hourly_swin = daily_to_hourly_swin_grids(hi_res_sw_rad, lats, lons, hourly_dt)
+
+            # Save out the met data and weightings used for precip
+            if save_by_timestep == True:
+                for i in range(len(hourly_dt)):
+                    dt_save = hourly_dt[i]
+                    write_nztm_grids_to_netcdf(met_out_folder + '/{}/met_inp_{}_{}.nc'.format(catchment, data_id, dt_save.strftime('%Y%m%d%H')),
+                                               [np.squeeze(hourly_temp[i, :, :]), np.squeeze(hourly_precip[i, :, :]), np.squeeze(hourly_swin[i, :, :])],
+                                               ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
+                                               dt_save, northings, eastings, lats, lons, elev, no_time=True)
+                pickle.dump(day_weightings, open(met_out_folder + '/{}/met_inp_{}_hy{}_daywts.pkl'.format(catchment, data_id, hydro_year_to_take), 'wb'), -1)
+            else:
+                write_nztm_grids_to_netcdf(met_out_folder + '/met_inp_{}_hy{}.nc'.format(data_id, hydro_year_to_take),
+                                           [hourly_temp, hourly_precip, hourly_swin],
+                                           ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
+                                           hourly_dt, northings, eastings, lats, lons, elev)
+                pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_hy{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
