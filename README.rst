@@ -16,3 +16,5 @@ Getting Started
 ===============
 
 How to use the package....
+
+The package has been tested in Python 2.7
