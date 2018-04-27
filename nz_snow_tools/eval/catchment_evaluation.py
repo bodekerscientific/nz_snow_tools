@@ -142,15 +142,14 @@ def load_mask_modis(catchment, output_dem, mask_folder, dem_file, mask_created=T
 if __name__ == '__main__':
 
     which_model = 'all'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
-    plot_sca = True # boolean specifying if plots of annual mean sca are required.
     clark2009run = True  # boolean specifying if the run already exists
     dsc_snow_opt = 'python'  # string identifying which version of the dsc snow model to use output from 'python' or 'fortran'
-    catchment = 'Clutha'
+    catchment = 'Nevis'
     output_dem = 'nztm250m'  # identifier for output dem
-    hydro_years_to_take = range(2001, 2017 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+    hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
-    dsc_snow_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/'
-    clark2009_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/'
+    dsc_snow_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
+    clark2009_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
     mask_folder = 'Y:/DSC-Snow/Masks'
     catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
     modis_folder = 'Y:/DSC-Snow/MODIS_NetCDF'
@@ -158,7 +157,7 @@ if __name__ == '__main__':
     met_inp_folder = 'Y:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
 
-    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/'
+    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
 
     # set up lists
     ann_ts_av_sca_m = []
@@ -202,7 +201,7 @@ if __name__ == '__main__':
                                                                                                                              hydro_year_to_take), 'wb'), -1)
             elif clark2009run == True:
                 # load previously run simulations from pickle file
-                st_snow = pickle.load(open(clark2009_output_folder + '/{}_{}_hy{}.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))
+                st_snow = pickle.load(open(clark2009_output_folder + '/{}_{}_hy{}_clark2009.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))
                 st_swe = st_snow[0]
                 st_melt = st_snow[1]
                 st_acc = st_snow[2]
@@ -217,11 +216,11 @@ if __name__ == '__main__':
             elif dsc_snow_opt == 'python':
                 # load previously run simulations from pickle file
                 st_snow = pickle.load(open(dsc_snow_output_folder + '/{}_{}_hy{}_dsc_snow.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))
-                st_swe = st_snow2[0]
-                st_melt = st_snow2[1]
-                st_acc = st_snow2[2]
-                out_dt = st_snow2[3]
-                mask = st_snow2[4]
+                st_swe = st_snow[0]
+                st_melt = st_snow[1]
+                st_acc = st_snow[2]
+                out_dt = st_snow[3]
+                mask = st_snow[4]
 
         if which_model == 'all':
             if clark2009run == False:
@@ -258,6 +257,7 @@ if __name__ == '__main__':
         for i in range(modis_fsca.shape[0]):
             ba_modis_sca.append(np.nanmean(modis_fsca[i, modis_mask]) / 100.0)
             ba_modis_sca_thres.append(np.nansum(modis_sc[i, modis_mask]).astype('d') / num_modis_gridpoints)
+
 
         # first model
         print('model 1')
@@ -296,12 +296,13 @@ if __name__ == '__main__':
         ann_hydro_days.append(convert_date_hydro_DOY(out_dt))
         ann_dt.append(out_dt)
 
-        ann_ts_av_sca2.append(np.asarray(ba_sca2))
-        ann_ts_av_swe2.append(np.asarray(ba_swe2))
-        # ann_ts_av_melt.append(np.asarray(ba_melt))
-        # ann_ts_av_acc.append(np.asarray(ba_acc))
-        ann_hydro_days2.append(convert_date_hydro_DOY(out_dt2))
-        ann_dt2.append(out_dt)
+        if which_model == 'all':
+            ann_ts_av_sca2.append(np.asarray(ba_sca2))
+            ann_ts_av_swe2.append(np.asarray(ba_swe2))
+            # ann_ts_av_melt.append(np.asarray(ba_melt))
+            # ann_ts_av_acc.append(np.asarray(ba_acc))
+            ann_hydro_days2.append(convert_date_hydro_DOY(out_dt2))
+            ann_dt2.append(out_dt)
 
         # # plot
         # plt.plot(ba_modis_sca, label='modis')
@@ -313,18 +314,22 @@ if __name__ == '__main__':
         # compare duration of snow cover
         print('calc snow cover duration')
         modis_scd = np.sum(modis_sc, axis=0)
+        modis_scd[modis_mask == 0] = -1
 
         st_sc = st_swe > 0
         mod1_scd = np.sum(st_sc, axis=0)
+        mod1_scd[mask == 0] = -1
 
         if which_model == 'all':
             st_sc2 = st_swe2 > 0
             mod2_scd = np.sum(st_sc2, axis=0)
+            mod2_scd[mask2==0] = -1
 
         # add to annual series
         ann_scd_m.append(modis_scd)
         ann_scd.append(mod1_scd)
-        ann_scd2.append(mod2_scd)
+        if which_model == 'all':
+            ann_scd2.append(mod2_scd)
 
     ann = [ann_ts_av_sca_m, ann_hydro_days_m, ann_dt_m, ann_scd_m, ann_ts_av_sca, ann_ts_av_swe, ann_hydro_days, ann_dt, ann_scd, ann_ts_av_sca2,
            ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2]

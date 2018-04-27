@@ -15,9 +15,9 @@ from nz_snow_tools.util.utils import create_mask_from_shpfile, make_regular_time
 which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 catchment = 'Nevis'  # string identifying the catchment to run. must match the naming of the catchment shapefile
 output_dem = 'nztm250m'  # identifier for output dem
-hydro_years_to_take = range(2001, 2017 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+hydro_years_to_take = range(2001, 2001 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
+output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/test'
 met_data_folder = 'Y:/DSC-Snow/input_data_hourly'
 
 #configuration dictionary containing model parameters.
@@ -51,7 +51,7 @@ for hydro_year_to_take in hydro_years_to_take:
     # create the extra variables required by catchment_evaluation
     inp_met = nc.Dataset(met_infile, 'r')
     inp_dt = nc.num2date(inp_met.variables['time'][:], inp_met.variables['time'].units)
-    out_dt = np.asarray(make_regular_timeseries(inp_dt[0], inp_dt[-1] + dt.timedelta(days=1), 86400))
+    out_dt = np.asarray(make_regular_timeseries(inp_dt[0], inp_dt[-1], 86400))
     mask = create_mask_from_shpfile(inp_met.variables['lat'][:], inp_met.variables['lon'][:], catchment_shp_folder + '/{}.shp'.format(catchment))
     pickle.dump([st_swe.astype(dtype=np.float32), st_melt.astype(dtype=np.float32), st_acc.astype(dtype=np.float32), out_dt, mask,config], open(
         output_folder + '/{}_{}_hy{}_{}.pkl'.format(catchment, output_dem, hydro_year_to_take, which_model), 'wb'), -1)

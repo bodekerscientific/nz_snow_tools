@@ -12,12 +12,12 @@ average_scd = False # boolean specifying if all years are to be averaged togethe
 which_model = 'all'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
 clark2009run = True  # boolean specifying if the run already exists
 dsc_snow_opt = 'python'  # string identifying which version of the dsc snow model to use output from 'python' or 'fortran'
-catchment = 'Clutha'
+catchment = 'Nevis'
 output_dem = 'nztm250m'  # identifier for output dem
-hydro_years_to_take = range(2001, 2013 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
-model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/test'
-plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/test'
+model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
+plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
 
 ann = pickle.load(open(model_output_folder + '/summary_{}_{}.pkl'.format(catchment, output_dem), 'rb'))
 # indexes 0-3 modis, 4-8 model 1 and 9-13 model 2
@@ -34,7 +34,8 @@ plt.tight_layout()
 if average_scd ==True:
     modis_scd = np.mean(np.asarray(ann_scd_m), axis=0)
     mod1_scd = np.mean(np.asarray(ann_scd), axis=0)
-    mod2_scd = np.mean(np.asarray(ann_scd2), axis=0)
+    if which_model == 'all':
+        mod2_scd = np.mean(np.asarray(ann_scd2), axis=0)
 
     plt.figure()
     plt.subplot(1, 3, 1)
@@ -45,8 +46,10 @@ if average_scd ==True:
     plt.subplot(1, 3, 2)
     plt.imshow(mod1_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='viridis')
     plt.colorbar()
-    plt.title('clark2009 duration')
+    if which_model != 'all':
+        plt.title('{} duration'.format(which_model))
     if which_model == 'all':
+        plt.title('clark2009 duration')
         plt.subplot(1, 3, 3)
         plt.imshow(mod2_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='viridis')
         plt.colorbar()
@@ -56,7 +59,8 @@ else:
     for i, hydro_year_to_take in enumerate(hydro_years_to_take):
         modis_scd = np.asarray(ann_scd_m[i])
         mod1_scd = np.asarray(ann_scd[i])
-        mod2_scd = np.asarray(ann_scd2[i])
+        if which_model == 'all':
+            mod2_scd = np.asarray(ann_scd2[i])
 
         plt.figure()
         plt.subplot(1, 3, 1)
@@ -67,11 +71,13 @@ else:
         plt.subplot(1, 3, 2)
         plt.imshow(mod1_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='viridis')
         plt.colorbar()
-        plt.title('clark2009 duration')
+        if which_model != 'all':
+            plt.title('{} duration'.format(which_model))
         if which_model == 'all':
+            plt.title('clark2009 duration')
             plt.subplot(1, 3, 3)
             plt.imshow(mod2_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='viridis')
             plt.colorbar()
             plt.title('dsc_snow duration')
-        plt.savefig(plot_folder + '/SCA hy{}.png'.format(hydro_year_to_take), dpi=300)
+        plt.savefig(plot_folder + '/SCA hy{}_{}_{}.png'.format(hydro_year_to_take,catchment, output_dem), dpi=300)
 

@@ -15,12 +15,12 @@ from nz_snow_tools.util.utils import convert_date_hydro_DOY, convert_hydro_DOY_t
 
 if __name__ == '__main__':
 
-    which_model = 'all'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
+    which_model = 'clark2009'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
     clark2009run = True  # boolean specifying if the run already exists
     dsc_snow_opt = 'python'  # string identifying which version of the dsc snow model to use output from 'python' or 'fortran'
-    catchment = 'Clutha'
+    catchment = 'Nevis'
     output_dem = 'nztm250m'  # identifier for output dem
-    hydro_years_to_take = range(2001, 2013 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+    hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/test'
     plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/test'
@@ -59,16 +59,16 @@ if __name__ == '__main__':
     plt.subplot(2, 1, 1)
     for ts,hd in zip(ann_ts_av_swe,ann_hydro_days):
         dt_index = convert_hydro_DOY_to_date(hd, 2010)
-        plt.plot(dt_index[:-2],ts[:-2], c=[0.4, 0.4, 0.4])
-    plt.plot(dt_index[:-1],np.mean(ann_ts_av_swe_array, axis=0),'r')
+        plt.plot(dt_index[:-1],ts[:-1], c=[0.4, 0.4, 0.4])
+    plt.plot(dt_index[:365],np.mean(ann_ts_av_swe_array, axis=0),'r')
     ax = plt.gca()
     ax.set_ylim([0, 100])
     ax.set_ylabel('SWE (mm w.e.)')
     plt.subplot(2, 1, 2)
     for ts,hd in zip(ann_ts_av_swe2,ann_hydro_days2):
         dt_index = convert_hydro_DOY_to_date(hd, 2010)
-        plt.plot(dt_index[:-2], ts[:-2], c=[0.4, 0.4, 0.4])
-    plt.plot(dt_index[:-1],np.mean(ann_ts_av_swe2_array, axis=0),'r')
+        plt.plot(dt_index[:-1], ts[:-1], c=[0.4, 0.4, 0.4])
+    plt.plot(dt_index[:365],np.mean(ann_ts_av_swe2_array, axis=0),'r')
 
     plt.gcf().autofmt_xdate()
     years = mdates.YearLocator()  # every year
@@ -90,7 +90,7 @@ if __name__ == '__main__':
     for ts, hd in zip(ann_ts_av_sca_m, ann_hydro_days):
         dt_index = convert_hydro_DOY_to_date(hd, 2010)
         plt.plot(dt_index[:-1], ts, c=[0.4, 0.4, 0.4])
-    plt.plot(dt_index[:-1], np.mean(ann_ts_av_sca_m_array, axis=0), 'r')
+    plt.plot(dt_index[:365], np.mean(ann_ts_av_sca_m_array, axis=0), 'r')
     ax = plt.gca()
     ax.set_ylim([0, 1])
     ax.set_ylabel('SCA')
@@ -98,16 +98,16 @@ if __name__ == '__main__':
     plt.subplot(3, 1, 2)
     for ts, hd in zip(ann_ts_av_sca, ann_hydro_days):
         dt_index = convert_hydro_DOY_to_date(hd, 2010)
-        plt.plot(dt_index[:-2], ts[:-2], c=[0.4, 0.4, 0.4])
-    plt.plot(dt_index[:-1], np.mean(ann_ts_av_sca_array, axis=0), 'r')
+        plt.plot(dt_index[:-1], ts[:-1], c=[0.4, 0.4, 0.4]) # remove last point as is 1st april in next year
+    plt.plot(dt_index[:365], np.mean(ann_ts_av_sca_array, axis=0), 'r')
     ax = plt.gca()
     ax.set_ylim([0, 1])
     ax.set_ylabel('SCA')
     plt.subplot(3, 1, 3)
     for ts, hd in zip(ann_ts_av_sca2, ann_hydro_days2):
         dt_index = convert_hydro_DOY_to_date(hd, 2010)
-        plt.plot(dt_index[:-2], ts[:-2], c=[0.4, 0.4, 0.4])
-    plt.plot(dt_index[:-1], np.mean(ann_ts_av_sca2_array, axis=0), 'r')
+        plt.plot(dt_index[:-1], ts[:-1], c=[0.4, 0.4, 0.4])
+    plt.plot(dt_index[:365], np.mean(ann_ts_av_sca2_array, axis=0), 'r')
 
     plt.gcf().autofmt_xdate()
     years = mdates.YearLocator()  # every year
@@ -121,5 +121,5 @@ if __name__ == '__main__':
     ax.set_ylim([0, 1])
     ax.set_ylabel('SCA')
     plt.tight_layout()
-    plt.savefig(plot_folder + '/av SCA ts.png', dpi=300)
+    plt.savefig(plot_folder + '/av_SCA_ts_{}_{}.png'.format(catchment, output_dem), dpi=300)
 

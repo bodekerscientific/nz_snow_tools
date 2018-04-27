@@ -20,6 +20,6 @@ How to use the package....
 The package has been tested in Python 2.7
 
 
-the snow model is called from run_snow_model
+The snow model is called from run_snow_model (for 2D met input) or run_snow_model_simple (for 1D met input)
 
-a configuration dictionary is required. THis dictionary specifies the parameter values, which will override the default values specified in the functions.
+A configuration dictionary can be used to change the default parameter values in the snow model. This dictionary specifies the parameter values, which will override the default values specified in the functions.
