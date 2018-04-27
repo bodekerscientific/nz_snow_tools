@@ -26,8 +26,8 @@ setup(
     license="MIT",
     packages=find_packages(exclude=["tests"]),
     long_description=read('README.rst'),
-    url='https://github.com/jonoconway/nz_snow_tools',  # use the URL to the github repo
-    download_url='https://github.com/jonoconway/nz_snow_tools/archive/{}.tar.gz'.format(version),
+    url='https://github.com/bodekerscientific/nz_snow_tools',  # use the URL to the github repo
+    download_url='https://github.com/bodekerscientific/nz_snow_tools/archive/{}.tar.gz'.format(version),
     install_requires=[
         'matplotlib',
         'netCDF4',
