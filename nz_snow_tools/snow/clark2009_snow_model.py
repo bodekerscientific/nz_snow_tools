@@ -6,15 +6,8 @@ from __future__ import division
 
 import numpy as np
 import netCDF4 as nc
-import matplotlib.pylab as plt
 
 from nz_snow_tools.util.utils import convert_dt_to_hourdec, convert_datetime_julian_day
-
-
-# def calc_melt_new(ta, swin, alb, tf, rf, tt):
-#     melt = tf * ta + rf * swin * (1 - alb)
-#     melt[(ta < tt)] = 0  # deal with no snow to melt in main loop
-#     return melt
 
 
 def calc_melt_Clark2009(ta, precip, d_snow, doy, acc, tmelt=274.16, **config):
@@ -76,7 +69,7 @@ def calc_melt_factor_Clark2009(doy, d_snow, precip, acc, mf_mean=5.0, mf_amp=5.0
     return mf
 
 
-def calc_acc(ta, precip, tacc=274.16,**config):
+def calc_acc(ta, precip, tacc=274.16, **config):
     """
     calculate accumulation when precip is below threshold
     :param ta: grid of current temperature (K)
@@ -90,7 +83,7 @@ def calc_acc(ta, precip, tacc=274.16,**config):
     return acc
 
 
-def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04, rf=0.0157, **config):
+def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04 * 24, rf=0.009 * 24, **config):
     """
     calculate the melt rate (mm day^-1) at current timestep according to dsc_snow model
     :param ta: grid of current temperature (K)
@@ -102,8 +95,8 @@ def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04, rf=0.0157, **
     :return: grid of melt rate at current timestep (mm day^-1)
     """
     #
-    alb = calc_albedo_snow(d_snow, swe,
-                           **config)  # dc=config['dc'], tc=config['tc'], a_ice=config['a_ice'], a_freshsnow=config['a_freshsnow'], a_firn=config['a_firn']
+    alb = calc_albedo_snow(d_snow, swe, **config)
+    # dc=config['dc'], tc=config['tc'], a_ice=config['a_ice'], a_freshsnow=config['a_freshsnow'], a_firn=config['a_firn']
     sw_net = sw * alb
     melt_rate = tf * (ta - tmelt) + rf * sw_net
     melt_rate[(ta < tmelt)] = 0
@@ -152,8 +145,7 @@ def calc_dswe(swe, d_snow, ta, precip, doy, dtstep, sw=None, which_melt='clark20
     return swe, d_snow, melt, acc
 
 
-def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=None, init_d_snow=None,
-                     read_on_timestep=False, n_tsteps_read=None, shape_xy=None, inp_file=None, **config):
+def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=None, init_d_snow=None, inp_sw=None, which_melt='clark2009', **config):
     """
     main snow model loop. handles timestepping and storage of output.
     assumes input data is at same temporal and spatial resolution as model time step (dtstep). Output is writen at the end of each day, then passed out
@@ -164,24 +156,17 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
     :param dtstep: timestep (seconds) of input data
     :param init_swe: inital grid of snow water equivalent (SWE; mm w.e.), dimensions (spatial:)
     :param init_d_snow: inital grid of times since last snowfall dimensions (spatial:)
-    :param read_on_timestep: boolean specifying if the data is to be read from netCDF at each timestep,
-    :param inp_file: full path to netCDF input file
-    :param n_tsteps_read: integer giving the number of timesteps to read from the netCDF file
-    :param out_shape_xy: list giving the shape of the xy grid
     :param  **config: configuration dictionary
     :return: st_swe - calculated SWE (mm w.e.) at the end of each day. (n = number of days + 1)
     """
-    if read_on_timestep:
-        num_timesteps = n_tsteps_read
-    else:
-        num_timesteps = inp_ta.shape[0]
+
+    num_timesteps = inp_ta.shape[0]
 
     # calculate how many days in input file
     num_out_steps = int(1 + num_timesteps * dtstep / 86400.0)
 
     # set up storage arrays
-    if read_on_timestep == False:
-        shape_xy = inp_ta.shape[1:]
+    shape_xy = inp_ta.shape[1:]
     if len(shape_xy) == 2:
         st_swe = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
         st_melt = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
@@ -204,21 +189,19 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
 
     # store initial swe value
     st_swe[0, :] = init_swe
+    st_melt[0, :] = 0
+    st_acc[0, :] = 0
     ii = 1
 
     # run through and update SWE for each timestep in input data
     for i in range(num_timesteps):
         d_snow += dtstep / 86400.0
-        if read_on_timestep == True:
-            inp_ta, inp_precip, inp_doy = read_met_input(inp_file, i)
-            swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta, inp_precip, inp_doy, dtstep, **config)
-        else:
-            swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta[i, :], inp_precip[i, :], inp_doy[i], dtstep, **config)
+        swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta[i, :], inp_precip[i, :], inp_doy[i], dtstep, sw=inp_sw[i, :], which_melt=which_melt, **config)
 
         # print swe[0]
         bucket_melt = bucket_melt + melt
         bucket_acc = bucket_acc + acc
-        if inp_hourdec[i] == 0 or inp_hourdec[i] == 24:  # output daily
+        if i != 0 and inp_hourdec[i] == 0 or inp_hourdec[i] == 24:  # output daily
             st_swe[ii, :] = swe
             st_melt[ii, :] = bucket_melt
             st_acc[ii, :] = bucket_acc
@@ -278,6 +261,8 @@ def snow_main(inp_file, init_swe=None, init_d_snow=None, which_melt='clark2009',
 
     # store initial swe value
     st_swe[0, :] = init_swe
+    st_melt[0, :] = 0
+    st_acc[0, :] = 0
     ii = 1
 
     # run through and update SWE for each timestep in input data
@@ -314,44 +299,3 @@ def read_met_input(inp_nc_file, i):
     inp_sw = inp_nc_file.get_variables_by_attributes(standard_name='surface_downwelling_shortwave_flux_in_air')[0][i, :]
 
     return inp_ta, inp_p, inp_sw
-
-# if __name__ == '__main__':
-# create fake input data
-# inp_ta = np.zeros((365 * 24, grid_size)) + 273.16
-# inp_precip = np.zeros((365 * 24, grid_size))
-# inp_doy = np.linspace(0, 365, 365 * 24 + 1)
-# st_swe1 = main(inp_ta, inp_precip + 1, inp_doy)  # 0 degrees with precip
-# st_swe2 = main(inp_ta + 0.5, inp_precip + 1, inp_doy)  # 0.5 degree with
-# st_swe3 = main(inp_ta + 1, inp_precip + 1, inp_doy)  # 1 degree with rain
-# st_swe4 = main(inp_ta + 2, inp_precip + 1, inp_doy)  # 2 degrees with rain
-# st_swe5 = main(inp_ta + 2, inp_precip, inp_doy)  # 2 degrees without rain
-# st_swe6 = main(inp_ta + 1, inp_precip, inp_doy)  # 1 degree without rain
-
-# # load brewster glacier data
-# inp_dat = np.genfromtxt(
-#     'S:\Scratch\Jono\Final Brewster Datasets\updated_met_data\BrewsterGlacier_Oct10_Sep12_mod3.dat')
-# inp_doy = inp_dat[:, 2]
-# inp_hourdec = inp_dat[:, 3]
-# # make grids of input data
-# grid_size = 10000
-# grid_id = np.arange(grid_size)
-# inp_ta = inp_dat[:, 7][:, np.newaxis] * np.ones(grid_size) + 273.16  # 2 metre air temp in C
-# inp_precip = inp_dat[:, 21][:, np.newaxis] * np.ones(grid_size)  # precip in mm
-# init_swe = np.ones(inp_ta.shape[1:]) * 10000  # give initial value of swe as starts in spring
-# init_d_snow = np.ones(inp_ta.shape[1:]) * 10  # give initial value of days since snow
-#
-# # call main function once hourly/sub-hourly temp and precip data available.
-# st_swe = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
-#                           init_d_snow=init_d_snow)
-#
-# #
-# print 'done'
-# # plt.plot(st_swe1[:, 0])
-# # plt.plot(st_swe2[:, 0])
-# # plt.plot(st_swe3[:, 0])
-# # plt.plot(st_swe4[:, 0])
-# # plt.plot(st_swe5[:, 0])
-# # plt.plot(st_swe6[:, 0])
-# # plt.legend(range(1, 7))
-# st_swe, st_melt, st_acc = snow_main(r"Y:\DSC-Snow\input_data_hourly\met_inp_Clutha_nztm250m_hy2001.nc",
-#                                     which_melt='dsc_snow')

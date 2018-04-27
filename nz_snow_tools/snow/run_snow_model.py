@@ -15,9 +15,9 @@ from nz_snow_tools.util.utils import create_mask_from_shpfile, make_regular_time
 which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 catchment = 'Nevis'  # string identifying the catchment to run. must match the naming of the catchment shapefile
 output_dem = 'nztm250m'  # identifier for output dem
-hydro_years_to_take = range(2013, 2017 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+hydro_years_to_take = range(2001, 2017 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/test'
+output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
 met_data_folder = 'Y:/DSC-Snow/input_data_hourly'
 
 #configuration dictionary containing model parameters.
@@ -34,8 +34,8 @@ config['mf_ros'] = 2.5
 
 # dsc_snow melt parameters
 config['tmelt'] = 274.16
-config['tf'] = 0.04
-config['rf'] = 0.0157
+config['tf'] = 0.04 * 24  # hamish 0.13
+config['rf'] = 0.009 * 24  # hamish 0.0075
 # albedo parameters
 config['dc'] = 11.0
 config['tc'] = 21.9
@@ -53,5 +53,5 @@ for hydro_year_to_take in hydro_years_to_take:
     inp_dt = nc.num2date(inp_met.variables['time'][:], inp_met.variables['time'].units)
     out_dt = np.asarray(make_regular_timeseries(inp_dt[0], inp_dt[-1] + dt.timedelta(days=1), 86400))
     mask = create_mask_from_shpfile(inp_met.variables['lat'][:], inp_met.variables['lon'][:], catchment_shp_folder + '/{}.shp'.format(catchment))
-    pickle.dump([st_swe.astype(dtype=np.float32), st_melt.astype(dtype=np.float32), st_acc.astype(dtype=np.float32), out_dt, mask], open(
+    pickle.dump([st_swe.astype(dtype=np.float32), st_melt.astype(dtype=np.float32), st_acc.astype(dtype=np.float32), out_dt, mask,config], open(
         output_folder + '/{}_{}_hy{}_{}.pkl'.format(catchment, output_dem, hydro_year_to_take, which_model), 'wb'), -1)
