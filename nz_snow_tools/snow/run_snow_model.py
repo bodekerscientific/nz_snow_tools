@@ -15,9 +15,9 @@ from nz_snow_tools.util.utils import create_mask_from_shpfile, make_regular_time
 which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 catchment = 'Nevis'  # string identifying the catchment to run. must match the naming of the catchment shapefile
 output_dem = 'nztm250m'  # identifier for output dem
-hydro_years_to_take = range(2001, 2001 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+hydro_years_to_take = range(2017, 2017 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/test'
+output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
 met_data_folder = 'Y:/DSC-Snow/input_data_hourly'
 
 #configuration dictionary containing model parameters.

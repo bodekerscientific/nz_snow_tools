@@ -106,7 +106,7 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
 
         in_dat1 = in_dat[i, :, :] * 1.0
 
-        if var in ['t_max', 't_min']:  # lapse to sea level
+        if var in ['tmax', 'tmin']:  # lapse to sea level
             in_t_offset = in_elev * lapse
             in_dat1 = in_dat1 - in_t_offset
 
@@ -115,7 +115,7 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
         # mask data at sea level
         # out_dat1[out_elev.data < 1.0] = np.nan # no longer send in a masked array
 
-        if var in ['t_max', 't_min']:  # lapse back to new elevations
+        if var in ['tmax', 'tmin']:  # lapse back to new elevations
             out_t_offset = out_elev * lapse
             out_dat1 = out_dat1 + out_t_offset
 
