@@ -201,14 +201,14 @@ if __name__ == '__main__':
     dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     # mask control
     mask_dem = True  # boolean to set whether or not to mask the output dem
-    catchment = 'Nevis'
+    catchment = 'Clutha'
     mask_created = True  # boolean to set whether or not the mask has already been created
     mask_folder = 'Y:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
         catchment)  # shapefile containing polyline or polygon of catchment in WGS84. Not needed if mask_created==True
     # time control
     hydro_years_to_take = range(2001, 2017 + 1)  # range(2001, 2013 + 1)
-    save_by_timestep = False  # save one timestep per file? Needed for Fortran version of dsc_snow
+    save_by_timestep = False  # save one timestep per file? Needed for Fortran version of dsc_snow, only works with compute_by_day==False
     compute_by_day = True  # only compute hourly values one day at a time? Useful for large grids, as not enough memory to compute for whole grid at once.
     # input met data
     nc_file_rain = 'T:/newVCSN/rain_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
@@ -244,9 +244,10 @@ if __name__ == '__main__':
 
     for hydro_year_to_take in hydro_years_to_take:
         # load data
-        # create timestamp to get
+        # create timestamp to get - this is in NZST
         dts_to_take = np.asarray(make_regular_timeseries(dt.datetime(hydro_year_to_take - 1, 4, 1), dt.datetime(hydro_year_to_take, 3, 31), 86400))
         # pull only data needed.
+        # this loads data for 00h NZST that corresponds to the day to come in i.e. min@ 8am, max @ 2pm , total sw and total rain for 1/1/2000 at 2000-01-01 00:00:00
         precip_daily = load_new_vscn('rain', dts_to_take, nc_file_rain)
         max_temp_daily = load_new_vscn('tmax', dts_to_take, nc_file_tmax)
         min_temp_daily = load_new_vscn('tmin', dts_to_take, nc_file_tmin)
@@ -279,12 +280,23 @@ if __name__ == '__main__':
                                                  None, ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
                                                  hourly_dt, northings, eastings, lats, lons, elev)
             day_weightings = []
-            for i in range(hi_res_precip.shape[0]):
+            num_days = hi_res_precip.shape[0]
+            for i in range(num_days):
                 # Do the temporal downsampling for one day
                 # precip is random cascade for each day. NOTE original VCSN data has almost correct timestamp - ie. total from 9am.
-                hourly_precip, day_weightings_1 = process_precip(hi_res_precip[i], one_day=True)  # TODO: align to 9am-9am
+                hourly_precip, day_weightings_1 = process_precip(hi_res_precip[i], one_day=True)  # TODO: align to 9am-9am - currently counts pretends it is midnight-midnight
                 # air temperature is three part sinusoidal between min at 8am and max at 2pm. NOTE original VCSN data has correct timestamp - ie. minimum to 9am, maximum from 9am.
-                hourly_temp = daily_to_hourly_temp_grids(hi_res_max_temp[i], hi_res_min_temp[i], single_dt=True)  # TODO: check how data
+                # hourly_temp = daily_to_hourly_temp_grids(hi_res_max_temp[i], hi_res_min_temp[i], single_dt=True)  #
+                if i == 0:
+                    hourly_temp = daily_to_hourly_temp_grids(hi_res_max_temp[i:i + 2], hi_res_min_temp[i:i + 2])
+                    hourly_temp = hourly_temp[:24]
+                elif i == num_days:
+                    hourly_temp = daily_to_hourly_temp_grids(hi_res_max_temp[i - 1:], hi_res_min_temp[i - 1:])
+                    hourly_temp = hourly_temp[-24:]
+                else:
+                    hourly_temp = daily_to_hourly_temp_grids(hi_res_max_temp[i - 1:i + 2], hi_res_min_temp[i - 1:i + 2])
+                    hourly_temp = hourly_temp[24:48]
+                #
                 hourly_swin = daily_to_hourly_swin_grids(hi_res_sw_rad[i], lats, lons, hourly_dt[i * 24: (i + 1) * 24], single_dt=True)
 
                 for var, data in zip(['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
@@ -300,7 +312,7 @@ if __name__ == '__main__':
             # precip is random cascade for each day. # NOTE original VCSN data has almost correct timestamp - ie. total from 9am.
             hourly_precip, day_weightings = process_precip(hi_res_precip)  # TODO: align to 9am-9am
             # air temperature is three part sinusoidal between min at 8am and max at 2pm. # NOTE original VCSN data has correct timestamp - ie. minimum to 9am, maximum from 9am.
-            hourly_temp = daily_to_hourly_temp_grids(hi_res_max_temp, hi_res_min_temp)  # TODO: check how data is selected to ensure correct
+            hourly_temp = daily_to_hourly_temp_grids(hi_res_max_temp, hi_res_min_temp)
             hourly_dt = np.asarray(make_regular_timeseries(start_dt, finish_dt + dt.timedelta(days=1), 3600))
             hourly_swin = daily_to_hourly_swin_grids(hi_res_sw_rad, lats, lons, hourly_dt)
 
