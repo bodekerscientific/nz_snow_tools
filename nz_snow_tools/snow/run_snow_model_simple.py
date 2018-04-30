@@ -19,6 +19,7 @@ config['mf_amp'] = 5.0
 config['mf_alb'] = 2.5
 config['mf_alb_decay'] = 5.0
 config['mf_ros'] = 0
+config['mf_doy_max_ddf'] = 356
 
 # dsc_snow melt parameters
 config['tf'] = 0.13*24  # hamish 0.13

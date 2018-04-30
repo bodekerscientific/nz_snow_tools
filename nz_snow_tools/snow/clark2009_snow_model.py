@@ -31,7 +31,7 @@ def calc_melt_Clark2009(ta, precip, d_snow, doy, acc, tmelt=274.16, **config):
 
 
 def calc_melt_factor_Clark2009(doy, d_snow, precip, acc, mf_mean=5.0, mf_amp=5.0, mf_alb=2.5, mf_alb_decay=5.0,
-                               mf_ros=2.5, hemis='south', **config):
+                               mf_ros=2.5, mf_doy_max_ddf=356, **config):
     """
     calculate the grid melt factor according to Clark 2009. Depends on day of year, time since snowfall and rain on snow.
     :param doy: current day of year
@@ -43,18 +43,12 @@ def calc_melt_factor_Clark2009(doy, d_snow, precip, acc, mf_mean=5.0, mf_amp=5.0
     :param mf_alb: Decrease in melt factor due to higher fresh snow albedo
     :param mf_alb_decay: Timescale for decrease in snow albedo
     :param mf_ros: Increase in the melt factor in rain-on-snow events
-    :param hemis: hemisphere of site
+    :param mf_doy_max_ddf: Day of year for maximum melt factor. Minimum ddf is 6 month opposite the max.
     :return: grid of melt factors at current timestep
     """
 
     # compute change in melt factor due to season
-    if hemis == 'south':
-        dmf_seas = mf_amp * np.sin(doy * 2 * np.pi / 366 + 0.551 * np.pi)
-    elif hemis == 'north':
-        dmf_seas = mf_amp * -1 * np.sin(doy * 2 * np.pi / 366 + 0.551 * np.pi)
-    else:
-        print('incorrect hemisphere chosen, defaulting to southern hemisphere')
-        dmf_seas = mf_amp * np.sin(doy * 2 * np.pi / 366 + 0.551 * np.pi)
+    dmf_seas = mf_amp * np.sin(2 * np.pi * (doy - mf_doy_max_ddf + 91.5) / 366)
 
     # compute change in melt factor due to increased albedo after snowfall
     dmf_alb = - mf_alb * np.exp(- d_snow / mf_alb_decay)

@@ -12,12 +12,12 @@ import matplotlib.pylab as plt
 from nz_snow_tools.snow.clark2009_snow_model import snow_main
 from nz_snow_tools.util.utils import create_mask_from_shpfile, make_regular_timeseries
 
-which_model = 'clark2009'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
-catchment = 'Clutha'  # string identifying the catchment to run. must match the naming of the catchment shapefile
+which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
+catchment = 'Nevis'  # string identifying the catchment to run. must match the naming of the catchment shapefile
 output_dem = 'nztm250m'  # identifier for output dem
 hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
+output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis_alb_thres'
 met_data_folder = 'Y:/DSC-Snow/input_data_hourly'
 
 #configuration dictionary containing model parameters.
