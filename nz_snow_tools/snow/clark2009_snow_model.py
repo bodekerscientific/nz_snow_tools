@@ -132,7 +132,7 @@ def calc_dswe(swe, d_snow, ta, precip, doy, dtstep, sw=None, which_melt='clark20
     """
     acc = calc_acc(ta, precip, **config)
     swe = swe + acc  # Precip is in mm. so doesn't need time dependence
-    d_snow[(acc > 0)] = 0  # reset days since snowfall when is new snow
+    # d_snow[(acc > 0)] = 0  # reset days since snowfall when is new snow # now handled with daily threshold in snow_main or snow_main_simple
     if which_melt == 'clark2009':
         melt_rate = calc_melt_Clark2009(ta, precip, d_snow, doy, acc, **config)  # tmelt=config['tmelt'],
     elif which_melt == 'dsc_snow':
@@ -145,7 +145,7 @@ def calc_dswe(swe, d_snow, ta, precip, doy, dtstep, sw=None, which_melt='clark20
     return swe, d_snow, melt, acc
 
 
-def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=None, init_d_snow=None, inp_sw=None, which_melt='clark2009', **config):
+def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=None, init_d_snow=None, inp_sw=None, which_melt='clark2009', alb_swe_thres = 5.0, **config):
     """
     main snow model loop. handles timestepping and storage of output.
     assumes input data is at same temporal and spatial resolution as model time step (dtstep). Output is writen at the end of each day, then passed out
@@ -156,6 +156,9 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
     :param dtstep: timestep (seconds) of input data
     :param init_swe: inital grid of snow water equivalent (SWE; mm w.e.), dimensions (spatial:)
     :param init_d_snow: inital grid of times since last snowfall dimensions (spatial:)
+    :param inp_ta: incoming sw radiation in Wm^-2. dimensions (time,spatial:)
+    :param which_melt: string specifying which melt model to be run. options include 'clark2009', 'dsc_snow'
+    :param alb_swe_thres: threshold for daily snowfall resetting albedo (mm w.e). calculated from daily swe change so that accumulation must be > melt
     :param  **config: configuration dictionary
     :return: st_swe - calculated SWE (mm w.e.) at the end of each day. (n = number of days + 1)
     """
@@ -171,11 +174,12 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
         st_swe = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
         st_melt = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
         st_acc = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
+        # st_alb = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
     elif len(shape_xy) == 1:
         st_swe = np.empty((num_out_steps, shape_xy[0])) * np.nan
         st_melt = np.empty((num_out_steps, shape_xy[0])) * np.nan
         st_acc = np.empty((num_out_steps, shape_xy[0])) * np.nan
-
+        # st_alb = np.empty((num_out_steps, shape_xy[0])) * np.nan
     # set up initial states of prognostic variables if not passed in
     if init_swe is None:
         init_swe = np.zeros(shape_xy)  # default to no snow
@@ -195,7 +199,8 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
 
     # run through and update SWE for each timestep in input data
     for i in range(num_timesteps):
-        d_snow += dtstep / 86400.0
+        # d_snow += dtstep / 86400.0 # now handled with daily threshold in at end of each day
+
         swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta[i, :], inp_precip[i, :], inp_doy[i], dtstep, sw=inp_sw[i, :], which_melt=which_melt, **config)
 
         # print swe[0]
@@ -205,14 +210,19 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
             st_swe[ii, :] = swe
             st_melt[ii, :] = bucket_melt
             st_acc[ii, :] = bucket_acc
+            d_snow += 1
+            swe_alb = st_swe[ii, :] - st_swe[ii-1, :]
+            d_snow[(swe_alb > alb_swe_thres)] = 0
+            #st_alb[ii, :] = calc_albedo_snow(d_snow, swe, **config)
             ii = ii + 1  # move storage counter for next output timestep
             bucket_melt = bucket_melt * 0  # reset buckets
             bucket_acc = bucket_acc * 0
 
-    return st_swe, st_melt, st_acc
+
+    return st_swe, st_melt, st_acc #, st_alb
 
 
-def snow_main(inp_file, init_swe=None, init_d_snow=None, which_melt='clark2009', **config):
+def snow_main(inp_file, init_swe=None, init_d_snow=None, which_melt='clark2009',alb_swe_thres = 5.0, **config):
     """
     main snow model loop. handles timestepping and storage of output.
     assumes all the input data is on the same spatial and temporal grid.
@@ -221,6 +231,8 @@ def snow_main(inp_file, init_swe=None, init_d_snow=None, which_melt='clark2009',
     :param inp_file: full path to netCDF input file
     :param init_swe: inital grid of snow water equivalent (SWE; mm w.e.), dimensions (spatial:)
     :param init_d_snow: inital grid of times since last snowfall dimensions (spatial:)
+    :param which_melt: string specifying which melt model to be run. options include 'clark2009', 'dsc_snow'
+    :param alb_swe_thres: threshold for daily snowfall resetting albedo (mm w.e). calculated from daily swe change so that accumulation must be > melt
     :return: st_swe - calculated SWE (mm w.e.) at the end of each day. (n = number of days + 1)
     """
 
@@ -267,7 +279,7 @@ def snow_main(inp_file, init_swe=None, init_d_snow=None, which_melt='clark2009',
 
     # run through and update SWE for each timestep in input data
     for i in range(num_timesteps):
-        d_snow += dtstep / 86400.0
+        #d_snow += dtstep / 86400.0
 
         inp_ta, inp_precip, inp_sw = read_met_input(inp_nc_file, i)
         swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta, inp_precip, inp_doy[i], dtstep, sw=inp_sw, which_melt=which_melt, **config)
@@ -279,6 +291,8 @@ def snow_main(inp_file, init_swe=None, init_d_snow=None, which_melt='clark2009',
             st_swe[ii, :] = swe
             st_melt[ii, :] = bucket_melt
             st_acc[ii, :] = bucket_acc
+            swe_alb = st_swe[ii, :] - st_swe[ii-1, :]
+            d_snow[(swe_alb > alb_swe_thres)] = 0
             ii = ii + 1  # move storage counter for next output timestep
             bucket_melt = bucket_melt * 0  # reset buckets
             bucket_acc = bucket_acc * 0
