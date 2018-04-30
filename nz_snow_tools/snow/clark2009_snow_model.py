@@ -97,7 +97,7 @@ def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04 * 24, rf=0.009
     #
     alb = calc_albedo_snow(d_snow, swe, **config)
     # dc=config['dc'], tc=config['tc'], a_ice=config['a_ice'], a_freshsnow=config['a_freshsnow'], a_firn=config['a_firn']
-    sw_net = sw * alb
+    sw_net = sw * (1-alb)
     melt_rate = tf * (ta - tmelt) + rf * sw_net
     melt_rate[(ta < tmelt)] = 0
     return melt_rate
