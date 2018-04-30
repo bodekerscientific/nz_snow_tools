@@ -16,8 +16,8 @@ catchment = 'Nevis'
 output_dem = 'nztm250m'  # identifier for output dem
 hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
-model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
-plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
+model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis'
+plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis'
 
 ann = pickle.load(open(model_output_folder + '/summary_{}_{}.pkl'.format(catchment, output_dem), 'rb'))
 # indexes 0-3 modis, 4-8 model 1 and 9-13 model 2

@@ -148,8 +148,8 @@ if __name__ == '__main__':
     output_dem = 'nztm250m'  # identifier for output dem
     hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
-    dsc_snow_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
-    clark2009_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
+    dsc_snow_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis'
+    clark2009_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis'
     mask_folder = 'Y:/DSC-Snow/Masks'
     catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
     modis_folder = 'Y:/DSC-Snow/MODIS_NetCDF'
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     met_inp_folder = 'Y:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
 
-    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs'
+    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis'
 
     # set up lists
     ann_ts_av_sca_m = []
@@ -332,5 +332,5 @@ if __name__ == '__main__':
             ann_scd2.append(mod2_scd)
 
     ann = [ann_ts_av_sca_m, ann_hydro_days_m, ann_dt_m, ann_scd_m, ann_ts_av_sca, ann_ts_av_swe, ann_hydro_days, ann_dt, ann_scd, ann_ts_av_sca2,
-           ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2]
+           ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2,ann_ts_av_sca_thres_m]
     pickle.dump(ann, open(output_folder + '/summary_{}_{}.pkl'.format(catchment, output_dem), 'wb'), -1)
