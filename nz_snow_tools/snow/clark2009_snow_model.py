@@ -77,9 +77,9 @@ def calc_acc(ta, precip, tacc=274.16, **config):
     return acc
 
 
-def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04 * 24, rf=0.009 * 24, **config):
+def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04 * 24, rf=0.009 * 24, alb=None, **config):
     """
-    calculate the melt rate (mm day^-1) at current timestep according to dsc_snow model
+    calculate the melt rate (mm day^-1) at current timestep according to dsc_snow model. calculates albedo if not available in the configuration
     :param ta: grid of current temperature (K)
     :param precip: grid of current precipitation (mm)
     :param sw: grid of current incoming shortwave rad (W m^-2)
@@ -89,7 +89,8 @@ def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04 * 24, rf=0.009
     :return: grid of melt rate at current timestep (mm day^-1)
     """
     #
-    alb = calc_albedo_snow(d_snow, swe, **config)
+    if alb is None:
+        alb = calc_albedo_snow(d_snow, swe, **config)
     # dc=config['dc'], tc=config['tc'], a_ice=config['a_ice'], a_freshsnow=config['a_freshsnow'], a_firn=config['a_firn']
     sw_net = sw * (1-alb)
     melt_rate = tf * (ta - tmelt) + rf * sw_net
@@ -191,9 +192,12 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
     st_acc[0, :] = 0
     ii = 1
 
+
     # run through and update SWE for each timestep in input data
     for i in range(num_timesteps):
         # d_snow += dtstep / 86400.0 # now handled with daily threshold in at end of each day
+        if 'inp_alb' in config:
+            config['alb'] = config['inp_alb'][i, :]
 
         swe, d_snow, melt, acc = calc_dswe(swe, d_snow, inp_ta[i, :], inp_precip[i, :], inp_doy[i], dtstep, sw=inp_sw[i, :], which_melt=which_melt, **config)
 

@@ -42,6 +42,9 @@ grid_id = np.arange(grid_size)
 inp_ta = inp_dat[:, 7][:, np.newaxis] * np.ones(grid_size) + 273.16  # 2 metre air temp in C
 inp_precip = inp_dat[:, 21][:, np.newaxis] * np.ones(grid_size)  # precip in mm
 inp_sw = inp_dat[:, 15][:, np.newaxis] * np.ones(grid_size)
+
+config['inp_alb'] = inp_dat[:, 15][:, np.newaxis] * np.ones(grid_size) # TODO check column number
+
 init_swe = np.ones(inp_ta.shape[1:]) * 10000  # give initial value of swe as starts in spring
 init_d_snow = np.ones(inp_ta.shape[1:]) * 10  # give initial value of days since snow
 
@@ -51,22 +54,25 @@ st_swe, st_melt, st_acc = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hour
 
 st_swe1, st_melt1, st_acc1 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='clark2009', **config)
-# 0 degrees and 1 mm per 30-mins rain
+
+
+# additional tests with set values for ta and precip
+# 0 degrees and 1 mm per 30-mins precip
 st_swe1, st_melt1, st_acc1 = snow_main_simple(inp_ta*0 + 273.16 , inp_precip*0 + 1, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-# 0.5 degree with rain
+# 0.5 degree with 1 mm per 30-mins precip
 st_swe2, st_melt2, st_acc2 = snow_main_simple(inp_ta*0 + 273.66 , inp_precip*0 + 1, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-# 1 degree with rain
+# 1 degree with 1 mm per 30-mins precip
 st_swe3, st_melt3, st_acc3 = snow_main_simple(inp_ta*0 + 274.16 , inp_precip*0 + 1, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-# 2 degrees with rain
+# 2 degrees with 1 mm per 30-mins precip
 st_swe4, st_melt4, st_acc4 = snow_main_simple(inp_ta*0 + 275.16 , inp_precip*0 + 1, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-# 2 degrees without rain
+# 2 degrees without 1 mm per 30-mins precip
 st_swe5, st_melt5, st_acc5 = snow_main_simple(inp_ta*0 + 275.16 , inp_precip*0, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-# 1 degree without rain
+# 1 degree without 1 mm per 30-mins precip
 st_swe6, st_melt6, st_acc6 = snow_main_simple(inp_ta*0 + 274.16 , inp_precip*0, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
 
