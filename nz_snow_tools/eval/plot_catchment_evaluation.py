@@ -19,12 +19,12 @@ if __name__ == '__main__':
     smooth_period = 5 # number of days to smooth data
     clark2009run = True  # boolean specifying if the run already exists
     dsc_snow_opt = 'python'  # string identifying which version of the dsc snow model to use output from 'python' or 'fortran'
-    catchment = 'Nevis'
+    catchment = 'Clutha'
     output_dem = 'nztm250m'  # identifier for output dem
     hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-    modis_sc_thresholds = [40,50,60,70,80]  # value of fsca (in percent) that is counted as being snow covered
-    model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis_alb_thres'
-    plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis_alb_thres'
+    modis_sc_thresholds = [50]  # value of fsca (in percent) that is counted as being snow covered 30,40,50,60,70,80
+    model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
+    plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
 
     plt.figure(figsize=[8,6])
     plt.subplot(3, 1, 1)
@@ -48,11 +48,11 @@ if __name__ == '__main__':
             ann_ts_av_sca2[i] = np.convolve(ann_ts_av_sca2[i], np.ones((smooth_period,)) / smooth_period, mode='same')
 
     # put data into an array
-    ann_ts_av_swe_array = np.zeros((len(ann_ts_av_swe), 365))
-    ann_ts_av_swe2_array = np.zeros((len(ann_ts_av_swe), 365))
-    ann_ts_av_sca_array = np.zeros((len(ann_ts_av_swe), 365))
-    ann_ts_av_sca2_array = np.zeros((len(ann_ts_av_swe), 365))
-    ann_ts_av_sca_m_array = np.zeros((len(ann_ts_av_swe), 365))
+    ann_ts_av_swe_array = np.zeros((len(ann_ts_av_swe), 365),dtype=np.float32)
+    ann_ts_av_swe2_array = np.zeros((len(ann_ts_av_swe), 365),dtype=np.float32)
+    ann_ts_av_sca_array = np.zeros((len(ann_ts_av_swe), 365),dtype=np.float32)
+    ann_ts_av_sca2_array = np.zeros((len(ann_ts_av_swe), 365),dtype=np.float32)
+    ann_ts_av_sca_m_array = np.zeros((len(ann_ts_av_swe), 365),dtype=np.float32)
     #ann_ts_av_sca_m_thres_array = np.zeros((len(ann_ts_av_swe), 365))
     ann_ts_av_sca_m[5][:] = np.nan # years 2006 and 2011 have bad modis data
     ann_ts_av_sca_m[10][:] = np.nan
@@ -173,7 +173,7 @@ if __name__ == '__main__':
     plt.plot(np.mean(ann_ts_av_sca_array,axis=1),label='clark2009')
     plt.plot(np.mean(ann_ts_av_sca2_array,axis=1),label='dsc_snow')
     plt.title('average snow covered area HY {}-{}'.format(hydro_years_to_take[0],hydro_years_to_take[-1]))
-    plt.xticks(range(len(hydro_years_to_take)),hydro_years_to_take)
+    plt.xticks(range(len(hydro_years_to_take)),hydro_years_to_take,rotation=45)
     plt.ylabel('SCA')
     plt.legend()
     plt.savefig(plot_folder + '/average snow covered area HY {}-{}.png'.format(hydro_years_to_take[0],hydro_years_to_take[-1]))

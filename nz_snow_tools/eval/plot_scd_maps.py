@@ -12,12 +12,12 @@ average_scd = False # boolean specifying if all years are to be averaged togethe
 which_model = 'all'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
 clark2009run = True  # boolean specifying if the run already exists
 dsc_snow_opt = 'python'  # string identifying which version of the dsc snow model to use output from 'python' or 'fortran'
-catchment = 'Nevis'
+catchment = 'Clutha'
 output_dem = 'nztm250m'  # identifier for output dem
-hydro_years_to_take = range(2001, 2013 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
-model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis_alb_thres'
-plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis_alb_thres'
+model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
+plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
 
 ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}.pkl'.format(catchment, output_dem, modis_sc_threshold), 'rb'))
 # indexes 0-3 modis, 4-8 model 1 and 9-13 model 2
@@ -30,14 +30,17 @@ ann_scd = ann[8]
 ann_scd2 = ann[13]
 
 
-plt.tight_layout()
+fig1 = plt.figure()
+
+# fig, axes = plt.subplots(nrows=1, ncols=3,figsize=[8,3])
+# for ax in axes.flat:
+
 if average_scd ==True:
     modis_scd = np.mean(np.asarray(ann_scd_m), axis=0)
     mod1_scd = np.mean(np.asarray(ann_scd), axis=0)
     if which_model == 'all':
         mod2_scd = np.mean(np.asarray(ann_scd2), axis=0)
 
-    plt.figure()
     plt.subplot(1, 3, 1)
     plt.imshow(modis_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='viridis')
     plt.colorbar()
@@ -62,22 +65,47 @@ else:
         if which_model == 'all':
             mod2_scd = np.asarray(ann_scd2[i])
 
-        plt.figure()
         plt.subplot(1, 3, 1)
-        plt.imshow(modis_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='viridis')
-        plt.colorbar()
-        plt.title('modis duration fsca > {}'.format(modis_sc_threshold))
+        h = plt.imshow(modis_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='viridis')
+        plt.xticks([])
+        plt.yticks([])
+        #plt.colorbar()
+        plt.title('modis fsca >= {}'.format(modis_sc_threshold))
+        plt.tight_layout()
 
         plt.subplot(1, 3, 2)
         plt.imshow(mod1_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='viridis')
-        plt.colorbar()
+        plt.xticks([])
+        plt.yticks([])
+        #plt.colorbar()
         if which_model != 'all':
             plt.title('{} duration'.format(which_model))
+            plt.tight_layout()
+
+            plt.subplots_adjust(right=0.8)
+            cbar_ax = fig1.add_axes([0.85, 0.15, 0.05, 0.7])
+            plt.colorbar(h, cax=cbar_ax)
+
         if which_model == 'all':
-            plt.title('clark2009 duration')
+            plt.title('clark2009')
+            plt.tight_layout()
+
             plt.subplot(1, 3, 3)
             plt.imshow(mod2_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='viridis')
-            plt.colorbar()
-            plt.title('dsc_snow duration')
-        plt.savefig(plot_folder + '/SCA hy{}_{}_{}.png'.format(hydro_year_to_take,catchment, output_dem), dpi=300)
+            #plt.colorbar()
+            plt.xticks([])
+            plt.yticks([])
+            plt.title('dsc_snow')
+            plt.tight_layout()
 
+        plt.subplots_adjust(right=0.8)
+        cbar_ax = fig1.add_axes([0.85, 0.15, 0.05, 0.7])
+        plt.colorbar(h, cax=cbar_ax)
+
+        # plt.subplot(1, 4, 4,frameon=False)
+        # plt.xticks([])
+        # plt.yticks([])
+        # plt.colorbar(h)
+        # plt.tight_layout()
+        plt.savefig(plot_folder + '/SCA hy{}_{}_{}.png'.format(hydro_year_to_take,catchment, output_dem), dpi=300)
+        plt.clf()
