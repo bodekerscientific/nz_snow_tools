@@ -13,11 +13,11 @@ from nz_snow_tools.snow.clark2009_snow_model import snow_main
 from nz_snow_tools.util.utils import create_mask_from_shpfile, make_regular_timeseries
 
 which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
-catchment = 'Nevis'  # string identifying the catchment to run. must match the naming of the catchment shapefile
+catchment = 'Clutha'  # string identifying the catchment to run. must match the naming of the catchment shapefile
 output_dem = 'nztm250m'  # identifier for output dem
 hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis_alb_thres'
+output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
 met_data_folder = 'Y:/DSC-Snow/input_data_hourly'
 
 #configuration dictionary containing model parameters.
@@ -31,9 +31,9 @@ config['mf_amp'] = 5.0
 config['mf_alb'] = 2.5
 config['mf_alb_decay'] = 5.0
 config['mf_ros'] = 2.5
+config['mf_doy_max_ddf'] = 356
 
 # dsc_snow melt parameters
-config['tmelt'] = 274.16
 config['tf'] = 0.04 * 24  # hamish 0.13
 config['rf'] = 0.009 * 24  # hamish 0.0075
 # albedo parameters

@@ -20,7 +20,7 @@ from nz_snow_tools.util.utils import convert_date_hydro_DOY, create_mask_from_sh
     trim_data_to_mask
 
 
-def run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder,catchment_shp_folder):
+def run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder, catchment_shp_folder):
     """
     wrapper to call the clark 2009 snow model for given area
     :param catchment: string giving catchment area to run model on
@@ -38,7 +38,7 @@ def run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder,catc
     inp_precip = inp_met.variables['precipitation'][:]
     print('met data loaded')
 
-    mask = create_mask_from_shpfile(inp_met.variables['lat'][:], inp_met.variables['lon'][:],catchment_shp_folder + '/{}.shp'.format(catchment))
+    mask = create_mask_from_shpfile(inp_met.variables['lat'][:], inp_met.variables['lon'][:], catchment_shp_folder + '/{}.shp'.format(catchment))
     # TODO: think about masking input data to speed up
 
     print('starting snow model')
@@ -148,8 +148,8 @@ if __name__ == '__main__':
     output_dem = 'nztm250m'  # identifier for output dem
     hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
-    dsc_snow_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis'
-    clark2009_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis'
+    dsc_snow_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis_alb_thres'
+    clark2009_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis_alb_thres'
     mask_folder = 'Y:/DSC-Snow/Masks'
     catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
     modis_folder = 'Y:/DSC-Snow/MODIS_NetCDF'
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     met_inp_folder = 'Y:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
 
-    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis'
+    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_nevis_alb_thres'
 
     # set up lists
     ann_ts_av_sca_m = []
@@ -196,7 +196,7 @@ if __name__ == '__main__':
         if which_model == 'clark2009':
             if clark2009run == False:
                 # run model and return timeseries of daily swe, acc and melt.
-                st_swe, st_melt, st_acc, out_dt, mask = run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder,catchment_shp_folder)
+                st_swe, st_melt, st_acc, out_dt, mask = run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder, catchment_shp_folder)
                 pickle.dump([st_swe, st_melt, st_acc, out_dt, mask], open(clark2009_output_folder + '/{}_{}_hy{}.pkl'.format(catchment, output_dem,
                                                                                                                              hydro_year_to_take), 'wb'), -1)
             elif clark2009run == True:
@@ -225,7 +225,7 @@ if __name__ == '__main__':
         if which_model == 'all':
             if clark2009run == False:
                 # run model and return timeseries of daily swe, acc and melt.
-                st_swe, st_melt, st_acc, out_dt, mask = run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder,catchment_shp_folder)
+                st_swe, st_melt, st_acc, out_dt, mask = run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder, catchment_shp_folder)
             elif clark2009run == True:
                 # load previously run simulations from pickle file
                 st_snow = pickle.load(open(clark2009_output_folder + '/{}_{}_hy{}_clark2009.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))
@@ -257,7 +257,6 @@ if __name__ == '__main__':
         for i in range(modis_fsca.shape[0]):
             ba_modis_sca.append(np.nanmean(modis_fsca[i, modis_mask]) / 100.0)
             ba_modis_sca_thres.append(np.nansum(modis_sc[i, modis_mask]).astype('d') / num_modis_gridpoints)
-
 
         # first model
         print('model 1')
@@ -323,7 +322,7 @@ if __name__ == '__main__':
         if which_model == 'all':
             st_sc2 = st_swe2 > 0
             mod2_scd = np.sum(st_sc2, axis=0)
-            mod2_scd[mask2==0] = -1
+            mod2_scd[mask2 == 0] = -1
 
         # add to annual series
         ann_scd_m.append(modis_scd)
@@ -332,5 +331,5 @@ if __name__ == '__main__':
             ann_scd2.append(mod2_scd)
 
     ann = [ann_ts_av_sca_m, ann_hydro_days_m, ann_dt_m, ann_scd_m, ann_ts_av_sca, ann_ts_av_swe, ann_hydro_days, ann_dt, ann_scd, ann_ts_av_sca2,
-           ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2,ann_ts_av_sca_thres_m]
-    pickle.dump(ann, open(output_folder + '/summary_{}_{}.pkl'.format(catchment, output_dem), 'wb'), -1)
+           ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2, ann_ts_av_sca_thres_m]
+    pickle.dump(ann, open(output_folder + '/summary_{}_{}_thres{}.pkl'.format(catchment, output_dem, modis_sc_threshold), 'wb'), -1)
