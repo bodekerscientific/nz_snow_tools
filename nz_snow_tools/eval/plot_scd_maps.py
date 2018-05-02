@@ -57,7 +57,7 @@ if average_scd ==True:
         plt.imshow(mod2_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='viridis')
         plt.colorbar()
         plt.title('dsc_snow duration')
-    plt.savefig(plot_folder + '/SCA hy{} to hy{}.png'.format(hydro_years_to_take[0],hydro_years_to_take[-1]), dpi=300)
+    plt.savefig(plot_folder + '/SCD hy{} to hy{}.png'.format(hydro_years_to_take[0],hydro_years_to_take[-1]), dpi=300)
 else:
     for i, hydro_year_to_take in enumerate(hydro_years_to_take):
         modis_scd = np.asarray(ann_scd_m[i])
@@ -107,5 +107,5 @@ else:
         # plt.yticks([])
         # plt.colorbar(h)
         # plt.tight_layout()
-        plt.savefig(plot_folder + '/SCA hy{}_{}_{}.png'.format(hydro_year_to_take,catchment, output_dem), dpi=300)
+        plt.savefig(plot_folder + '/SCD hy{}_{}_{}.png'.format(hydro_year_to_take,catchment, output_dem), dpi=300)
         plt.clf()
