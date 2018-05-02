@@ -28,11 +28,11 @@ config['tf'] = 0.08*24  # hamish 0.13
 config['rf'] = 0.0075*24 # hamish 0.0075
 # albedo parameters
 config['dc'] = 11.0
-config['tc'] = 10.0
+config['tc'] = 10
 config['a_ice'] = 0.42
-config['a_freshsnow'] = 0.90
-config['a_firn'] = 0.53
-config['alb_swe_thres'] = 10
+config['a_freshsnow'] = 0.95
+config['a_firn'] = 0.62
+config['alb_swe_thres'] = 20
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
@@ -72,14 +72,14 @@ init_swe = np.ones(inp_ta.shape[1:]) * 0  # give initial value of swe as starts 
 init_d_snow = np.ones(inp_ta.shape[1:]) * 30  # give initial value of days since snow
 
 # call main function once hourly/sub-hourly temp and precip data available.
-st_swe, st_melt, st_acc = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
+st_swe, st_melt, st_acc, st_alb = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='clark2009', **config)
 
-st_swe1, st_melt1, st_acc1 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
+st_swe1, st_melt1, st_acc1, st_alb1 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
 
 config['inp_alb'] = inp_dat[start_t:end_t, 16][:, np.newaxis] * np.ones(grid_size)
-st_swe3, st_melt3, st_acc3 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
+st_swe3, st_melt3, st_acc3, st_alb3 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
 
 plot_dt = inp_dt[start_t-1:end_t] # model stores initial state

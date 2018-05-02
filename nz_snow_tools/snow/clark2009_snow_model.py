@@ -171,12 +171,12 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
         st_swe = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
         st_melt = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
         st_acc = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
-        # st_alb = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
+        st_alb = np.empty((num_out_steps, shape_xy[0], shape_xy[1])) * np.nan
     elif len(shape_xy) == 1:
         st_swe = np.empty((num_out_steps, shape_xy[0])) * np.nan
         st_melt = np.empty((num_out_steps, shape_xy[0])) * np.nan
         st_acc = np.empty((num_out_steps, shape_xy[0])) * np.nan
-        # st_alb = np.empty((num_out_steps, shape_xy[0])) * np.nan
+        st_alb = np.empty((num_out_steps, shape_xy[0])) * np.nan
     # set up initial states of prognostic variables if not passed in
     if init_swe is None:
         init_swe = np.zeros(shape_xy)  # default to no snow
@@ -213,18 +213,19 @@ def snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep, init_swe=
             swe_alb = swe - swe_day_before
             d_snow[(swe_alb > alb_swe_thres)] = 0
             swe_day_before = swe
-            #st_alb[ii, :] = calc_albedo_snow(d_snow, swe, **config)
+
 
         if (i+1) % storage_interval == 0:# if timestep divisible by the storage interval
             st_swe[ii, :] = swe
             st_melt[ii, :] = bucket_melt
             st_acc[ii, :] = bucket_acc
+            st_alb[ii, :] = calc_albedo_snow(d_snow, swe, **config)
             ii = ii + 1  # move storage counter for next output timestep
             bucket_melt = bucket_melt * 0  # reset buckets
             bucket_acc = bucket_acc * 0
 
 
-    return st_swe, st_melt, st_acc #, st_alb
+    return st_swe, st_melt, st_acc, st_alb
 
 
 def snow_main(inp_file, init_swe=None, init_d_snow=None, which_melt='clark2009',alb_swe_thres = 5.0, **config):
