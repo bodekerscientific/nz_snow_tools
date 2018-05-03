@@ -13,7 +13,7 @@ import matplotlib.dates as mdates
 config = {}
 config['num_secs_output']=1800
 config['tacc'] = 274.16
-config['tmelt'] = 273.16
+config['tmelt'] = 274.16
 
 # clark2009 melt parameters
 config['mf_mean'] = 5.0
@@ -24,8 +24,8 @@ config['mf_ros'] = 2.5
 config['mf_doy_max_ddf'] = 356
 
 # dsc_snow melt parameters
-config['tf'] = 0.08*24  # hamish 0.13
-config['rf'] = 0.0075*24 # hamish 0.0075
+config['tf'] = 0.05*24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
+config['rf'] = 0.0094*24 # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094
 # albedo parameters
 config['dc'] = 11.0
 config['tc'] = 10
@@ -37,8 +37,8 @@ config['alb_swe_thres'] = 20
 # load brewster glacier data
 inp_dat = np.genfromtxt(
     'S:\Scratch\Jono\Final Brewster Datasets\updated_met_data\BrewsterGlacier_Oct10_Sep12_mod3.dat')
-start_t = 9600 -1# 9456 = start of doy 130 10th May 2011 9600 = end of 13th May
-end_t = 21360  # 20783 = end of doy 365, 21264 = end of 10th January 2012
+start_t = 9600 -1# 9456 = start of doy 130 10th May 2011 9600 = end of 13th May,18432 = start of 11th Nov 2013,19296 = 1st december 2011
+end_t = 21360  # 20783 = end of doy 365, 21264 = end of 10th January 2012, 21360 = end of 12th Jan
 inp_dt = make_regular_timeseries(dt.datetime(2010,10,25,00,30),dt.datetime(2012,9,2,00,00),1800)
 
 inp_doy = inp_dat[start_t:end_t, 2]
@@ -101,6 +101,7 @@ ax.xaxis.set_major_formatter(monthsFmt)
 plt.xlabel('month')
 plt.ylabel('SWE mm w.e.')
 plt.legend()
+plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/brewster snow calibration.png')
 plt.show()
 plt.close()
 #
