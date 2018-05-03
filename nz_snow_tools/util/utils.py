@@ -362,3 +362,48 @@ def trim_data_to_mask(data, mask):
         print 'data does not have correct dimensions'
 
     return trimmed_data
+
+
+def nash_sut(y_sim,y_obs):
+    """
+    calculate the nash_sutcliffe efficiency criterion (taken from Ayala, 2017, WRR)
+
+    :param y_sim: series of simulated values
+    :param y_obs: series of observed values
+    :return:
+    """
+    assert y_sim.ndim ==1 and y_obs.ndim ==1
+
+    ns = 1 - np.sum((y_sim - y_obs)**2) / np.sum((y_obs - np.mean(y_obs))**2)
+
+    return  ns
+
+
+def mean_bias(y_sim,y_obs):
+    """
+    calculate the mean bias difference (taken from Ayala, 2017, WRR)
+
+    :param y_sim: series of simulated values
+    :param y_obs: series of observed values
+    :return:
+    """
+    assert y_sim.ndim == 1 and y_obs.ndim == 1 and len(y_sim) == len(y_obs)
+
+    mbd = np.sum(y_sim - y_obs) / len(y_sim)
+
+    return mbd
+
+
+def rmsd(y_sim,y_obs):
+    """
+    calculate the mean bias difference (taken from Ayala, 2017, WRR)
+
+    :param y_sim: series of simulated values
+    :param y_obs: series of observed values
+    :return:
+    """
+    assert y_sim.ndim == 1 and y_obs.ndim == 1 and len(y_sim) == len(y_obs)
+
+    rs = np.sqrt(np.mean((y_sim - y_obs)**2))
+
+    return rs

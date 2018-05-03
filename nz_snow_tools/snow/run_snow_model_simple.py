@@ -24,8 +24,8 @@ config['mf_ros'] = 2.5
 config['mf_doy_max_ddf'] = 356
 
 # dsc_snow melt parameters
-config['tf'] = 0.05*24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
-config['rf'] = 0.0094*24 # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094
+config['tf'] = 0.3*24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
+config['rf'] = 0.005*24 # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094
 # albedo parameters
 config['dc'] = 11.0
 config['tc'] = 10
