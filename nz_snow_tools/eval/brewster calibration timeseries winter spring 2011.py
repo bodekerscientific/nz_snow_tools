@@ -20,8 +20,8 @@ config['mf_mean'] = 5.0
 config['mf_amp'] = 5.0
 config['mf_alb'] = 2.5
 config['mf_alb_decay'] = 5.0
-config['mf_ros'] = 2.5
-config['mf_doy_max_ddf'] = 356
+config['mf_ros'] = 0
+config['mf_doy_max_ddf'] = 35
 
 # dsc_snow melt parameters
 config['tf'] = 0.2*24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
@@ -30,7 +30,7 @@ config['rf'] = 0.005*24 # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094
 config['dc'] = 11.0
 config['tc'] = 10
 config['a_ice'] = 0.42
-config['a_freshsnow'] = 0.95
+config['a_freshsnow'] = 0.90
 config['a_firn'] = 0.62
 config['alb_swe_thres'] = 20
 
@@ -83,8 +83,8 @@ st_swe3, st_melt3, st_acc3, st_alb3 = snow_main_simple(inp_ta, inp_precip, inp_d
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
 
 plot_dt = inp_dt[start_t-1:end_t] # model stores initial state
-# plt.plot(st_swe[:, 0],label='clark2009')
-# plt.plot(plot_dt,st_swe1[:, 0],label='dsc_snow-param albedo')
+#plt.plot(plot_dt,st_swe[:, 0],label='clark2009')
+#plt.plot(plot_dt,st_swe1[:, 0],label='dsc_snow-param albedo')
 plt.plot(plot_dt,st_swe3[:, 0],label='dsc_snow-obs albedo')
 plt.plot(plot_dt,seb_mb, label='SEB')
 plt.plot(plot_dt,inp_sfc*492,label='sfc*492')
