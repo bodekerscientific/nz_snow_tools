@@ -23,15 +23,15 @@ met_data_folder = 'Y:/DSC-Snow/input_data_hourly'
 #configuration dictionary containing model parameters.
 config = {}
 config['tacc'] = 274.16
-config['tmelt'] = 274.16
+
 
 # clark2009 melt parameters
 config['mf_mean'] = 5.0
 config['mf_amp'] = 5.0
 config['mf_alb'] = 2.5
 config['mf_alb_decay'] = 5.0
-config['mf_ros'] = 2.5
-config['mf_doy_max_ddf'] = 356
+config['mf_ros'] = 0
+config['mf_doy_max_ddf'] = 35
 
 # dsc_snow melt parameters
 config['tf'] = 0.2 * 24  # hamish 0.13
@@ -45,6 +45,10 @@ config['a_firn'] = 0.62
 config['alb_swe_thres'] = 20
 
 for which_model in ['clark2009', 'dsc_snow']:
+    if which_model == 'clark2009':
+        config['tmelt'] = 273.16
+    if which_model == 'dsc_snow':
+        config['tmelt'] = 274.16
     for hydro_year_to_take in hydro_years_to_take:
         # run model and return timeseries of daily swe, acc and melt.
         met_infile = met_data_folder + '/met_inp_{}_{}_hy{}.nc'.format(catchment, output_dem, hydro_year_to_take)
