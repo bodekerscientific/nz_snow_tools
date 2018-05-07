@@ -7,15 +7,15 @@ A suite of python code to run and evaluate snow models developed as part of the 
 Installation
 ============
 
-Install the latest version of the package using pip:
+Install the latest version of the package from github:
 
-    pip install nz_snow_tools
+https://github.com/bodekerscientific/nz_snow_tools
+
+once you have downloaded, run setup.py to install (checks what other packages are necessary).
 
 
 Getting Started
 ===============
-
-How to use the package....
 
 The package has been tested in Python 2.7
 

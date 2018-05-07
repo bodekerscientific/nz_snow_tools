@@ -22,15 +22,16 @@ if __name__ == '__main__':
     catchment = 'Clutha'
     output_dem = 'nztm250m'  # identifier for output dem
     hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-    modis_sc_thresholds = [30,50,70]  # value of fsca (in percent) that is counted as being snow covered 30,40,50,60,70,80
-    model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
-    plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
+    modis_sc_thresholds = [50]  # value of fsca (in percent) that is counted as being snow covered 30,40,50,60,70,80
+    model_swe_sc_threshold = 10 # threshold for treating a grid cell as snow covered
+    model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha1'
+    plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha1'
 
     plt.figure(figsize=[8,6])
     plt.subplot(3, 1, 1)
 
     # load the first file to get model + basic modis info
-    ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}.pkl'.format(catchment, output_dem, modis_sc_thresholds[0]), 'rb'))
+    ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}_swe{}.pkl'.format(catchment, output_dem, modis_sc_thresholds[0],model_swe_sc_threshold), 'rb'))
 
     # [ann_ts_av_sca_m, ann_hydro_days_m, ann_dt_m, ann_scd_m, ann_ts_av_sca, ann_ts_av_swe, ann_hydro_days, ann_dt,
     #  ann_scd, ann_ts_av_sca2, ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2] = ann
@@ -76,7 +77,7 @@ if __name__ == '__main__':
 
     # plot average for different modis fsca thresholds
     for modis_sc_threshold in modis_sc_thresholds:
-        ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}.pkl'.format(catchment, output_dem, modis_sc_threshold), 'rb'))
+        ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}_swe{}.pkl'.format(catchment, output_dem, modis_sc_threshold,model_swe_sc_threshold), 'rb'))
         ann_ts_av_sca_m_thres = ann[14]
         ann_ts_av_sca_m_thres[5][:] = np.nan # years 2006 and 2011 have bad modis data
         ann_ts_av_sca_m_thres[10][:] = np.nan
@@ -128,7 +129,7 @@ if __name__ == '__main__':
     ax.set_ylabel('SCA')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(plot_folder + '/av_SCA_ts_{}_{}.png'.format(catchment, output_dem), dpi=300)
+    plt.savefig(plot_folder + '/av_SCA_ts_{}_{}_swe{}.png'.format(catchment, output_dem, model_swe_sc_threshold), dpi=300)
 
 
     # plot timeseries of SWE
@@ -165,7 +166,7 @@ if __name__ == '__main__':
     ax.set_ylabel('SWE (mm w.e.)')
     plt.legend()
     plt.tight_layout()
-    plt.savefig(plot_folder + '/av_SWE_ts_{}_{}.png'.format(catchment, output_dem), dpi=300)
+    plt.savefig(plot_folder + '/av_SWE_ts_{}_{}_swe{}.png'.format(catchment, output_dem, model_swe_sc_threshold), dpi=300)
 
 
     plt.figure()
@@ -176,4 +177,4 @@ if __name__ == '__main__':
     plt.xticks(range(len(hydro_years_to_take)),hydro_years_to_take,rotation=45)
     plt.ylabel('SCA')
     plt.legend()
-    plt.savefig(plot_folder + '/average snow covered area HY {}-{}.png'.format(hydro_years_to_take[0],hydro_years_to_take[-1]))
+    plt.savefig(plot_folder + '/average snow covered area HY {}-{} swe{}.png'.format(hydro_years_to_take[0],hydro_years_to_take[-1], model_swe_sc_threshold))

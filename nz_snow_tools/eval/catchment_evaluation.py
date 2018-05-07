@@ -147,9 +147,10 @@ if __name__ == '__main__':
     catchment = 'Clutha'
     output_dem = 'nztm250m'  # identifier for output dem
     hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-    modis_sc_threshold = 70  # value of fsca (in percent) that is counted as being snow covered
-    dsc_snow_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
-    clark2009_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
+    modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
+    model_swe_sc_threshold = 5 # threshold for treating a grid cell as snow covered
+    dsc_snow_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha1'
+    clark2009_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha1'
     mask_folder = 'Y:/DSC-Snow/Masks'
     catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
     modis_folder = 'Y:/DSC-Snow/MODIS_NetCDF'
@@ -157,7 +158,7 @@ if __name__ == '__main__':
     met_inp_folder = 'Y:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
 
-    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
+    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha1'
 
     # set up lists
     ann_ts_av_sca_m = []
@@ -243,7 +244,7 @@ if __name__ == '__main__':
 
             for i in range(st_swe.shape[0]):
                 ba_swe.append(np.nanmean(st_swe[i, mask]))  # some points don't have input data, so are nan
-                ba_sca.append(np.nansum(st_swe[i, mask] > 0).astype('d') / num_gridpoints)
+                ba_sca.append(np.nansum(st_swe[i, mask] > model_swe_sc_threshold).astype('d') / num_gridpoints)
                 # ba_melt.append(np.mean(st_melt[i, mask.astype('int')]))
                 # ba_acc.append(np.mean(st_acc[i, mask.astype('int')]))
             # add to annual series
@@ -254,9 +255,9 @@ if __name__ == '__main__':
             ann_hydro_days.append(convert_date_hydro_DOY(out_dt))
             ann_dt.append(out_dt)
             # calculate snow cover duration
-            st_sc = st_swe > 0
+            st_sc = st_swe > model_swe_sc_threshold
             mod1_scd = np.sum(st_sc, axis=0)
-            mod1_scd[mask == 0] = -1
+            mod1_scd[mask == 0] = -999
             ann_scd.append(mod1_scd)
 
             # clear arrays
@@ -292,7 +293,7 @@ if __name__ == '__main__':
             ba_sca2 = []
             for i in range(st_swe.shape[0]):
                 ba_swe2.append(np.nanmean(st_swe[i, mask]))
-                ba_sca2.append(np.nansum(st_swe[i, mask] > 0).astype('d') / num_gridpoints2)
+                ba_sca2.append(np.nansum(st_swe[i, mask] > model_swe_sc_threshold).astype('d') / num_gridpoints2)
 
             #print('adding to annual series')
             # add to annual timeseries
@@ -313,9 +314,9 @@ if __name__ == '__main__':
                 ann_dt.append(out_dt)
 
             #print('calc snow cover duration')
-            st_sc = st_swe > 0
+            st_sc = st_swe > model_swe_sc_threshold
             mod_scd = np.sum(st_sc, axis=0)
-            mod_scd[mask == 0] = -1
+            mod_scd[mask == 0] = -999
 
             if which_model == 'all':
                 ann_scd2.append(mod_scd)
@@ -361,4 +362,4 @@ if __name__ == '__main__':
 
     ann = [ann_ts_av_sca_m, ann_hydro_days_m, ann_dt_m, ann_scd_m, ann_ts_av_sca, ann_ts_av_swe, ann_hydro_days, ann_dt, ann_scd, ann_ts_av_sca2,
            ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2, ann_ts_av_sca_thres_m,configs]
-    pickle.dump(ann, open(output_folder + '/summary_{}_{}_thres{}.pkl'.format(catchment, output_dem, modis_sc_threshold), 'wb'), -1)
+    pickle.dump(ann, open(output_folder + '/summary_{}_{}_thres{}_swe{}.pkl'.format(catchment, output_dem, modis_sc_threshold,model_swe_sc_threshold), 'wb'), -1)

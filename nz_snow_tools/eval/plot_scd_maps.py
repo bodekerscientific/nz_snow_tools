@@ -16,10 +16,11 @@ catchment = 'Clutha'
 output_dem = 'nztm250m'  # identifier for output dem
 hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
-model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
-plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha'
+model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered
+model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha1'
+plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha1'
 
-ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}.pkl'.format(catchment, output_dem, modis_sc_threshold), 'rb'))
+ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}_swe{}.pkl'.format(catchment, output_dem, modis_sc_threshold,model_swe_sc_threshold), 'rb'))
 # indexes 0-3 modis, 4-8 model 1 and 9-13 model 2
 # ann = [ann_ts_av_sca_m, ann_hydro_days_m, ann_dt_m, ann_scd_m,
 # ann_ts_av_sca, ann_ts_av_swe, ann_hydro_days, ann_dt, ann_scd,
@@ -107,5 +108,5 @@ else:
         # plt.yticks([])
         # plt.colorbar(h)
         # plt.tight_layout()
-        plt.savefig(plot_folder + '/SCD hy{}_{}_{}.png'.format(hydro_year_to_take,catchment, output_dem), dpi=300)
+        plt.savefig(plot_folder + '/SCD hy{}_{}_{}_swe{}.png'.format(hydro_year_to_take,catchment, output_dem,model_swe_sc_threshold), dpi=300)
         plt.clf()
