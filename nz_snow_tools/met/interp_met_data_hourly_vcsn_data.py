@@ -169,12 +169,13 @@ def daily_to_hourly_swin_grids(swin_grid, lats, lons, hourly_dt, single_dt=False
     return hourly_grid
 
 
-def load_new_vscn(variable, dt_out, nc_file_in):
+def load_new_vscn(variable, dt_out, nc_file_in, point=None):
     """
     load vcsn data from file for specified datetimes. transforms spatial dimensions so that latitude and longitude are increasing
     :param variable: string describing the field to take. options for newVCSN data are 'rain', 'tmax', 'tmin', 'srad'
     :param dt_out: array of datetimes requested
     :param nc_file_in: string describing full path to netCDF file with VCSN data
+    :param point[y,x] : point to extract data at, where y and x refer to the array positions of point required
     :return: array containing VCSN data with dimensions [time, lat, lon]
     """
     nc_file = nc.Dataset(nc_file_in)
@@ -187,9 +188,11 @@ def load_new_vscn(variable, dt_out, nc_file_in):
     if variable == 'tmax' or variable == 'rain' or variable == 'srad':  # take measurement (max or sum) to 9am next day
         start_idx = start_idx + 1
         end_idx = end_idx + 1
-    data = np.fliplr(nc_file.variables[variable][start_idx:end_idx + 1, :,
-                     :])  # flip so latitude and longitude is increasing. i.e. origin at bottom left.
-    # fliplr flips second dimension
+    if point is None:
+        data = np.fliplr(nc_file.variables[variable][start_idx:end_idx + 1, :, :])
+        # flip so latitude and longitude is increasing. i.e. origin at bottom left.    # fliplr flips second dimension
+    else:
+        data = nc_file.variables[variable][start_idx:end_idx + 1, point[0], point[1]]
 
     return data
 
@@ -284,7 +287,8 @@ if __name__ == '__main__':
             for i in range(num_days):
                 # Do the temporal downsampling for one day
                 # precip is random cascade for each day. NOTE original VCSN data has almost correct timestamp - ie. total from 9am.
-                hourly_precip, day_weightings_1 = process_precip(hi_res_precip[i], one_day=True)  # TODO: align to 9am-9am - currently counts pretends it is midnight-midnight
+                hourly_precip, day_weightings_1 = process_precip(hi_res_precip[i],
+                                                                 one_day=True)  # TODO: align to 9am-9am - currently counts pretends it is midnight-midnight
                 # air temperature is three part sinusoidal between min at 8am and max at 2pm. NOTE original VCSN data has correct timestamp - ie. minimum to 9am, maximum from 9am.
                 # hourly_temp = daily_to_hourly_temp_grids(hi_res_max_temp[i], hi_res_min_temp[i], single_dt=True)  #
                 if i == 0:
