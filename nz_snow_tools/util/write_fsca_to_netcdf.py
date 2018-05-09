@@ -75,6 +75,40 @@ def create_ncvar_fsca(ds):
     return fsca_var
 
 
+def create_ncvar_swe(ds):
+    swe_var = ds.createVariable('swe', 'f4', ('time', 'northing', 'easting',))
+    swe_var.setncatts({
+        'long_name': 'snow water equivalent',
+        'missing': -9999.
+        # 'valid_min': 0,
+        # 'valid_max': 100
+    })
+    return swe_var
+
+
+def create_ncvar_acc(ds):
+    acc_var = ds.createVariable('acc', 'f4', ('time', 'northing', 'easting',))
+    acc_var.setncatts({
+        'long_name': 'snowfall in mm snow water equivalent',
+        'missing': -9999.
+        # 'valid_min': 0,
+        # 'valid_max': 100
+    })
+    return acc_var
+
+
+def create_ncvar_melt(ds):
+    melt_var = ds.createVariable('melt', 'f4', ('time', 'northing', 'easting',))
+    melt_var.setncatts({
+        'long_name': 'melt in mm snow water equivalent',
+        'missing': -9999.
+        # 'valid_min': 0,
+        # 'valid_max': 100
+    })
+    return melt_var
+
+
+
 def create_lat_lons_for_NZTMgrid(extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, extent_s=4.82e6, resolution=250):
     """create grids of latitude and longitude corresponding to grid centres of data in nztm grid
     """
@@ -179,6 +213,10 @@ def write_nztm_grids_to_netcdf(fname, list_of_data_arrays, var_names, datetime_l
         fsca_var = create_ncvar_fsca(ds)
         fsca_var[:] = list_of_data_arrays[var_names.index('fsca')]
 
+    if 'swe' in var_names:
+        swe_var = create_ncvar_swe(ds)
+        swe_var[:] = list_of_data_arrays[var_names.index('swe')]
+
     ds.close()
 
 
@@ -268,8 +306,16 @@ def setup_nztm_grid_netcdf(fname, list_of_data_arrays, var_names, datetime_list,
     if 'surface_downwelling_shortwave_flux' in var_names:
         temp_var = create_ncvar_shortwave(ds, no_time=no_time)
 
-
     if 'fsca' in var_names:
         fsca_var = create_ncvar_fsca(ds)
+
+    if 'swe' in var_names:
+        swe_var = create_ncvar_swe(ds)
+
+    if 'acc' in var_names:
+        acc_var = create_ncvar_acc(ds)
+
+    if 'melt' in var_names:
+        melt_var = create_ncvar_melt(ds)
 
     return ds

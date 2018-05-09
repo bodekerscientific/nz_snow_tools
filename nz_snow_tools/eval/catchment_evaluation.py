@@ -16,7 +16,7 @@ import numpy as np
 import pickle
 
 from nz_snow_tools.snow.clark2009_snow_model import snow_main_simple
-from nz_snow_tools.util.utils import convert_date_hydro_DOY, create_mask_from_shpfile, trim_lat_lon_bounds, setup_clutha_dem_250m, make_regular_timeseries, \
+from nz_snow_tools.util.utils import convert_date_hydro_DOY, create_mask_from_shpfile, trim_lat_lon_bounds, setup_nztm_dem, make_regular_timeseries, \
     trim_data_to_mask
 
 
@@ -122,7 +122,7 @@ def load_mask_modis(catchment, output_dem, mask_folder, dem_file, mask_created=T
     '''
     load mask and trimmed mask of catchment for modis clutha domain
     '''
-    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_clutha_dem_250m(dem_file)
+    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
 
     # # Get the masks for the individual regions of interest
     if mask_created == True:  # load precalculated mask

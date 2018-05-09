@@ -15,7 +15,7 @@ import pickle
 import mpl_toolkits.basemap as basemap
 
 from nz_snow_tools.util.utils import process_precip, process_temp, create_mask_from_shpfile, make_regular_timeseries, calc_toa, trim_lat_lon_bounds, \
-    setup_clutha_dem_250m
+    setup_nztm_dem
 
 from nz_snow_tools.util.write_fsca_to_netcdf import write_nztm_grids_to_netcdf, setup_nztm_grid_netcdf
 
@@ -69,7 +69,7 @@ from nz_snow_tools.util.write_fsca_to_netcdf import write_nztm_grids_to_netcdf, 
 #     return data[:, overlap]
 
 
-def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, out_elev, lapse=-0.005):
+def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, out_elev, lapse=-0.005,single_dt=False):
     """
     interpolate met data for one timestep from coarse (vcsn) grid onto higher-resolution grid using bilinear interpolation.
 
@@ -100,28 +100,47 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
         XI = out_lons
         YI = out_lats
 
-    out_dat = np.empty([in_dat.shape[0], num_out_lats, num_out_lons], dtype=np.float32) * np.nan
+    if single_dt ==False:
+        out_dat = np.empty([in_dat.shape[0], num_out_lats, num_out_lons], dtype=np.float32) * np.nan
 
-    for i in range(in_dat.shape[0]):
+        for i in range(in_dat.shape[0]):
 
-        in_dat1 = in_dat[i, :, :] * 1.0
+            in_dat1 = in_dat[i, :, :] * 1.0
+
+            if var in ['tmax', 'tmin']:  # lapse to sea level
+                in_t_offset = in_elev * lapse
+                in_dat1 = in_dat1 - in_t_offset
+
+            out_dat1 = basemap.interp(in_dat1, in_lons, in_lats, XI, YI, checkbounds=False, masked=False,
+                                      order=1)
+            # mask data at sea level
+            # out_dat1[out_elev.data < 1.0] = np.nan # no longer send in a masked array
+
+            if var in ['tmax', 'tmin']:  # lapse back to new elevations
+                out_t_offset = out_elev * lapse
+                out_dat1 = out_dat1 + out_t_offset
+
+            out_dat[i, :, :] = out_dat1
+
+    elif single_dt== True:
+
+        #out_dat = np.empty([num_out_lats, num_out_lons], dtype=np.float32) * np.nan
+        #in_dat1 = in_dat * 1.0
 
         if var in ['tmax', 'tmin']:  # lapse to sea level
             in_t_offset = in_elev * lapse
-            in_dat1 = in_dat1 - in_t_offset
+            in_dat = in_dat - in_t_offset
 
-        out_dat1 = basemap.interp(in_dat1, in_lons, in_lats, XI, YI, checkbounds=False, masked=False,
+        out_dat = basemap.interp(in_dat, in_lons, in_lats, XI, YI, checkbounds=False, masked=False,
                                   order=1)
         # mask data at sea level
         # out_dat1[out_elev.data < 1.0] = np.nan # no longer send in a masked array
 
         if var in ['tmax', 'tmin']:  # lapse back to new elevations
             out_t_offset = out_elev * lapse
-            out_dat1 = out_dat1 + out_t_offset
+            out_dat = out_dat + out_t_offset
 
-        out_dat[i, :, :] = out_dat1
-
-    return out_dat
+    return out_dat.astype(np.float32)
 
 
 def daily_to_hourly_temp_grids(max_temp_grid, min_temp_grid, single_dt=False):
@@ -169,20 +188,31 @@ def daily_to_hourly_swin_grids(swin_grid, lats, lons, hourly_dt, single_dt=False
     return hourly_grid
 
 
-def load_new_vscn(variable, dt_out, nc_file_in, point=None):
+def load_new_vscn(variable, dt_out, nc_file_in, point=None,nc_opt=False,single_dt=False,nc_datetimes=None):
     """
     load vcsn data from file for specified datetimes. transforms spatial dimensions so that latitude and longitude are increasing
     :param variable: string describing the field to take. options for newVCSN data are 'rain', 'tmax', 'tmin', 'srad'
     :param dt_out: array of datetimes requested
     :param nc_file_in: string describing full path to netCDF file with VCSN data
     :param point[y,x] : point to extract data at, where y and x refer to the array positions of point required
+    :param nc_opt: set to True if nc_file_in is a netCDF instance rather than a string
     :return: array containing VCSN data with dimensions [time, lat, lon]
     """
-    nc_file = nc.Dataset(nc_file_in)
-    nc_datetimes = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
-    # nc dts are in UTC, and recorded at 9am. To get record relevant to NZST day (at 00:00), need to subtract 3 hours (12 hour offset, plus 9 hours)
-    index = np.where(np.logical_and(nc_datetimes >= (dt_out[0] - dt.timedelta(hours=3)),
-                                    nc_datetimes <= (dt_out[-1] - dt.timedelta(hours=3))))
+    if nc_opt:
+        nc_file = nc_file_in
+    else:
+        nc_file = nc.Dataset(nc_file_in)
+
+    if nc_datetimes is None:
+        nc_datetimes = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
+
+    if single_dt==False:
+        # nc dts are in UTC, and recorded at 9am. To get record relevant to NZST day (at 00:00), need to subtract 3 hours (12 hour offset, plus 9 hours)
+        index = np.where(np.logical_and(nc_datetimes >= (dt_out[0] - dt.timedelta(hours=3)),
+                                        nc_datetimes <= (dt_out[-1] - dt.timedelta(hours=3))))
+    else:
+        index = np.where(nc_datetimes == (dt_out - dt.timedelta(hours=3)))
+
     start_idx = index[0][0]
     end_idx = index[0][-1]
     if variable == 'tmax' or variable == 'rain' or variable == 'srad':  # take measurement (max or sum) to 9am next day
@@ -191,6 +221,8 @@ def load_new_vscn(variable, dt_out, nc_file_in, point=None):
     if point is None:
         data = np.fliplr(nc_file.variables[variable][start_idx:end_idx + 1, :, :])
         # flip so latitude and longitude is increasing. i.e. origin at bottom left.    # fliplr flips second dimension
+        if single_dt:
+            data = np.squeeze(data)
     else:
         data = nc_file.variables[variable][start_idx:end_idx + 1, point[0], point[1]]
 
@@ -225,7 +257,7 @@ if __name__ == '__main__':
 
     # set up input and output DEM for processing
     # output DEM
-    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_clutha_dem_250m(dem_file)
+    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
     data_id = '{}_{}'.format(catchment, output_dem)  # name to identify the output data
     if mask_dem == True:
         # Get the masks for the individual regions of interest

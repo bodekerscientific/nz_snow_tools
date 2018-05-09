@@ -9,6 +9,7 @@ from PIL import Image
 from matplotlib.path import Path
 from pyproj import Proj, transform
 
+
 ### Date utilities
 
 def convert_datetime_julian_day(dt_list):
@@ -100,13 +101,13 @@ def convert_hydro_DOY_to_date(h_DOY, year, hemis='south'):
         epoch = datetime.date(year - 1, 10, 1)
     d = []
     for doy in h_DOY:
-        d.append(epoch + datetime.timedelta(days=doy-1))
+        d.append(epoch + datetime.timedelta(days=doy - 1))
     return np.asarray(d)
 
 
 ### temporal interpolation utilities
 
-def process_precip(precip_daily,one_day=False):
+def process_precip(precip_daily, one_day=False):
     """
     Generate hourly precip fields using a multiplicative cascade model
 
@@ -116,13 +117,13 @@ def process_precip(precip_daily,one_day=False):
     :return:
     """
 
-    if one_day == True: # assume is 2d and add a time dimension on the start
-        precip_daily=precip_daily.reshape([1, precip_daily.shape[0], precip_daily.shape[1]])
+    if one_day == True:  # assume is 2d and add a time dimension on the start
+        precip_daily = precip_daily.reshape([1, precip_daily.shape[0], precip_daily.shape[1]])
 
     if precip_daily.ndim == 2:
-        hourly_data = np.zeros((precip_daily.shape[0] * 24, precip_daily.shape[1]),dtype=np.float32)
+        hourly_data = np.zeros((precip_daily.shape[0] * 24, precip_daily.shape[1]), dtype=np.float32)
     elif precip_daily.ndim == 3:
-        hourly_data = np.zeros((precip_daily.shape[0] * 24, precip_daily.shape[1],precip_daily.shape[2]),dtype=np.float32)
+        hourly_data = np.zeros((precip_daily.shape[0] * 24, precip_daily.shape[1], precip_daily.shape[2]), dtype=np.float32)
 
     store_day_weights = []
     for idx in range(precip_daily.shape[0]):
@@ -154,8 +155,8 @@ def random_cascade(l):
     weights = np.random.random(2)
     weights /= weights.sum()
 
-    res[:l/2] = weights[0] * random_cascade(l // 2)
-    res[l/2:] *= weights[1] * random_cascade(l // 2)
+    res[:l / 2] = weights[0] * random_cascade(l // 2)
+    res[l / 2:] *= weights[1] * random_cascade(l // 2)
     return res
 
 
@@ -181,7 +182,7 @@ def process_temp(max_temp_daily, min_temp_daily):
 
     scaling_factors = hour_func(np.arange(24.))
 
-    hourly_data = np.zeros((max_temp_daily.shape[0] * 24, max_temp_daily.shape[1]),dtype=np.float32)
+    hourly_data = np.zeros((max_temp_daily.shape[0] * 24, max_temp_daily.shape[1]), dtype=np.float32)
     hours = np.array(range(24) * max_temp_daily.shape[0])
 
     # Calculate each piecewise element seperately as some need the previous days data
@@ -232,7 +233,7 @@ def create_mask_from_shpfile(lat, lon, shp_path, idx=0):
     shapes2 = shp.shapes()
     shppath = Path(shapes2[idx].points)
 
-    if lat.ndim == 1 and lon.ndim == 1: # create array of lat and lon
+    if lat.ndim == 1 and lon.ndim == 1:  # create array of lat and lon
         nx, ny = len(lon), len(lat)
         longarray, latarray = np.meshgrid(lon, lat)
     elif lat.ndim == 2 and lon.ndim == 2:
@@ -317,17 +318,25 @@ def calc_toa(lat_ref, lon_ref, hourly_dt):
     return SRtoa
 
 
-def setup_clutha_dem_250m(dem_file):
+def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, extent_s=4.82e6, resolution=250):
+    """
+    load dem tif file. defaults to clutha 250 dem.
+    :param dem_file: string specifying path to dem
+    :param extent_w: extent in nztm
+    :param extent_e: extent in nztm
+    :param extent_n: extent in nztm
+    :param extent_s: extent in nztm
+    :param resolution: resolution in m
+    :return:
+    """
     nztm_dem = Image.open(dem_file)
     # np.array(nztm_dem).shape is (1240L, 800L) but origin is in NW corner. Move to SW to align with increasing Easting and northing.
     nztm_dem = np.flipud(np.array(nztm_dem))
-    extent_w = 1.2e6
-    extent_e = 1.4e6
-    extent_n = 5.13e6
-    extent_s = 4.82e6
-    resolution = 250
-    num_e = 800
-    num_n = 1240
+    # extent_w = 1.2e6
+    # extent_e = 1.4e6
+    # extent_n = 5.13e6
+    # extent_s = 4.82e6
+    # resolution = 250
     # create coordinates
     x_centres = np.arange(extent_w + resolution / 2, extent_e, resolution)
     y_centres = np.arange(extent_s + resolution / 2, extent_n, resolution)
@@ -364,7 +373,7 @@ def trim_data_to_mask(data, mask):
     return trimmed_data
 
 
-def nash_sut(y_sim,y_obs):
+def nash_sut(y_sim, y_obs):
     """
     calculate the nash_sutcliffe efficiency criterion (taken from Ayala, 2017, WRR)
 
@@ -372,14 +381,14 @@ def nash_sut(y_sim,y_obs):
     :param y_obs: series of observed values
     :return:
     """
-    assert y_sim.ndim ==1 and y_obs.ndim ==1
+    assert y_sim.ndim == 1 and y_obs.ndim == 1
 
-    ns = 1 - np.sum((y_sim - y_obs)**2) / np.sum((y_obs - np.mean(y_obs))**2)
+    ns = 1 - np.sum((y_sim - y_obs) ** 2) / np.sum((y_obs - np.mean(y_obs)) ** 2)
 
-    return  ns
+    return ns
 
 
-def mean_bias(y_sim,y_obs):
+def mean_bias(y_sim, y_obs):
     """
     calculate the mean bias difference (taken from Ayala, 2017, WRR)
 
@@ -394,7 +403,7 @@ def mean_bias(y_sim,y_obs):
     return mbd
 
 
-def rmsd(y_sim,y_obs):
+def rmsd(y_sim, y_obs):
     """
     calculate the mean bias difference (taken from Ayala, 2017, WRR)
 
@@ -404,6 +413,6 @@ def rmsd(y_sim,y_obs):
     """
     assert y_sim.ndim == 1 and y_obs.ndim == 1 and len(y_sim) == len(y_obs)
 
-    rs = np.sqrt(np.mean((y_sim - y_obs)**2))
+    rs = np.sqrt(np.mean((y_sim - y_obs) ** 2))
 
     return rs

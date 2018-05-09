@@ -8,7 +8,7 @@ import pickle
 import mpl_toolkits.basemap as basemap
 from scipy.stats import linregress
 from nz_snow_tools.util.utils import process_precip, process_temp, create_mask_from_shpfile, make_regular_timeseries, calc_toa, trim_lat_lon_bounds, \
-    setup_clutha_dem_250m
+    setup_nztm_dem
 from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn
 from nz_snow_tools.util.write_fsca_to_netcdf import write_nztm_grids_to_netcdf, setup_nztm_grid_netcdf
 
