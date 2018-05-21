@@ -18,8 +18,8 @@ from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, in
 which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-years_to_take = range(2015, 2015 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-catchment = 'Nevis'  # string identifying the catchment to run. must match the naming of the catchment shapefile
+years_to_take = range(2000, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+catchment = 'Clutha'  # string identifying the catchment to run. must match the naming of the catchment shapefile
 output_dem = 'nztm250m'  # identifier for output dem
 dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
 dem = 'si_dem_250m'
@@ -31,7 +31,7 @@ mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
 catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
 
 # output options
-output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_nevis2'
+output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha2'
 
 # paths to input met data
 nc_file_rain = nc.Dataset('T:/newVCSN/rain_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc', 'r')
