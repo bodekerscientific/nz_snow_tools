@@ -18,12 +18,12 @@ from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, in
 which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-years_to_take = range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment shapefile
+years_to_take = range(2015, 2015 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+catchment = 'Nevis'  # string identifying the catchment to run. must match the naming of the catchment shapefile
 output_dem = 'nztm250m'  # identifier for output dem
 dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
 dem = 'si_dem_250m'
-mask_dem = False  # boolean to set whether or not to mask the output dem
+mask_dem = True  # boolean to set whether or not to mask the output dem
 mask_created = True  # boolean to set whether or not the mask has already been created
 mask_folder = 'Y:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
 mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
@@ -31,13 +31,16 @@ mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
 catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
 
 # output options
-output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_SI'
+output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_nevis2'
 
 # paths to input met data
 nc_file_rain = nc.Dataset('T:/newVCSN/rain_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc', 'r')
-nc_file_tmax = nc.Dataset('T:/newVCSN/tmax_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc', 'r')
-nc_file_tmin = nc.Dataset('T:/newVCSN/tmin_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc', 'r')
+#nc_file_tmax = nc.Dataset('T:/newVCSN/tmax_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc', 'r')
+nc_file_tmax = nc.Dataset('T:/newVCSN/tmax_N2_1980010100_2017073100_south-island_p05_daily.nc', 'r')
+#nc_file_tmin = nc.Dataset('T:/newVCSN/tmin_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc', 'r')
+nc_file_tmin = nc.Dataset('T:/newVCSN/tmin_N2_1980010100_2017073100_south-island_p05_daily.nc', 'r')
 nc_file_srad = nc.Dataset('T:/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc', 'r')
+
 
 # configuration dictionary containing model parameters.
 config = {}
@@ -67,15 +70,15 @@ vcsn_elev_interp = np.ma.fix_invalid(vcsn_elev).data
 vcsn_lats = nc_file_rain.variables['latitude'][::-1]
 vcsn_lons = nc_file_rain.variables['longitude'][:]
 vcsn_dt = nc.num2date(nc_file_rain.variables['time'][:], nc_file_rain.variables['time'].units)
-vcsn_dt2 = nc.num2date(nc_file_tmax.variables['time'][0], nc_file_tmax.variables['time'].units)
-vcsn_dt3 = nc.num2date(nc_file_tmin.variables['time'][0], nc_file_tmin.variables['time'].units)
-vcsn_dt4 = nc.num2date(nc_file_srad.variables['time'][0], nc_file_srad.variables['time'].units)
+vcsn_dt2 = nc.num2date(nc_file_tmax.variables['time'][:], nc_file_tmax.variables['time'].units)
+vcsn_dt3 = nc.num2date(nc_file_tmin.variables['time'][:], nc_file_tmin.variables['time'].units)
+vcsn_dt4 = nc.num2date(nc_file_srad.variables['time'][:], nc_file_srad.variables['time'].units)
 
 # check for the same timestamp
-assert vcsn_dt[0] == vcsn_dt2 == vcsn_dt3 == vcsn_dt4
-vcsn_dt2 = None
-vcsn_dt3 = None
-vcsn_dt4 = None
+# assert vcsn_dt[0] == vcsn_dt2[0] == vcsn_dt3 == vcsn_dt4
+# vcsn_dt2 = None
+# vcsn_dt3 = None
+# vcsn_dt4 = None
 
 # calculate model grid etc:
 # output DEM
@@ -137,11 +140,11 @@ for year_to_take in years_to_take:
     for ii, dt_t in enumerate(out_dt[:-1]):
         # load one day of precip and shortwave rad data
         precip_daily = load_new_vscn('rain', dt_t, nc_file_rain, nc_opt=True, single_dt=True, nc_datetimes=vcsn_dt)
-        sw_rad_daily = load_new_vscn('srad', dt_t, nc_file_srad, nc_opt=True, single_dt=True, nc_datetimes=vcsn_dt)
+        sw_rad_daily = load_new_vscn('srad', dt_t, nc_file_srad, nc_opt=True, single_dt=True, nc_datetimes=vcsn_dt4)
         # load 3 days of temperature data (1 either side of day of interest - needed for interpolation of temperature)
         dts_to_take = make_regular_timeseries(dt_t - dt.timedelta(days=1), dt_t + dt.timedelta(days=1), 86400)
-        max_temp_daily = load_new_vscn('tmax', dts_to_take, nc_file_tmax, nc_opt=True, nc_datetimes=vcsn_dt)
-        min_temp_daily = load_new_vscn('tmin', dts_to_take, nc_file_tmin, nc_opt=True, nc_datetimes=vcsn_dt)
+        max_temp_daily = load_new_vscn('tmax', dts_to_take, nc_file_tmax, nc_opt=True, nc_datetimes=vcsn_dt2)
+        min_temp_daily = load_new_vscn('tmin', dts_to_take, nc_file_tmin, nc_opt=True, nc_datetimes=vcsn_dt3)
         # precip_daily_data = precip_daily.data
         # precip_daily_data[(precip_daily_data == precip_daily.fill_value)] = np.nan
         # sw_rad_daily_data = sw_rad_daily.data
@@ -198,4 +201,6 @@ for year_to_take in years_to_take:
         bucket_acc = bucket_acc * 0
 
     out_nc_file.close()
-    pickle.dump(day_weightings, open(output_folder + '/met_inp_{}_{}_hy{}_daywts.pkl'.format(catchment, output_dem, year_to_take), 'wb'), -1)
+
+    pickle.dump(config, open(output_folder + '/config_{}_{}_{}.pkl'.format(catchment, output_dem, year_to_take), 'wb'), -1)
+    pickle.dump(day_weightings, open(output_folder + '/met_inp_{}_{}_{}_daywts.pkl'.format(catchment, output_dem, year_to_take), 'wb'), -1)
