@@ -139,17 +139,31 @@ def load_mask_modis(catchment, output_dem, mask_folder, dem_file, mask_created=T
     return mask, trimmed_mask
 
 
+def load_dsc_snow_output_python_otf(catchment, output_dem, year_to_take, dsc_snow_output_folder):
+
+    dsc_snow_output = nc.Dataset(dsc_snow_output_folder + '/snow_out_{}_{}_{}.nc'.format(catchment, output_dem, year_to_take-1), 'r')
+
+    out_dt = nc.num2date(dsc_snow_output.variables['time'][:], dsc_snow_output.variables['time'].units)
+
+    st_swe = dsc_snow_output.variables['swe'][:]
+    st_melt = dsc_snow_output.variables['melt'][:]
+    st_acc = dsc_snow_output.variables['acc'][:]
+
+    return st_swe, st_melt, st_acc , out_dt
+
+
 if __name__ == '__main__':
 
-    which_model = 'all'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
+    which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
     clark2009run = True  # boolean specifying if the run already exists
     dsc_snow_opt = 'python'  # string identifying which version of the dsc snow model to use output from 'python' or 'fortran'
+    dsc_snow_opt2 = 'netCDF' # string identifying which version of output from python model 'netCDF' of 'pickle'
     catchment = 'Clutha'
     output_dem = 'nztm250m'  # identifier for output dem
     hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_swe_sc_threshold = 5 # threshold for treating a grid cell as snow covered
-    dsc_snow_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha1'
+    dsc_snow_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha2'
     clark2009_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha1'
     mask_folder = 'Y:/DSC-Snow/Masks'
     catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
@@ -158,7 +172,7 @@ if __name__ == '__main__':
     met_inp_folder = 'Y:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
 
-    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha1'
+    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha2'
 
     # set up lists
     ann_ts_av_sca_m = []
@@ -278,15 +292,26 @@ if __name__ == '__main__':
                 st_swe, st_melt, st_acc, out_dt, mask = load_dsc_snow_output(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder,
                                                                              dsc_snow_dem_folder)
             elif dsc_snow_opt == 'python':
-                # load previously run simulations from pickle file
-                st_snow = pickle.load(open(dsc_snow_output_folder + '/{}_{}_hy{}_dsc_snow.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))
-                st_swe = st_snow[0]
-                st_melt = st_snow[1]
-                st_acc = st_snow[2]
-                out_dt = st_snow[3]
-                mask = st_snow[4]
-                config2 = st_snow[5]
-                configs.append(config2)
+                if dsc_snow_opt2 == 'netCDF':
+                    st_swe, st_melt, st_acc, out_dt = load_dsc_snow_output_python_otf(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder)
+                    # load mask
+                    dem = 'si_dem_250m'
+                    dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
+                    dem_file = dem_folder + dem + '.tif'
+                    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
+                    mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, dem))
+                    _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
+                    mask = trimmed_mask
+                elif dsc_snow_opt2 == 'pickle':
+                    # load previously run simulations from pickle file
+                    st_snow = pickle.load(open(dsc_snow_output_folder + '/{}_{}_hy{}_dsc_snow.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))
+                    st_swe = st_snow[0]
+                    st_melt = st_snow[1]
+                    st_acc = st_snow[2]
+                    out_dt = st_snow[3]
+                    mask = st_snow[4]
+                    config2 = st_snow[5]
+                    configs.append(config2)
             #print('calculating basin average sca')
             num_gridpoints2 = np.sum(mask)
             ba_swe2 = []
