@@ -17,7 +17,7 @@ output_dem = 'nztm250m'  # identifier for output dem
 hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
 model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered
-model_output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha2'
+model_output_folder = 'D:/Projects-DSC-Snow/nz_snow_runs/baseline_clutha1'
 plot_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha2'
 
 ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}_swe{}.pkl'.format(catchment, output_dem, modis_sc_threshold,model_swe_sc_threshold), 'rb'))
