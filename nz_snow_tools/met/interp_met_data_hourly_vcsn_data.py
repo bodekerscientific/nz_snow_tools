@@ -69,7 +69,7 @@ from nz_snow_tools.util.write_fsca_to_netcdf import write_nztm_grids_to_netcdf, 
 #     return data[:, overlap]
 
 
-def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, out_elev, lapse=-0.005,single_dt=False):
+def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, out_elev, lapse=-0.005, single_dt=False):
     """
     interpolate met data for one timestep from coarse (vcsn) grid onto higher-resolution grid using bilinear interpolation.
 
@@ -100,19 +100,24 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
         XI = out_lons
         YI = out_lats
 
-    if single_dt ==False:
+    if single_dt == False:
         out_dat = np.empty([in_dat.shape[0], num_out_lats, num_out_lons], dtype=np.float32) * np.nan
 
         for i in range(in_dat.shape[0]):
 
             in_dat1 = in_dat[i, :, :] * 1.0
 
+            if type(in_dat) == np.ma.core.MaskedArray:
+                in_dat1.data[in_dat1.mask] = np.nan
+
             if var in ['tmax', 'tmin']:  # lapse to sea level
                 in_t_offset = in_elev * lapse
                 in_dat1 = in_dat1 - in_t_offset
 
-            out_dat1 = basemap.interp(in_dat1, in_lons, in_lats, XI, YI, checkbounds=False, masked=False,
-                                      order=1)
+            out_dat1 = basemap.interp(in_dat1, in_lons, in_lats, XI, YI, checkbounds=False, masked=False, order=1)  # bilinear grid - will miss edges
+            if type(in_dat) == np.ma.core.MaskedArray:
+                out_dat0 = basemap.interp(in_dat1, in_lons, in_lats, XI, YI, checkbounds=False, masked=False, order=0)  # nearest neighbour grid to fill edges
+                out_dat1[np.where(out_dat1.mask)] = out_dat0[np.where(out_dat1.mask)]  # replace the masked elements in bilinear grid with the nn grid
             # mask data at sea level
             # out_dat1[out_elev.data < 1.0] = np.nan # no longer send in a masked array
 
@@ -122,17 +127,22 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
 
             out_dat[i, :, :] = out_dat1
 
-    elif single_dt== True:
+    elif single_dt == True:
 
-        #out_dat = np.empty([num_out_lats, num_out_lons], dtype=np.float32) * np.nan
-        #in_dat1 = in_dat * 1.0
+        # out_dat = np.empty([num_out_lats, num_out_lons], dtype=np.float32) * np.nan
+        # in_dat1 = in_dat * 1.0
+
+        if type(in_dat) == np.ma.core.MaskedArray:
+            in_dat.data[in_dat.mask] = np.nan
 
         if var in ['tmax', 'tmin']:  # lapse to sea level
             in_t_offset = in_elev * lapse
             in_dat = in_dat - in_t_offset
 
-        out_dat = basemap.interp(in_dat, in_lons, in_lats, XI, YI, checkbounds=False, masked=False,
-                                  order=1)
+        out_dat = basemap.interp(in_dat, in_lons, in_lats, XI, YI, checkbounds=False, masked=False, order=1)
+        if type(in_dat) == np.ma.core.MaskedArray:
+            out_dat0 = basemap.interp(in_dat, in_lons, in_lats, XI, YI, checkbounds=False, masked=False, order=0)  # nearest neighbour grid to fill edges
+            out_dat[np.where(out_dat.mask)] = out_dat0[np.where(out_dat.mask)]
         # mask data at sea level
         # out_dat1[out_elev.data < 1.0] = np.nan # no longer send in a masked array
 
@@ -188,7 +198,7 @@ def daily_to_hourly_swin_grids(swin_grid, lats, lons, hourly_dt, single_dt=False
     return hourly_grid
 
 
-def load_new_vscn(variable, dt_out, nc_file_in, point=None,nc_opt=False,single_dt=False,nc_datetimes=None):
+def load_new_vscn(variable, dt_out, nc_file_in, point=None, nc_opt=False, single_dt=False, nc_datetimes=None):
     """
     load vcsn data from file for specified datetimes. transforms spatial dimensions so that latitude and longitude are increasing
     :param variable: string describing the field to take. options for newVCSN data are 'rain', 'tmax', 'tmin', 'srad'
@@ -206,7 +216,7 @@ def load_new_vscn(variable, dt_out, nc_file_in, point=None,nc_opt=False,single_d
     if nc_datetimes is None:
         nc_datetimes = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
 
-    if single_dt==False:
+    if single_dt == False:
         # nc dts are in UTC, and recorded at 9am. To get record relevant to NZST day (at 00:00), need to subtract 3 hours (12 hour offset, plus 9 hours)
         index = np.where(np.logical_and(nc_datetimes >= (dt_out[0] - dt.timedelta(hours=3)),
                                         nc_datetimes <= (dt_out[-1] - dt.timedelta(hours=3))))
