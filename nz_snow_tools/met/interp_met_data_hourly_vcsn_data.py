@@ -295,7 +295,7 @@ if __name__ == '__main__':
         if hydro_years == True:
             dts_to_take = np.asarray(make_regular_timeseries(dt.datetime(hydro_year_to_take - 1, 4, 1), dt.datetime(hydro_year_to_take, 3, 31), 86400))
         else:
-            dts_to_take = np.asarray(make_regular_timeseries(dt.datetime(hydro_year_to_take, 1, 1), dt.datetime(hydro_year_to_take, 1, 5), 86400))
+            dts_to_take = np.asarray(make_regular_timeseries(dt.datetime(hydro_year_to_take, 1, 1), dt.datetime(hydro_year_to_take, 12, 31), 86400))
 
         # pull only data needed.
         # this loads data for 00h NZST that corresponds to the day to come in i.e. min@ 8am, max @ 2pm , total sw and total rain for 1/1/2000 at 2000-01-01 00:00:00
