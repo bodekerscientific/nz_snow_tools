@@ -180,22 +180,22 @@ def process_temp(max_temp_daily, min_temp_daily):
         ])
         return (f + 1.) / 2.  # Set the range to be 0 - 1 0 is tmin and 1 being tmax
 
-    scaling_factors = hour_func(np.arange(24.))
+    scaling_factors = hour_func(np.arange(1., 25.))
 
     hourly_data = np.zeros((max_temp_daily.shape[0] * 24, max_temp_daily.shape[1]), dtype=np.float32)
-    hours = np.array(range(24) * max_temp_daily.shape[0])
+    hours = np.array(range(1, 25) * max_temp_daily.shape[0])
 
     # Calculate each piecewise element seperately as some need the previous days data
     mask = hours < 8
     max_temp_prev_day = np.concatenate((max_temp_daily[0][np.newaxis, :], max_temp_daily[:-1]))
-    hourly_data[mask] = _interp_temp(scaling_factors[:8], max_temp_prev_day, min_temp_daily)
+    hourly_data[mask] = _interp_temp(scaling_factors[:7], max_temp_prev_day, min_temp_daily)
 
     mask = (hours >= 8) & (hours < 14)
-    hourly_data[mask] = _interp_temp(scaling_factors[8:14], max_temp_daily, min_temp_daily)
+    hourly_data[mask] = _interp_temp(scaling_factors[7:13], max_temp_daily, min_temp_daily)
 
     mask = hours >= 14
     min_temp_next_day = np.concatenate((min_temp_daily[1:], min_temp_daily[-1][np.newaxis, :]))
-    hourly_data[mask] = _interp_temp(scaling_factors[14:], max_temp_daily, min_temp_next_day)
+    hourly_data[mask] = _interp_temp(scaling_factors[13:], max_temp_daily, min_temp_next_day)
 
     return hourly_data
 

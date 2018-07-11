@@ -58,7 +58,7 @@ if __name__ == '__main__':
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
         catchment)  # shapefile containing polyline or polygon of catchment in WGS84. Not needed if mask_created==True
     # time control
-    years_to_take = range(2001, 2017 + 1)  # range(2001, 2013 + 1)
+    years_to_take = range(2000, 2016 + 1)  # range(2001, 2013 + 1)
 
     # input met data
     nc_file_rain = 'Y:/DSC-Snow/JOBST/PRECIP_WITH_UCC/CLUTHA_PRECIP_250m_' # provide only partial filename up to 01-Jan-2000to31-dec-2000

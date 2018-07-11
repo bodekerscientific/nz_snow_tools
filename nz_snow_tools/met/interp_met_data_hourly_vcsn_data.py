@@ -184,7 +184,7 @@ def daily_to_hourly_swin_grids(swin_grid, lats, lons, hourly_dt, single_dt=False
 
     lon_ref = np.mean(lons)
     lat_ref = np.mean(lats)
-    # compute hourly TOA for reference in middle of domain #TODO explicit cacluation for each grid point?
+    # compute hourly TOA for reference in middle of domain #TODO explicit calculation for each grid point?
     toa_ref = calc_toa(lat_ref, lon_ref, hourly_dt)
     # compute daily average TOA and atmospheric transmissivity
     daily_av_toa = []
@@ -246,13 +246,14 @@ if __name__ == '__main__':
     dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     # mask control
     mask_dem = True  # boolean to set whether or not to mask the output dem
-    catchment = 'Clutha'
+    catchment = 'Nevis'
     mask_created = True  # boolean to set whether or not the mask has already been created
     mask_folder = 'Y:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
         catchment)  # shapefile containing polyline or polygon of catchment in WGS84. Not needed if mask_created==True
     # time control
-    hydro_years_to_take = range(2001, 2017 + 1)  # range(2001, 2013 + 1)
+    hydro_years = False  # use hydrolgical years (april 1 to March 31)?
+    hydro_years_to_take = range(2000, 2016 + 1)  # range(2001, 2013 + 1)
     save_by_timestep = False  # save one timestep per file? Needed for Fortran version of dsc_snow, only works with compute_by_day==False
     compute_by_day = True  # only compute hourly values one day at a time? Useful for large grids, as not enough memory to compute for whole grid at once.
     # input met data
@@ -279,6 +280,7 @@ if __name__ == '__main__':
             np.save(mask_folder + '/{}_{}.npy'.format(catchment, output_dem), mask)
         # Trim down the number of latitudes requested so it all stays in memory
         lats, lons, elev, northings, eastings = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
+        _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
     else:
         mask = None
         lats = lat_array
@@ -290,7 +292,11 @@ if __name__ == '__main__':
     for hydro_year_to_take in hydro_years_to_take:
         # load data
         # create timestamp to get - this is in NZST
-        dts_to_take = np.asarray(make_regular_timeseries(dt.datetime(hydro_year_to_take - 1, 4, 1), dt.datetime(hydro_year_to_take, 3, 31), 86400))
+        if hydro_years == True:
+            dts_to_take = np.asarray(make_regular_timeseries(dt.datetime(hydro_year_to_take - 1, 4, 1), dt.datetime(hydro_year_to_take, 3, 31), 86400))
+        else:
+            dts_to_take = np.asarray(make_regular_timeseries(dt.datetime(hydro_year_to_take, 1, 1), dt.datetime(hydro_year_to_take, 1, 5), 86400))
+
         # pull only data needed.
         # this loads data for 00h NZST that corresponds to the day to come in i.e. min@ 8am, max @ 2pm , total sw and total rain for 1/1/2000 at 2000-01-01 00:00:00
         precip_daily = load_new_vscn('rain', dts_to_take, nc_file_rain)
@@ -318,11 +324,22 @@ if __name__ == '__main__':
         hi_res_min_temp = interpolate_met(min_temp_daily, 'tmin', vcsn_lons, vcsn_lats, np.ma.fix_invalid(vcsn_elev).data, lons, lats, elev)
         hi_res_sw_rad = interpolate_met(sw_rad_daily, 'srad', vcsn_lons, vcsn_lats, np.ma.fix_invalid(vcsn_elev).data, lons, lats, elev)
 
+        # make all the data outside catchment nan to save space
+        if mask_dem:
+            hi_res_precip[:, trimmed_mask == False] = np.nan
+            hi_res_max_temp[:,trimmed_mask==False] = np.nan
+            hi_res_min_temp[:, trimmed_mask == False] = np.nan
+            hi_res_sw_rad[:, trimmed_mask == False] = np.nan
+
         # process and write
         if compute_by_day == True:  # process and write one day at a time.
-            hourly_dt = np.asarray(make_regular_timeseries(start_dt, finish_dt + dt.timedelta(days=1), 3600))
-            out_nc_file = setup_nztm_grid_netcdf(met_out_folder + '/met_inp_{}_hy{}.nc'.format(data_id, hydro_year_to_take),
-                                                 None, ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
+            hourly_dt = np.asarray(make_regular_timeseries(start_dt + dt.timedelta(hours=1), finish_dt + dt.timedelta(days=1), 3600))
+            if hydro_years == True:
+                outfile = met_out_folder + '/met_inp_{}_hy{}.nc'.format(data_id, hydro_year_to_take)
+            else:
+                outfile = met_out_folder + '/met_inp_{}_{}.nc'.format(data_id, hydro_year_to_take)
+
+            out_nc_file = setup_nztm_grid_netcdf(outfile, None, ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
                                                  hourly_dt, northings, eastings, lats, lons, elev)
             day_weightings = []
             num_days = hi_res_precip.shape[0]
@@ -350,8 +367,10 @@ if __name__ == '__main__':
                     out_nc_file.variables[var][i * 24: (i + 1) * 24, :, :] = data
                 day_weightings.extend(day_weightings_1)
             out_nc_file.close()
-
-            pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_hy{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
+            if hydro_years == True:
+                pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_hy{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
+            else:
+                pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
 
         else:  # compute all the values then write (takes too much memory for large grids)
             # Do the temporal downsampling
