@@ -132,7 +132,7 @@ if __name__ == '__main__':
             hi_res_sw_rad[:, trimmed_mask == False] = np.nan
 
         # process and write
-        hourly_dt = np.asarray(make_regular_timeseries(start_dt, finish_dt + dt.timedelta(days=1), 3600))
+        hourly_dt = np.asarray(make_regular_timeseries(start_dt + dt.timedelta(hours=1), finish_dt + dt.timedelta(days=1), 3600))
         out_nc_file = setup_nztm_grid_netcdf(met_out_folder + '/met_inp_{}_{}_jobst_ucc.nc'.format(data_id, year_to_take),
                                              None, ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
                                              hourly_dt, northings, eastings, lats, lons, elev)
