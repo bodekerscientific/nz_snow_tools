@@ -246,7 +246,7 @@ if __name__ == '__main__':
     dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     # mask control
     mask_dem = True  # boolean to set whether or not to mask the output dem
-    catchment = 'Nevis'
+    catchment = 'Clutha'
     mask_created = True  # boolean to set whether or not the mask has already been created
     mask_folder = 'Y:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
@@ -258,8 +258,10 @@ if __name__ == '__main__':
     compute_by_day = True  # only compute hourly values one day at a time? Useful for large grids, as not enough memory to compute for whole grid at once.
     # input met data
     nc_file_rain = 'T:/newVCSN/rain_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
-    nc_file_tmax = 'T:/newVCSN/tmax_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
-    nc_file_tmin = 'T:/newVCSN/tmin_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    nc_file_tmax = 'T:/newVCSN/tmax_N2_1980010100_2017073100_south-island_p05_daily.nc'
+    nc_file_tmin = 'T:/newVCSN/tmin_N2_1980010100_2017073100_south-island_p05_daily.nc'
+    # nc_file_tmax = 'T:/newVCSN/tmax_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    # nc_file_tmin = 'T:/newVCSN/tmin_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
     nc_file_srad = 'T:/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
     # output met data
     met_out_folder = 'Y:/DSC-Snow/input_data_hourly'
@@ -337,7 +339,7 @@ if __name__ == '__main__':
             if hydro_years == True:
                 outfile = met_out_folder + '/met_inp_{}_hy{}.nc'.format(data_id, hydro_year_to_take)
             else:
-                outfile = met_out_folder + '/met_inp_{}_{}.nc'.format(data_id, hydro_year_to_take)
+                outfile = met_out_folder + '/met_inp_{}_{}_norton.nc'.format(data_id, hydro_year_to_take)
 
             out_nc_file = setup_nztm_grid_netcdf(outfile, None, ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
                                                  hourly_dt, northings, eastings, lats, lons, elev)
@@ -370,7 +372,7 @@ if __name__ == '__main__':
             if hydro_years == True:
                 pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_hy{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
             else:
-                pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
+                pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_{}_daywts_norton.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
 
         else:  # compute all the values then write (takes too much memory for large grids)
             # Do the temporal downsampling
