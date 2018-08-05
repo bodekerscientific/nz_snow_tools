@@ -14,50 +14,11 @@ import netCDF4 as nc
 import datetime as dt
 import numpy as np
 import pickle
-
-from nz_snow_tools.snow.clark2009_snow_model import snow_main_simple
-from nz_snow_tools.util.utils import convert_date_hydro_DOY, create_mask_from_shpfile, trim_lat_lon_bounds, setup_nztm_dem, make_regular_timeseries, \
-    trim_data_to_mask
+from nz_snow_tools.eval.catchment_evaluation import *
+from nz_snow_tools.util.utils import convert_date_hydro_DOY, trim_lat_lon_bounds, setup_nztm_dem
 
 
-def run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder, catchment_shp_folder):
-    """
-    wrapper to call the clark 2009 snow model for given area
-    :param catchment: string giving catchment area to run model on
-    :param output_dem: string identifying the grid to run model on
-    :param hydro_year_to_take: integer specifying the hydrological year to run model over. 2001 = 1/4/2000 to 31/3/2001
-    :return: st_swe, st_melt, st_acc, out_dt, mask. daily grids of SWE at day's end, total melt and accumulation over the previous day, and datetimes of ouput
-    """
-    print('loading met data')
-    data_id = '{}_{}'.format(catchment, output_dem)
-    inp_met = nc.Dataset(met_inp_folder + '/met_inp_{}_hy{}.nc'.format(data_id, hydro_year_to_take), 'r')
-    inp_dt = nc.num2date(inp_met.variables['time'][:], inp_met.variables['time'].units)
-    inp_doy = convert_date_hydro_DOY(inp_dt)
-    inp_hourdec = [datt.hour for datt in inp_dt]
-    inp_ta = inp_met.variables['temperature'][:]
-    inp_precip = inp_met.variables['precipitation'][:]
-    print('met data loaded')
-
-    mask = create_mask_from_shpfile(inp_met.variables['lat'][:], inp_met.variables['lon'][:], catchment_shp_folder + '/{}.shp'.format(catchment))
-    # TODO: think about masking input data to speed up
-
-    print('starting snow model')
-    # start with no snow.
-    # call main function once hourly/sub-hourly temp and precip data available.
-    st_swe, st_melt, st_acc = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=3600)
-    out_dt = np.asarray(make_regular_timeseries(inp_dt[0], inp_dt[-1] + dt.timedelta(days=1), 86400))
-
-    print('snow model finished')
-
-    # mask out values outside of catchment
-    st_swe[:, mask == False] = np.nan
-    st_melt[:, mask == False] = np.nan
-    st_acc[:, mask == False] = np.nan
-
-    return st_swe, st_melt, st_acc, out_dt, mask
-
-
-def load_dsc_snow_output(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder, dsc_snow_dem_folder):
+def load_dsc_snow_output_annual(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder, dsc_snow_dem_folder, run_opt):
     """
     load output from dsc_snow model previously run from linux VM
     :param catchment: string giving catchment area to run model on
@@ -67,7 +28,7 @@ def load_dsc_snow_output(catchment, output_dem, hydro_year_to_take, dsc_snow_out
     """
     data_id = '{}_{}'.format(catchment, output_dem)
 
-    dsc_snow_output = nc.Dataset(dsc_snow_output_folder + '/{}_hy{}.nc'.format(data_id, hydro_year_to_take), 'r')
+    dsc_snow_output = nc.Dataset(dsc_snow_output_folder + '/{}_{}_{}.nc'.format(data_id, hydro_year_to_take,run_opt), 'r')
 
     out_dt = nc.num2date(dsc_snow_output.variables['time'][:], dsc_snow_output.variables['time'].units)
 
@@ -90,80 +51,19 @@ def load_dsc_snow_output(catchment, output_dem, hydro_year_to_take, dsc_snow_out
     return st_swe * 1e3, st_melt * 1e3, st_acc * 1e3, out_dt, mask  # convert to mm w.e.
 
 
-def load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, dem_file, mask_folder, catchment_shp_folder):
-    """
-    load modis data from file and cut to catchment of interest
-    :param catchment: string giving catchment area to run model on
-    :param output_dem: string identifying the grid to run model on
-    :param hydro_year_to_take: integer specifying the hydrological year to run model over. 2001 = 1/4/2000 to 31/3/2001
-    :return: trimmed_fsca, modis_dt, trimmed_mask. The data, datetimes and catchment mask
-    """
-    # load a file
-    nc_file = nc.Dataset(modis_folder + '/fsca_{}hy_comp9.nc'.format(hydro_year_to_take))
-    fsca = nc_file.variables['fsca'][:].astype('float32')
-    # read date and convert into hydrological year
-    modis_dt = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
-    # filter out dud values
-    fsca[fsca > 100] = np.nan
-    # trim to only the catchment desired
-    mask, trimmed_mask = load_mask_modis(catchment, output_dem, mask_folder, dem_file=dem_file, mask_created=True,
-                                         shapefile_folder=catchment_shp_folder)
-
-    # trimmed_fsca = trim_data_bounds(mask, lat_array, lon_array, fsca[183].copy(), y_centres, x_centres)
-    trimmed_fsca = trim_data_to_mask(fsca, mask)
-
-    # mask out values outside of catchment
-    trimmed_fsca[:, trimmed_mask == 0] = np.nan
-
-    return trimmed_fsca, modis_dt, trimmed_mask
-
-
-def load_mask_modis(catchment, output_dem, mask_folder, dem_file, mask_created=True, shapefile_folder=None):
-    '''
-    load mask and trimmed mask of catchment for modis clutha domain
-    '''
-    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
-
-    # # Get the masks for the individual regions of interest
-    if mask_created == True:  # load precalculated mask
-        mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, output_dem))
-        # mask = np.load(env.data('/GIS_DATA/Hydrology/Catchments/Masks/{}_{}.npy'.format(catchment, output_dem)))
-    elif mask_created == False:  # create mask and save to npy file
-        # masks = get_masks() #TODO set up for multiple masks
-        mask = create_mask_from_shpfile(lat_array, lon_array, shapefile_folder + '/{}.shp'.format(catchment))
-        np.save(mask_folder + '/{}_{}.npy'.format(catchment, output_dem), mask)
-        # np.save(env.data('/GIS_DATA/Hydrology/Catchments/Masks/{}_{}.npy'.format(catchment, output_dem)), mask)
-
-    _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
-
-    return mask, trimmed_mask
-
-
-def load_dsc_snow_output_python_otf(catchment, output_dem, year_to_take, dsc_snow_output_folder):
-
-    dsc_snow_output = nc.Dataset(dsc_snow_output_folder + '/snow_out_{}_{}_{}.nc'.format(catchment, output_dem, year_to_take-1), 'r')
-
-    out_dt = nc.num2date(dsc_snow_output.variables['time'][:], dsc_snow_output.variables['time'].units)
-
-    st_swe = dsc_snow_output.variables['swe'][:]
-    st_melt = dsc_snow_output.variables['melt'][:]
-    st_acc = dsc_snow_output.variables['acc'][:]
-
-    return st_swe, st_melt, st_acc , out_dt
-
-
 if __name__ == '__main__':
 
     which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
     clark2009run = True  # boolean specifying if the run already exists
-    dsc_snow_opt = 'python'  # string identifying which version of the dsc snow model to use output from 'python' or 'fortran'
+    dsc_snow_opt = 'fortran'  # string identifying which version of the dsc snow model to use output from 'python' or 'fortran'
     dsc_snow_opt2 = 'netCDF' # string identifying which version of output from python model 'netCDF' of 'pickle'
     catchment = 'Clutha'
     output_dem = 'nztm250m'  # identifier for output dem
-    hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+    run_id = 'jobst_ucc_1'  # string identifying fortran dsc_snow run. everything after the year
+    years_to_take = range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_swe_sc_threshold = 5 # threshold for treating a grid cell as snow covered
-    dsc_snow_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha2'
+    dsc_snow_output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_2D_test_erebus'
     clark2009_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha1'
     mask_folder = 'Y:/DSC-Snow/Masks'
     catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
@@ -172,7 +72,7 @@ if __name__ == '__main__':
     met_inp_folder = 'Y:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
 
-    output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha2'
+    output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_2D_test_erebus'
 
     # set up lists
     ann_ts_av_sca_m = []
@@ -198,12 +98,12 @@ if __name__ == '__main__':
     ann_scd2 = []
     configs = []
 
-    for hydro_year_to_take in hydro_years_to_take:
+    for year_to_take in years_to_take:
 
-        print('loading modis data HY {}'.format(hydro_year_to_take))
+        print('loading modis data {}'.format(year_to_take))
 
         # load modis data for evaluation
-        modis_fsca, modis_dt, modis_mask = load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, dem_file, mask_folder,catchment_shp_folder)
+        modis_fsca, modis_dt, modis_mask = load_subset_modis(catchment, output_dem, year_to_take, modis_folder, dem_file, mask_folder, catchment_shp_folder)
         modis_hydro_days = convert_date_hydro_DOY(modis_dt)
         modis_sc = modis_fsca >= modis_sc_threshold
 
@@ -233,15 +133,15 @@ if __name__ == '__main__':
         modis_scd = None
 
         if which_model == 'clark2009' or which_model== 'all':
-            print('loading clark2009 model data HY {}'.format(hydro_year_to_take))
+            print('loading clark2009 model data {}'.format(year_to_take))
             if clark2009run == False:
                 # run model and return timeseries of daily swe, acc and melt.
-                st_swe, st_melt, st_acc, out_dt, mask = run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder, catchment_shp_folder)
+                st_swe, st_melt, st_acc, out_dt, mask = run_clark2009(catchment, output_dem, year_to_take, met_inp_folder, catchment_shp_folder)
                 pickle.dump([st_swe, st_melt, st_acc, out_dt, mask], open(clark2009_output_folder + '/{}_{}_hy{}.pkl'.format(catchment, output_dem,
-                                                                                                                             hydro_year_to_take), 'wb'), -1)
+                                                                                                                             year_to_take), 'wb'), -1)
             elif clark2009run == True:
                 # load previously run simulations from pickle file
-                st_snow = pickle.load(open(clark2009_output_folder + '/{}_{}_hy{}_clark2009.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))
+                st_snow = pickle.load(open(clark2009_output_folder + '/{}_{}_hy{}_clark2009.pkl'.format(catchment, output_dem, year_to_take), 'rb'))
                 st_swe = st_snow[0]
                 st_melt = st_snow[1]
                 st_acc = st_snow[2]
@@ -285,15 +185,15 @@ if __name__ == '__main__':
             st_snow = None
 
         if which_model == 'dsc_snow' or which_model == 'all':
-            print('loading dsc_snow model data HY {}'.format(hydro_year_to_take))
+            print('loading dsc_snow model data {}'.format(year_to_take))
 
             if dsc_snow_opt == 'fortran':
                 # load previously run simulations from netCDF
-                st_swe, st_melt, st_acc, out_dt, mask = load_dsc_snow_output(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder,
-                                                                             dsc_snow_dem_folder)
+                st_swe, st_melt, st_acc, out_dt, mask = load_dsc_snow_output_annual(catchment, output_dem, year_to_take, dsc_snow_output_folder,
+                                                                                    dsc_snow_dem_folder, run_id)
             elif dsc_snow_opt == 'python':
                 if dsc_snow_opt2 == 'netCDF':
-                    st_swe, st_melt, st_acc, out_dt = load_dsc_snow_output_python_otf(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder)
+                    st_swe, st_melt, st_acc, out_dt = load_dsc_snow_output_python_otf(catchment, output_dem, year_to_take, dsc_snow_output_folder)
                     # load mask
                     dem = 'si_dem_250m'
                     dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
@@ -304,7 +204,7 @@ if __name__ == '__main__':
                     mask = trimmed_mask
                 elif dsc_snow_opt2 == 'pickle':
                     # load previously run simulations from pickle file
-                    st_snow = pickle.load(open(dsc_snow_output_folder + '/{}_{}_hy{}_dsc_snow.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))
+                    st_snow = pickle.load(open(dsc_snow_output_folder + '/{}_{}_hy{}_dsc_snow.pkl'.format(catchment, output_dem, year_to_take), 'rb'))
                     st_swe = st_snow[0]
                     st_melt = st_snow[1]
                     st_acc = st_snow[2]
@@ -363,10 +263,10 @@ if __name__ == '__main__':
         # if which_model == 'all':
         #     if clark2009run == False:
         #         # run model and return timeseries of daily swe, acc and melt.
-        #         st_swe, st_melt, st_acc, out_dt, mask = run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder, catchment_shp_folder)
+        #         st_swe, st_melt, st_acc, out_dt, mask = run_clark2009(catchment, output_dem, year_to_take, met_inp_folder, catchment_shp_folder)
         #     elif clark2009run == True:
         #         # load previously run simulations from pickle file
-        #         st_snow = pickle.load(open(clark2009_output_folder + '/{}_{}_hy{}_clark2009.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))
+        #         st_snow = pickle.load(open(clark2009_output_folder + '/{}_{}_hy{}_clark2009.pkl'.format(catchment, output_dem, year_to_take), 'rb'))
         #         st_swe = st_snow[0]
         #         st_melt = st_snow[1]
         #         st_acc = st_snow[2]
@@ -375,10 +275,10 @@ if __name__ == '__main__':
         #
         #     # load previously run simulations from netCDF or pickle file
         #     if dsc_snow_opt == 'fortran':
-        #         st_swe2, st_melt2, st_acc2, out_dt2, mask2 = load_dsc_snow_output(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder,
+        #         st_swe2, st_melt2, st_acc2, out_dt2, mask2 = load_dsc_snow_output(catchment, output_dem, year_to_take, dsc_snow_output_folder,
         #                                                                           dsc_snow_dem_folder)
         #     elif dsc_snow_opt == 'python':
-        #         st_snow2 = pickle.load(open(dsc_snow_output_folder + '/{}_{}_hy{}_dsc_snow.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))
+        #         st_snow2 = pickle.load(open(dsc_snow_output_folder + '/{}_{}_hy{}_dsc_snow.pkl'.format(catchment, output_dem, year_to_take), 'rb'))
         #         st_swe2 = st_snow2[0]
         #         st_melt2 = st_snow2[1]
         #         st_acc2 = st_snow2[2]
@@ -387,4 +287,4 @@ if __name__ == '__main__':
 
     ann = [ann_ts_av_sca_m, ann_hydro_days_m, ann_dt_m, ann_scd_m, ann_ts_av_sca, ann_ts_av_swe, ann_hydro_days, ann_dt, ann_scd, ann_ts_av_sca2,
            ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2, ann_ts_av_sca_thres_m,configs]
-    pickle.dump(ann, open(output_folder + '/summary_{}_{}_thres{}_swe{}.pkl'.format(catchment, output_dem, modis_sc_threshold,model_swe_sc_threshold), 'wb'), -1)
+    pickle.dump(ann, open(output_folder + '/summary_{}_{}_thres{}_swe{}_{}_{}.pkl'.format(catchment, output_dem, modis_sc_threshold,model_swe_sc_threshold,which_model,run_id), 'wb'), -1)
