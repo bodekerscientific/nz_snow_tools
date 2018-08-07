@@ -13,7 +13,7 @@ import matplotlib.dates as mdates
 config = {}
 config['num_secs_output']=1800
 config['tacc'] = 274.16
-config['tmelt'] = 274.16
+config['tmelt'] = 273.16
 
 # clark2009 melt parameters
 config['mf_mean'] = 5.0
@@ -24,15 +24,16 @@ config['mf_ros'] = 2.5
 config['mf_doy_max_ddf'] = 356
 
 # dsc_snow melt parameters
-config['tf'] = 0.2*24  # hamish 0.13 # opt 0.25
-config['rf'] = 0.005*24 # hamish 0.0075 # opt 0.005
+config['tf'] = 0.05*24  # hamish 0.13 # opt 0.25
+config['rf'] = 0.0108*24 # hamish 0.0075 # opt 0.005
 # albedo parameters
 config['dc'] = 11.0
 config['tc'] = 10
 config['a_ice'] = 0.42
 config['a_freshsnow'] = 0.90
 config['a_firn'] = 0.62
-config['alb_swe_thres'] = 20
+config['alb_swe_thres'] = 10
+config['ros'] = False
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
@@ -84,7 +85,7 @@ st_swe3, st_melt3, st_acc3, st_alb3 = snow_main_simple(inp_ta, inp_precip, inp_d
 
 plot_dt = inp_dt[start_t-1:end_t] # model stores initial state
 # plt.plot(plot_dt,st_swe[:, 0],label='clark2009')
-#plt.plot(plot_dt,st_swe1[:, 0]-st_swe1[0, 0],label='dsc_snow-param albedo')
+plt.plot(plot_dt,st_swe1[:, 0]-st_swe1[0, 0],label='dsc_snow-param albedo')
 plt.plot(plot_dt,st_swe3[:, 0]-st_swe3[0, 0],label='dsc_snow-obs albedo')
 plt.plot(plot_dt,seb_mb, label='SEB')
 plt.plot(plot_dt,inp_sfc*492,label='sfc*492')
@@ -102,7 +103,7 @@ plt.xlabel('month')
 plt.ylabel('SWE mm w.e.')
 plt.legend()
 plt.title('cumulated mass balance TF:{}, RF: {}, Tmelt:{}'.format(config['tf'],config['rf'],config['tmelt']))
-plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/spring 2010 TF{}RF{}Tmelt{}.png'.format(config['tf'],config['rf'],config['tmelt']))
+plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/spring 2010 TF{}RF{}Tmelt{}.png'.format(config['tf'],config['rf'],config['tmelt']))
 
 plt.figure()
 # show daily change in SWE
@@ -128,7 +129,7 @@ plt.ylabel('model melt')
 plt.xlabel('surface height * -492 kg m^3')
 
 plt.title('daily melt rate TF:{}, RF: {}, Tmelt:{}'.format(config['tf'],config['rf'],config['tmelt']))
-plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/spring 2010 daily TF{}RF{}Tmelt{}.png'.format(config['tf'],config['rf'],config['tmelt']))
+plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/spring 2010 daily TF{}RF{}Tmelt{}.png'.format(config['tf'],config['rf'],config['tmelt']))
 #plt.show()
 
 plt.close()

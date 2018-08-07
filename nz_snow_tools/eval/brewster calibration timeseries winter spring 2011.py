@@ -13,7 +13,7 @@ import matplotlib.dates as mdates
 config = {}
 config['num_secs_output']=1800
 config['tacc'] = 274.16
-config['tmelt'] = 274.16
+config['tmelt'] = 273.16
 
 # clark2009 melt parameters
 config['mf_mean'] = 5.0
@@ -24,15 +24,17 @@ config['mf_ros'] = 0
 config['mf_doy_max_ddf'] = 35
 
 # dsc_snow melt parameters
-config['tf'] = 0.2*24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
-config['rf'] = 0.005*24 # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094
+config['tf'] = 0.05*24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
+config['rf'] = 0.0108*24 # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094
+
 # albedo parameters
 config['dc'] = 11.0
 config['tc'] = 10
 config['a_ice'] = 0.42
 config['a_freshsnow'] = 0.90
 config['a_firn'] = 0.62
-config['alb_swe_thres'] = 20
+config['alb_swe_thres'] = 10
+config['ros'] = True
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
@@ -84,7 +86,7 @@ st_swe3, st_melt3, st_acc3, st_alb3 = snow_main_simple(inp_ta, inp_precip, inp_d
 
 plot_dt = inp_dt[start_t-1:end_t] # model stores initial state
 #plt.plot(plot_dt,st_swe[:, 0],label='clark2009')
-#plt.plot(plot_dt,st_swe1[:, 0],label='dsc_snow-param albedo')
+plt.plot(plot_dt,st_swe1[:, 0],label='dsc_snow-param albedo')
 plt.plot(plot_dt,st_swe3[:, 0],label='dsc_snow-obs albedo')
 plt.plot(plot_dt,seb_mb, label='SEB')
 plt.plot(plot_dt,inp_sfc*492,label='sfc*492')
@@ -102,6 +104,6 @@ plt.xlabel('month')
 plt.ylabel('SWE mm w.e.')
 plt.legend()
 plt.title('cumulative mass balance TF:{}, RF: {}, Tmelt:{}'.format(config['tf'],config['rf'],config['tmelt']))
-plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/winter spring 2011 daily TF{}RF{}Tmelt{}.png'.format(config['tf'],config['rf'],config['tmelt']))
+plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/winter spring 2011 daily TF{}RF{}Tmelt{}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
 plt.close()
 
