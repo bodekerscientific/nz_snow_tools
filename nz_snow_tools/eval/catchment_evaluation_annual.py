@@ -51,6 +51,38 @@ def load_dsc_snow_output_annual(catchment, output_dem, hydro_year_to_take, dsc_s
     return st_swe * 1e3, st_melt * 1e3, st_acc * 1e3, out_dt, mask  # convert to mm w.e.
 
 
+def load_subset_modis_annual(catchment, output_dem, year_to_take, modis_folder, dem_file, mask_folder, catchment_shp_folder):
+    """
+    load modis data from file and cut to catchment of interest
+    :param catchment: string giving catchment area to run model on
+    :param output_dem: string identifying the grid to run model on
+    :param year_to_take: integer specifying the hydrological year to run model over. 2001 = 1/4/2000 to 31/3/2001
+    :return: trimmed_fsca, modis_dt, trimmed_mask. The data, datetimes and catchment mask
+    """
+    # load a file
+    nc_file = nc.Dataset(modis_folder + '/DSC_MOD10_{}_clutha_v0_nosparse_interp.nc'.format(year_to_take))
+    ndsi = nc_file.variables['NDSI_Snow_Cover_Cloudfree'][:].astype('float32') # nsdi in %
+    fsca = -0.01+1.45*(ndsi/100) # convert to snow cover fraction in % (as per Modis collection 5)
+    fsca[ndsi > 100] = np.nan # set all points with inland water or ocean(237 or 239) to nan
+    fsca[fsca > 1] = 1 # limit fsca to 100%
+    fsca[fsca < 0] = 0 # limit fsca to 0
+    fsca = fsca*100 # set back to 0-100%
+    # read date and convert into hydrological year
+    modis_dt = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
+
+    # trim to only the catchment desired
+    mask, trimmed_mask = load_mask_modis(catchment, output_dem, mask_folder, dem_file=dem_file, mask_created=True,
+                                         shapefile_folder=catchment_shp_folder)
+
+    # trimmed_fsca = trim_data_bounds(mask, lat_array, lon_array, fsca[183].copy(), y_centres, x_centres)
+    trimmed_fsca = trim_data_to_mask(fsca, mask)
+
+    # mask out values outside of catchment
+    trimmed_fsca[:, trimmed_mask == 0] = np.nan
+
+    return trimmed_fsca, modis_dt, trimmed_mask
+
+
 if __name__ == '__main__':
 
     which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
@@ -59,20 +91,20 @@ if __name__ == '__main__':
     dsc_snow_opt2 = 'netCDF' # string identifying which version of output from python model 'netCDF' of 'pickle'
     catchment = 'Clutha'
     output_dem = 'nztm250m'  # identifier for output dem
-    run_id = 'jobst_ucc_1'  # string identifying fortran dsc_snow run. everything after the year
-    years_to_take = range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+    run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
+    years_to_take = [2011, 2011]#range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_swe_sc_threshold = 5 # threshold for treating a grid cell as snow covered
-    dsc_snow_output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_2D_test_erebus'
+    dsc_snow_output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
     clark2009_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha1'
     mask_folder = 'Y:/DSC-Snow/Masks'
     catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-    modis_folder = 'Y:/DSC-Snow/MODIS_NetCDF'
+    modis_folder = r'D:\Snow project\from Pascal' #''Y:/sync_to_data/MODIS_snow/MODIS_NetCDF'
     dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     met_inp_folder = 'Y:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
 
-    output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_2D_test_erebus'
+    output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
 
     # set up lists
     ann_ts_av_sca_m = []
@@ -103,7 +135,7 @@ if __name__ == '__main__':
         print('loading modis data {}'.format(year_to_take))
 
         # load modis data for evaluation
-        modis_fsca, modis_dt, modis_mask = load_subset_modis(catchment, output_dem, year_to_take, modis_folder, dem_file, mask_folder, catchment_shp_folder)
+        modis_fsca, modis_dt, modis_mask = load_subset_modis_annual(catchment, output_dem, year_to_take, modis_folder, dem_file, mask_folder, catchment_shp_folder)
         modis_hydro_days = convert_date_hydro_DOY(modis_dt)
         modis_sc = modis_fsca >= modis_sc_threshold
 

@@ -10,14 +10,14 @@ import matplotlib.pylab as plt
 
 average_scd = True  # boolean specifying if all years are to be averaged together - now plots difference between
 which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
-run_id = 'jobst_ucc_1'  # string identifying fortran dsc_snow run. everything after the year
+run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
 catchment = 'Clutha'
 output_dem = 'nztm250m'  # identifier for output dem
-years_to_take = range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+years_to_take = range(2011, 2011 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
 model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered
-model_output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_2D_test_erebus'
-plot_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_2D_test_erebus'
+model_output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
+plot_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
 
 ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}_swe{}_{}_{}.pkl'.format(catchment, output_dem, modis_sc_threshold, model_swe_sc_threshold,
                                                                                              which_model, run_id), 'rb'))

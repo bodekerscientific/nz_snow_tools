@@ -167,7 +167,7 @@ if __name__ == '__main__':
     clark2009_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha1'
     mask_folder = 'Y:/DSC-Snow/Masks'
     catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-    modis_folder = 'Y:/DSC-Snow/MODIS_NetCDF'
+    modis_folder = 'Y:/sync_to_data/MODIS_snow/MODIS_NetCDF'
     dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     met_inp_folder = 'Y:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
