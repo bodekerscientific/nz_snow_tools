@@ -13,26 +13,28 @@ import matplotlib.dates as mdates
 config = {}
 config['num_secs_output']=1800
 config['tacc'] = 274.16
-config['tmelt'] = 274.16
+config['tmelt'] = 273.16
 
 # clark2009 melt parameters
 config['mf_mean'] = 5.0
 config['mf_amp'] = 5.0
 config['mf_alb'] = 2.5
 config['mf_alb_decay'] = 5.0
-config['mf_ros'] = 2.5
-config['mf_doy_max_ddf'] = 356
+config['mf_ros'] = 0
+config['mf_doy_max_ddf'] = 35
 
 # dsc_snow melt parameters
-config['tf'] = 0.2*24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
-config['rf'] = 0.005*24 # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094
+config['tf'] = 0.05*24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
+config['rf'] = 0.0108*24 # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094
+
 # albedo parameters
 config['dc'] = 11.0
 config['tc'] = 10
 config['a_ice'] = 0.42
-config['a_freshsnow'] = 0.95
+config['a_freshsnow'] = 0.90
 config['a_firn'] = 0.62
-config['alb_swe_thres'] = 20
+config['alb_swe_thres'] = 10
+config['ros'] = True
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
@@ -83,7 +85,7 @@ st_swe3, st_melt3, st_acc3, st_alb3 = snow_main_simple(inp_ta, inp_precip, inp_d
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
 
 plot_dt = inp_dt[start_t-1:end_t] # model stores initial state
-# plt.plot(st_swe[:, 0],label='clark2009')
+#plt.plot(plot_dt,st_swe[:, 0],label='clark2009')
 plt.plot(plot_dt,st_swe1[:, 0],label='dsc_snow-param albedo')
 plt.plot(plot_dt,st_swe3[:, 0],label='dsc_snow-obs albedo')
 plt.plot(plot_dt,seb_mb, label='SEB')
@@ -101,50 +103,7 @@ ax.xaxis.set_major_formatter(monthsFmt)
 plt.xlabel('month')
 plt.ylabel('SWE mm w.e.')
 plt.legend()
-plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/brewster snow calibration_opt.png')
-plt.show()
+plt.title('cumulative mass balance TF:{}, RF: {}, Tmelt:{}'.format(config['tf'],config['rf'],config['tmelt']))
+plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/winter spring 2011 daily TF{}RF{}Tmelt{}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
 plt.close()
-#
-# # additional tests with set values for ta and precip
-# # 0 degrees and 1 mm per 30-mins precip
-# st_swe1, st_melt1, st_acc1 = snow_main_simple(inp_ta*0 + 273.16 , inp_precip*0 + 1, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
-#                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-# # 0.5 degree with 1 mm per 30-mins precip
-# st_swe2, st_melt2, st_acc2 = snow_main_simple(inp_ta*0 + 273.66 , inp_precip*0 + 1, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
-#                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-# # 1 degree with 1 mm per 30-mins precip
-# st_swe3, st_melt3, st_acc3 = snow_main_simple(inp_ta*0 + 274.16 , inp_precip*0 + 1, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
-#                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-# # 2 degrees with 1 mm per 30-mins precip
-# st_swe4, st_melt4, st_acc4 = snow_main_simple(inp_ta*0 + 275.16 , inp_precip*0 + 1, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
-#                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-# # 2 degrees without 1 mm per 30-mins precip
-# st_swe5, st_melt5, st_acc5 = snow_main_simple(inp_ta*0 + 275.16 , inp_precip*0, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
-#                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-# # 1 degree without 1 mm per 30-mins precip
-# st_swe6, st_melt6, st_acc6 = snow_main_simple(inp_ta*0 + 274.16 , inp_precip*0, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
-#                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-#
-# print('done')
 
-#
-# # # create fake input data
-# grid_size = 1
-# inp_ta = np.zeros((365 * 24, grid_size)) + 273.16
-# inp_precip = np.zeros((365 * 24, grid_size))
-# inp_doy = np.linspace(0, 365, 365 * 24 + 1)
-# st_swe1 = snow_main_simple(inp_ta, inp_precip + 1, inp_doy)  # 0 degrees with precip
-# st_swe2 = snow_main_simple(inp_ta + 0.5, inp_precip + 1, inp_doy)  # 0.5 degree with
-# st_swe3 = snow_main_simple(inp_ta + 1, inp_precip + 1, inp_doy)  # 1 degree with rain
-# st_swe4 = snow_main_simple(inp_ta + 2, inp_precip + 1, inp_doy)  # 2 degrees with rain
-# st_swe5 = snow_main_simple(inp_ta + 2, inp_precip, inp_doy)  # 2 degrees without rain
-# st_swe6 = snow_main_simple(inp_ta + 1, inp_precip, inp_doy)  # 1 degree without rain
-#
-#
-# plt.plot(st_swe1[:, 0])
-# plt.plot(st_swe2[:, 0])
-# plt.plot(st_swe3[:, 0])
-# plt.plot(st_swe4[:, 0])
-# plt.plot(st_swe5[:, 0])
-# plt.plot(st_swe6[:, 0])
-# plt.legend(range(3, 7))
