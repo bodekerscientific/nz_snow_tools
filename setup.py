@@ -35,7 +35,8 @@ setup(
         'basemap',
         'pyshp',
         'pillow',
-        'pyproj'
+        'pyproj',
+        'f90nml'
     ],
     classifiers=[
         'Development Status :: 3 - Alpha',
