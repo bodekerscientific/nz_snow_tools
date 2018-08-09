@@ -65,7 +65,7 @@ def create_ncvar_precipitation(ds, no_time=False):
 
 
 def create_ncvar_fsca(ds):
-    fsca_var = ds.createVariable('fsca', 'u8', ('time', 'northing', 'easting',))
+    fsca_var = ds.createVariable('fsca', 'u8', ('time', 'northing', 'easting',), zlib=True, complevel=4)
     fsca_var.setncatts({
         'long_name': 'fractional snow covered area'
         # 'missing': -9999.,
@@ -76,7 +76,7 @@ def create_ncvar_fsca(ds):
 
 
 def create_ncvar_swe(ds):
-    swe_var = ds.createVariable('swe', 'f4', ('time', 'northing', 'easting',))
+    swe_var = ds.createVariable('swe', 'f4', ('time', 'northing', 'easting',), zlib=True, complevel=4)
     swe_var.setncatts({
         'long_name': 'snow water equivalent',
         'missing': -9999.
@@ -87,7 +87,7 @@ def create_ncvar_swe(ds):
 
 
 def create_ncvar_acc(ds):
-    acc_var = ds.createVariable('acc', 'f4', ('time', 'northing', 'easting',))
+    acc_var = ds.createVariable('acc', 'f4', ('time', 'northing', 'easting',), zlib=True, complevel=4)
     acc_var.setncatts({
         'long_name': 'snowfall in mm snow water equivalent',
         'missing': -9999.
@@ -98,7 +98,7 @@ def create_ncvar_acc(ds):
 
 
 def create_ncvar_melt(ds):
-    melt_var = ds.createVariable('melt', 'f4', ('time', 'northing', 'easting',))
+    melt_var = ds.createVariable('melt', 'f4', ('time', 'northing', 'easting',), zlib=True, complevel=4)
     melt_var.setncatts({
         'long_name': 'melt in mm snow water equivalent',
         'missing': -9999.
