@@ -22,7 +22,7 @@ if __name__ == '__main__':
     run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
     catchment = 'Clutha'
     output_dem = 'nztm250m'  # identifier for output dem
-    years_to_take = [2011,2011]#range(2000, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+    years_to_take = [2000,2009+1]#range(2000, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_thresholds = [50]  # value of fsca (in percent) that is counted as being snow covered 30,40,50,60,70,80
     model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered
     model_output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'

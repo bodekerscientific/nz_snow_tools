@@ -364,9 +364,9 @@ def trim_data_to_mask(data, mask):
     lon_max_idx = valid_lon_bounds.max()
 
     if data.ndim == 2:
-        trimmed_data = data[lat_min_idx:lat_max_idx + 1, lon_min_idx:lon_max_idx + 1]
+        trimmed_data = data[lat_min_idx:lat_max_idx + 1, lon_min_idx:lon_max_idx + 1].astype(data.dtype)
     elif data.ndim == 3:
-        trimmed_data = data[:, lat_min_idx:lat_max_idx + 1, lon_min_idx:lon_max_idx + 1]
+        trimmed_data = data[:, lat_min_idx:lat_max_idx + 1, lon_min_idx:lon_max_idx + 1].astype(data.dtype)
     else:
         print 'data does not have correct dimensions'
 

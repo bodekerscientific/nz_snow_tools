@@ -90,7 +90,7 @@ def load_dsc_snow_output(catchment, output_dem, hydro_year_to_take, dsc_snow_out
     return st_swe * 1e3, st_melt * 1e3, st_acc * 1e3, out_dt, mask  # convert to mm w.e.
 
 
-def load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, dem_file, mask_folder, catchment_shp_folder):
+def load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, dem_folder, modis_dem, mask_folder, catchment_shp_folder):
     """
     load modis data from file and cut to catchment of interest
     :param catchment: string giving catchment area to run model on
@@ -106,7 +106,7 @@ def load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, d
     # filter out dud values
     fsca[fsca > 100] = np.nan
     # trim to only the catchment desired
-    mask, trimmed_mask = load_mask_modis(catchment, output_dem, mask_folder, dem_file=dem_file, mask_created=True,
+    mask, trimmed_mask = load_mask_modis(catchment, output_dem, mask_folder, dem_folder=dem_folder, dem=modis_dem, mask_created=True,
                                          shapefile_folder=catchment_shp_folder)
 
     # trimmed_fsca = trim_data_bounds(mask, lat_array, lon_array, fsca[183].copy(), y_centres, x_centres)
@@ -118,20 +118,27 @@ def load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, d
     return trimmed_fsca, modis_dt, trimmed_mask
 
 
-def load_mask_modis(catchment, output_dem, mask_folder, dem_file, mask_created=True, shapefile_folder=None):
+def load_mask_modis(catchment, output_dem, mask_folder, dem_folder, modis_dem, mask_created=True, shapefile_folder=None):
     '''
     load mask and trimmed mask of catchment for modis clutha domain
     '''
-    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
 
+    if modis_dem == 'clutha_dem_250m':
+        dem_file = dem_folder + modis_dem + '.tif'
+        nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
+
+    if modis_dem == 'si_dem_250m':
+        dem_file = dem_folder + modis_dem + '.tif'
+        nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file, extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
+                                                                              resolution=250)
     # # Get the masks for the individual regions of interest
     if mask_created == True:  # load precalculated mask
-        mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, output_dem))
+        mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, modis_dem))
         # mask = np.load(env.data('/GIS_DATA/Hydrology/Catchments/Masks/{}_{}.npy'.format(catchment, output_dem)))
     elif mask_created == False:  # create mask and save to npy file
         # masks = get_masks() #TODO set up for multiple masks
         mask = create_mask_from_shpfile(lat_array, lon_array, shapefile_folder + '/{}.shp'.format(catchment))
-        np.save(mask_folder + '/{}_{}.npy'.format(catchment, output_dem), mask)
+        np.save(mask_folder + '/{}_{}.npy'.format(catchment, modis_dem), mask)
         # np.save(env.data('/GIS_DATA/Hydrology/Catchments/Masks/{}_{}.npy'.format(catchment, output_dem)), mask)
 
     _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
@@ -140,8 +147,7 @@ def load_mask_modis(catchment, output_dem, mask_folder, dem_file, mask_created=T
 
 
 def load_dsc_snow_output_python_otf(catchment, output_dem, year_to_take, dsc_snow_output_folder):
-
-    dsc_snow_output = nc.Dataset(dsc_snow_output_folder + '/snow_out_{}_{}_{}.nc'.format(catchment, output_dem, year_to_take-1), 'r')
+    dsc_snow_output = nc.Dataset(dsc_snow_output_folder + '/snow_out_{}_{}_{}.nc'.format(catchment, output_dem, year_to_take - 1), 'r')
 
     out_dt = nc.num2date(dsc_snow_output.variables['time'][:], dsc_snow_output.variables['time'].units)
 
@@ -149,7 +155,7 @@ def load_dsc_snow_output_python_otf(catchment, output_dem, year_to_take, dsc_sno
     st_melt = dsc_snow_output.variables['melt'][:]
     st_acc = dsc_snow_output.variables['acc'][:]
 
-    return st_swe, st_melt, st_acc , out_dt
+    return st_swe, st_melt, st_acc, out_dt
 
 
 if __name__ == '__main__':
@@ -157,18 +163,19 @@ if __name__ == '__main__':
     which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
     clark2009run = True  # boolean specifying if the run already exists
     dsc_snow_opt = 'python'  # string identifying which version of the dsc snow model to use output from 'python' or 'fortran'
-    dsc_snow_opt2 = 'netCDF' # string identifying which version of output from python model 'netCDF' of 'pickle'
+    dsc_snow_opt2 = 'netCDF'  # string identifying which version of output from python model 'netCDF' of 'pickle'
     catchment = 'Clutha'
     output_dem = 'nztm250m'  # identifier for output dem
     hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
-    model_swe_sc_threshold = 5 # threshold for treating a grid cell as snow covered
+    model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered
     dsc_snow_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha2'
     clark2009_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha1'
     mask_folder = 'Y:/DSC-Snow/Masks'
     catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
     modis_folder = 'Y:/sync_to_data/MODIS_snow/MODIS_NetCDF'
-    dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
+    dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
+    modis_dem = 'clutha_dem_250m'
     met_inp_folder = 'Y:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
 
@@ -203,11 +210,12 @@ if __name__ == '__main__':
         print('loading modis data HY {}'.format(hydro_year_to_take))
 
         # load modis data for evaluation
-        modis_fsca, modis_dt, modis_mask = load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, dem_file, mask_folder,catchment_shp_folder)
+        modis_fsca, modis_dt, modis_mask = load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, dem_folder, modis_dem, mask_folder,
+                                                             catchment_shp_folder)
         modis_hydro_days = convert_date_hydro_DOY(modis_dt)
         modis_sc = modis_fsca >= modis_sc_threshold
 
-        #print('calculating basin average sca')
+        # print('calculating basin average sca')
         # modis
         num_modis_gridpoints = np.sum(modis_mask)
         ba_modis_sca = []
@@ -216,11 +224,11 @@ if __name__ == '__main__':
             ba_modis_sca.append(np.nanmean(modis_fsca[i, modis_mask]) / 100.0)
             ba_modis_sca_thres.append(np.nansum(modis_sc[i, modis_mask]).astype('d') / num_modis_gridpoints)
 
-        #print('adding to annual series')
+        # print('adding to annual series')
         ann_ts_av_sca_m.append(np.asarray(ba_modis_sca))
         ann_ts_av_sca_thres_m.append(np.asarray(ba_modis_sca_thres))
 
-        #print('calc snow cover duration')
+        # print('calc snow cover duration')
         modis_scd = np.sum(modis_sc, axis=0)
         modis_scd[modis_mask == 0] = -1
         # add to annual series
@@ -232,7 +240,7 @@ if __name__ == '__main__':
         modis_sc = None
         modis_scd = None
 
-        if which_model == 'clark2009' or which_model== 'all':
+        if which_model == 'clark2009' or which_model == 'all':
             print('loading clark2009 model data HY {}'.format(hydro_year_to_take))
             if clark2009run == False:
                 # run model and return timeseries of daily swe, acc and melt.
@@ -312,7 +320,7 @@ if __name__ == '__main__':
                     mask = st_snow[4]
                     config2 = st_snow[5]
                     configs.append(config2)
-            #print('calculating basin average sca')
+            # print('calculating basin average sca')
             num_gridpoints2 = np.sum(mask)
             ba_swe2 = []
             ba_sca2 = []
@@ -320,7 +328,7 @@ if __name__ == '__main__':
                 ba_swe2.append(np.nanmean(st_swe[i, mask]))
                 ba_sca2.append(np.nansum(st_swe[i, mask] > model_swe_sc_threshold).astype('d') / num_gridpoints2)
 
-            #print('adding to annual series')
+            # print('adding to annual series')
             # add to annual timeseries
 
             if which_model == 'all':
@@ -338,7 +346,7 @@ if __name__ == '__main__':
                 ann_hydro_days.append(convert_date_hydro_DOY(out_dt))
                 ann_dt.append(out_dt)
 
-            #print('calc snow cover duration')
+            # print('calc snow cover duration')
             st_sc = st_swe > model_swe_sc_threshold
             mod_scd = np.sum(st_sc, axis=0)
             mod_scd[mask == 0] = -999
@@ -347,7 +355,6 @@ if __name__ == '__main__':
                 ann_scd2.append(mod_scd)
             elif which_model == 'dsc_snow':
                 ann_scd.append(mod_scd)
-
 
             # clear arrays
             st_snow = None
@@ -386,5 +393,6 @@ if __name__ == '__main__':
         #         mask2 = st_snow2[4]
 
     ann = [ann_ts_av_sca_m, ann_hydro_days_m, ann_dt_m, ann_scd_m, ann_ts_av_sca, ann_ts_av_swe, ann_hydro_days, ann_dt, ann_scd, ann_ts_av_sca2,
-           ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2, ann_ts_av_sca_thres_m,configs]
-    pickle.dump(ann, open(output_folder + '/summary_{}_{}_thres{}_swe{}.pkl'.format(catchment, output_dem, modis_sc_threshold,model_swe_sc_threshold), 'wb'), -1)
+           ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2, ann_ts_av_sca_thres_m, configs]
+    pickle.dump(ann, open(output_folder + '/summary_{}_{}_thres{}_swe{}.pkl'.format(catchment, output_dem, modis_sc_threshold, model_swe_sc_threshold), 'wb'),
+                -1)
