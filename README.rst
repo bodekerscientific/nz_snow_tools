@@ -1,5 +1,5 @@
 nz_snow_tools
-====
+=============
 
 A suite of python code to run and evaluate snow models developed as part of the Deep South National Science Challenge "Frozen Water" project.
 
@@ -11,7 +11,7 @@ Install the latest version of the package from github:
 
 https://github.com/bodekerscientific/nz_snow_tools
 
-once you have downloaded, run setup.py to install (checks what other packages are necessary).
+once you have downloaded, check the requirements.txt file and install the needed packages. It is safer to use conda, rather than pip to install these. run setup.py to install (checks what other packages are necessary).
 
 
 Getting Started

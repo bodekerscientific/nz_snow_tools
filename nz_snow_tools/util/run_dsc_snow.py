@@ -22,8 +22,7 @@ for year in years:
     nml = f90nml.read(path_to_namelist)
     # modify for given run
     nml['ddf_config']['ClimateSource'] = temp + '/DSC-Snow/input_data_hourly/met_inp_Clutha_nztm250m_{}_{}.nc'.format(year, inp_id)
-    nml['ddf_config']['OutputFile'] = projects + '/DSC-Snow/runs/output/clutha_nztm250m_erebus/Clutha_nztm250m_{}_{}_{}.nc'.format(year, inp_id,
-                                                                                                                                            config_id_out)
+    nml['ddf_config']['OutputFile'] = projects + '/DSC-Snow/runs/output/clutha_nztm250m_erebus/Clutha_nztm250m_{}_{}_{}.nc'.format(year, inp_id, config_id_out)
     nml['ddf_config']['starttime'][0] = year
     nml['ddf_config']['endtime'][0] = year + 1
     # write namelist
