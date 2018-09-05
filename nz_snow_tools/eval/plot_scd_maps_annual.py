@@ -70,6 +70,7 @@ for run_id in run_ids:
     plt.close()
     # else:
     for i, year_to_take in enumerate(years_to_take):
+        fig1 = plt.figure(figsize=[10, 4])
         modis_scd = ann_scd_m[i]
         mod1_scd = ann_scd[i]
 

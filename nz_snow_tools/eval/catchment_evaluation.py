@@ -106,8 +106,7 @@ def load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, d
     # filter out dud values
     fsca[fsca > 100] = np.nan
     # trim to only the catchment desired
-    mask, trimmed_mask = load_mask_modis(catchment, output_dem, mask_folder, dem_folder=dem_folder, dem=modis_dem, mask_created=True,
-                                         shapefile_folder=catchment_shp_folder)
+    mask, trimmed_mask = load_mask_modis(catchment, output_dem, mask_folder, dem_folder=dem_folder, modis_dem=modis_dem)
 
     # trimmed_fsca = trim_data_bounds(mask, lat_array, lon_array, fsca[183].copy(), y_centres, x_centres)
     trimmed_fsca = trim_data_to_mask(fsca, mask)
@@ -118,7 +117,7 @@ def load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, d
     return trimmed_fsca, modis_dt, trimmed_mask
 
 
-def load_mask_modis(catchment, output_dem, mask_folder, dem_folder, modis_dem, mask_created=True, shapefile_folder=None):
+def load_mask_modis(catchment, output_dem, mask_folder, dem_folder, modis_dem):
     '''
     load mask and trimmed mask of catchment for modis clutha domain
     '''
@@ -133,19 +132,12 @@ def load_mask_modis(catchment, output_dem, mask_folder, dem_folder, modis_dem, m
                                                                               resolution=250)
 
     if modis_dem == 'modis_si_dem_250m':
-        dem_file = dem_folder + modis_dem + '.tif'
-        _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file, extent_w=1.085e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
+        # dem_file = dem_folder + modis_dem + '.tif'
+        _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.085e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
                                                                        resolution=250)
 
     # # Get the masks for the individual regions of interest
-    if mask_created == True:  # load precalculated mask
-        mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, modis_dem))
-        # mask = np.load(env.data('/GIS_DATA/Hydrology/Catchments/Masks/{}_{}.npy'.format(catchment, output_dem)))
-    elif mask_created == False:  # create mask and save to npy file
-        # masks = get_masks() #TODO set up for multiple masks
-        mask = create_mask_from_shpfile(lat_array, lon_array, shapefile_folder + '/{}.shp'.format(catchment))
-        np.save(mask_folder + '/{}_{}.npy'.format(catchment, modis_dem), mask)
-        # np.save(env.data('/GIS_DATA/Hydrology/Catchments/Masks/{}_{}.npy'.format(catchment, output_dem)), mask)
+    mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, modis_dem))
 
     _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
 
