@@ -124,13 +124,19 @@ def load_mask_modis(catchment, output_dem, mask_folder, dem_folder, modis_dem, m
     '''
 
     if modis_dem == 'clutha_dem_250m':
-        dem_file = dem_folder + modis_dem + '.tif'
-        nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
+        # dem_file = dem_folder + modis_dem + '.tif'
+        _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None)
 
     if modis_dem == 'si_dem_250m':
-        dem_file = dem_folder + modis_dem + '.tif'
-        nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file, extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
+        # dem_file = dem_folder + modis_dem + '.tif'
+        _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
                                                                               resolution=250)
+
+    if modis_dem == 'modis_si_dem_250m':
+        dem_file = dem_folder + modis_dem + '.tif'
+        _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file, extent_w=1.085e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
+                                                                       resolution=250)
+
     # # Get the masks for the individual regions of interest
     if mask_created == True:  # load precalculated mask
         mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, modis_dem))
@@ -233,6 +239,8 @@ if __name__ == '__main__':
         modis_scd[modis_mask == 0] = -1
         # add to annual series
         ann_scd_m.append(modis_scd)
+        ann_hydro_days_m.append(modis_hydro_days)
+        ann_dt_m.append(modis_dt)
 
         modis_fsca = None
         modis_dt = None

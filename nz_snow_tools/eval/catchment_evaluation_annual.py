@@ -91,8 +91,8 @@ if __name__ == '__main__':
     dsc_snow_opt2 = 'netCDF'  # string identifying which version of output from python model 'netCDF' of 'pickle'
     catchment = 'Clutha'
     output_dem = 'nztm250m'  # identifier for output dem
-    run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
-    years_to_take = [2000, 2016 + 1]  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+    run_id = 'norton_4'  # string identifying fortran dsc_snow run. everything after the year
+    years_to_take = range(2000, 2016 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered (mm w.e)
     dsc_snow_output_folder = 'T:/DSC-Snow/runs/output/clutha_nztm250m_erebus'
@@ -102,7 +102,7 @@ if __name__ == '__main__':
     modis_folder = 'T:/sync_to_data/MODIS_snow/NSDI_SI_cloudfilled'  # ''Y:/sync_to_data/MODIS_snow/MODIS_NetCDF'
     # dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
-    modis_dem = 'si_dem_250m'
+    modis_dem = 'modis_si_dem_250m'
     met_inp_folder = 'T:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
     output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
@@ -156,9 +156,13 @@ if __name__ == '__main__':
 
         # print('calc snow cover duration')
         modis_scd = np.sum(modis_sc, axis=0)
-        modis_scd[modis_mask == 0] = -1
+        modis_scd[modis_mask == 0] = -999 # set areas outside catchment to -999
+        modis_scd[np.logical_and(modis_sc[0]==np.nan, modis_mask=1)] = -1 # set areas of water to -1
+
         # add to annual series
         ann_scd_m.append(modis_scd)
+        ann_hydro_days_m.append(modis_hydro_days)
+        ann_dt_m.append(modis_dt)
 
         modis_fsca = None
         modis_dt = None
