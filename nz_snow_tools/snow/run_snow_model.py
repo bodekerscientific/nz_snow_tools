@@ -17,8 +17,8 @@ catchment = 'Clutha'  # string identifying the catchment to run. must match the 
 output_dem = 'nztm250m'  # identifier for output dem
 hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha1'
-met_data_folder = 'Y:/DSC-Snow/input_data_hourly'
+output_folder = 'T:/DSC-Snow/nz_snow_runs/baseline_clutha1'
+met_data_folder = 'T:/DSC-Snow/input_data_hourly'
 
 #configuration dictionary containing model parameters.
 config = {}

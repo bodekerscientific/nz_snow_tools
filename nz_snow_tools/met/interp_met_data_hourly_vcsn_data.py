@@ -248,7 +248,7 @@ if __name__ == '__main__':
     mask_dem = True  # boolean to set whether or not to mask the output dem
     catchment = 'Clutha'
     mask_created = True  # boolean to set whether or not the mask has already been created
-    mask_folder = 'Y:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
+    mask_folder = 'T:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
         catchment)  # shapefile containing polyline or polygon of catchment in WGS84. Not needed if mask_created==True
     # time control
@@ -264,7 +264,7 @@ if __name__ == '__main__':
     # nc_file_tmin = 'T:/newVCSN/tmin_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
     nc_file_srad = 'T:/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
     # output met data
-    met_out_folder = 'Y:/DSC-Snow/input_data_hourly'
+    met_out_folder = 'T:/DSC-Snow/input_data_hourly'
 
     ####
 

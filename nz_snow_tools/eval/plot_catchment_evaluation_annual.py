@@ -147,13 +147,17 @@ if __name__ == '__main__':
         plt.close()
 
         plt.figure()
-        plt.plot(np.mean(ann_ts_av_sca_m_array, axis=1), label='modis')
-        plt.plot(np.mean(ann_ts_av_sca_array, axis=1), label='{} {}'.format(which_model,run_id))
+        ba_sca_ann_m = np.mean(ann_ts_av_sca_m_array, axis=1)
+        ba_sca_ann = np.mean(ann_ts_av_sca_array, axis=1)
+        plt.plot(ba_sca_ann_m , label='modis')
+        plt.plot(ba_sca_ann, label='{} {}'.format(which_model,run_id))
         plt.title('average snow covered area {}-{}'.format(years_to_take[0], years_to_take[-1]))
         plt.xticks(range(len(years_to_take)), years_to_take, rotation=45)
         plt.ylabel('SCA')
         plt.ylim([0, 0.2])
         plt.legend(loc=1)
+        r = np.corrcoef(ba_sca_ann_m,ba_sca_ann)
+        plt.title('r = {:0.3}'.format(r[0,1]))
         plt.savefig(
             plot_folder + '/average snow covered area HY {}-{} swe{} {} {}.png'.format(years_to_take[0], years_to_take[-1], model_swe_sc_threshold, which_model,
                                                                                        run_id))

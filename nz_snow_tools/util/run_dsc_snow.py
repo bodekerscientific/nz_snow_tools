@@ -8,7 +8,7 @@ import f90nml
 # compatibility for windows or linux
 projects = "P:"  # '/shareddrive' #
 temp = "T:"  # '/mnt/temp'
-data2 = "Y:"  # '/mnt/data2'
+# data2 = "Y:"  # '/mnt/data2'
 
 path_to_ddf_run = "/home/jono/dsc_snow/ddf/ddf_run" # path to fortran executable
 inp_id = 'norton' # string identifying the input data used (suffix to input netcdf files)

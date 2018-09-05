@@ -167,14 +167,14 @@ if __name__ == '__main__':
     hydro_years_to_take = range(2001, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered
-    dsc_snow_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha2'
-    clark2009_output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha1'
-    mask_folder = 'Y:/DSC-Snow/Masks'
+    dsc_snow_output_folder = 'T:/DSC-Snow/nz_snow_runs/baseline_clutha2'
+    clark2009_output_folder = 'T:/DSC-Snow/nz_snow_runs/baseline_clutha1'
+    mask_folder = 'T:/DSC-Snow/Masks'
     catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-    modis_folder = 'Y:/sync_to_data/MODIS_snow/MODIS_NetCDF'
+    modis_folder = 'Z:/MODIS_snow/MODIS_NetCDF'
     dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
     modis_dem = 'clutha_dem_250m'
-    met_inp_folder = 'Y:/DSC-Snow/input_data_hourly'
+    met_inp_folder = 'T:/DSC-Snow/input_data_hourly'
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
 
     output_folder = 'P:/Projects/DSC-Snow/nz_snow_runs/baseline_clutha2'

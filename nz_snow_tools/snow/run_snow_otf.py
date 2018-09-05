@@ -25,13 +25,13 @@ dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
 dem = 'si_dem_250m'
 mask_dem = True  # boolean to set whether or not to mask the output dem
 mask_created = True  # boolean to set whether or not the mask has already been created
-mask_folder = 'Y:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
+mask_folder = 'T:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
 mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
     catchment)  # shapefile containing polyline or polygon of catchment in WGS84. Not needed if mask_created==True
 catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
 
 # output options
-output_folder = 'Y:/DSC-Snow/nz_snow_runs/baseline_clutha2'
+output_folder = 'T:/DSC-Snow/nz_snow_runs/baseline_clutha2'
 
 # paths to input met data
 nc_file_rain = nc.Dataset('T:/newVCSN/rain_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc', 'r')

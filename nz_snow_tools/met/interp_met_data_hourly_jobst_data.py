@@ -54,20 +54,20 @@ if __name__ == '__main__':
     mask_dem = True  # boolean to set whether or not to mask the output dem
     catchment = 'Clutha'
     mask_created = True  # boolean to set whether or not the mask has already been created
-    mask_folder = 'Y:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
+    mask_folder = 'T:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
         catchment)  # shapefile containing polyline or polygon of catchment in WGS84. Not needed if mask_created==True
     # time control
     years_to_take = range(2000, 2016 + 1)  # range(2001, 2013 + 1)
 
     # input met data
-    nc_file_rain = 'Y:/DSC-Snow/JOBST/PRECIP_WITH_UCC/CLUTHA_PRECIP_250m_' # provide only partial filename up to 01-Jan-2000to31-dec-2000
-    nc_file_tmax = 'Y:/DSC-Snow/JOBST/Tmax/CLUTHA_Tmax_250m_'
-    nc_file_tmin = 'Y:/DSC-Snow/JOBST/Tmin/CLUTHA_Tmin_250m_'
-    nc_file_srad = 'T:/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    nc_file_rain = 'Z:/JOBST_met_data/PRECIP_WITH_UCC/CLUTHA_PRECIP_250m_' # provide only partial filename up to 01-Jan-2000to31-dec-2000
+    nc_file_tmax = 'Z:/JOBST_met_data/Tmax/CLUTHA_Tmax_250m_'
+    nc_file_tmin = 'Z:/JOBST_met_data/Tmin/CLUTHA_Tmin_250m_'
+    nc_file_srad = 'T:/sync_to_data/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
 
     # output met data
-    met_out_folder = 'Y:/DSC-Snow/input_data_hourly'
+    met_out_folder = 'T:/DSC-Snow/input_data_hourly'
 
     ####
 
