@@ -28,7 +28,7 @@ if __name__ == '__main__':
     plot_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
 
     # run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
-    run_ids = ['vcsn_4','jobst_ucc_4']  # ,'norton_4'
+    run_ids = ['vcsn_4','jobst_ucc_4','norton_4']  # ,
 
     for run_id in run_ids:
         plt.figure(figsize=[8, 6])

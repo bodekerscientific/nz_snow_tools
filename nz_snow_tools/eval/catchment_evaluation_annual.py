@@ -148,7 +148,7 @@ if __name__ == '__main__':
         # print('calc snow cover duration')
         modis_scd = np.sum(modis_sc, axis=0)
         modis_scd[modis_mask == 0] = -999  # set areas outside catchment to -999
-        modis_scd[np.logical_and(modis_sc[0] == np.nan, modis_mask == 1)] = -1  # set areas of water to -1
+        modis_scd[np.logical_and(np.isnan(modis_fsca[0]), modis_mask == 1)] = -1  # set areas of water to -1
 
         # add to annual series
         ann_scd_m.append(modis_scd)

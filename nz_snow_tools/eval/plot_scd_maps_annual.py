@@ -19,7 +19,7 @@ model_output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
 plot_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
 
 # run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
-run_ids = ['jobst_ucc_4','vcsn_4'] #,'norton_4'
+run_ids = ['norton_4','jobst_ucc_4','vcsn_4'] #,
 
 for run_id in run_ids:
     ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}_swe{}_{}_{}.pkl'.format(catchment, output_dem, modis_sc_threshold, model_swe_sc_threshold,
@@ -30,11 +30,13 @@ for run_id in run_ids:
     # ann_ts_av_sca2, ann_ts_av_swe2, ann_hydro_days2, ann_dt2, ann_scd2]
 
     ann_scd_m = np.asarray(ann[3], dtype=np.double)
-    ann_scd = np.asarray(ann[8], dtype=np.double)
+    ann_scd = np.asarray(ann[7], dtype=np.double)
+
+    ann_scd[(ann_scd == -999)] = np.nan
+    ann_scd[(ann_scd_m == -1)] = np.nan # set areas of water as nan
 
     ann_scd_m[(ann_scd_m <= -1)] = np.nan  # set areas outside of catchment and in water to nan
-    ann_scd[(ann_scd == -999)] = np.nan
-    ann_scd[(ann_scd_m == -1)] = np.nan
+
 
     fig1 = plt.figure(figsize=[10, 4])
 
