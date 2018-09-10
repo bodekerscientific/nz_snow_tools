@@ -25,10 +25,10 @@ if __name__ == '__main__':
     modis_sc_thresholds = [50]  # value of fsca (in percent) that is counted as being snow covered 30,40,50,60,70,80
     model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered
     model_output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
-    plot_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
+    plot_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus/plots'
 
     # run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
-    run_ids = ['vcsn_4','jobst_ucc_4','norton_4']  # ,
+    run_ids = ['vcsn_4','jobst_ucc_4','norton_4','jobst_ucc_4_pre_nccache']  # ,
 
     for run_id in run_ids:
         plt.figure(figsize=[8, 6])

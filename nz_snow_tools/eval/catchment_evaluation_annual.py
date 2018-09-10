@@ -90,7 +90,7 @@ if __name__ == '__main__':
     dsc_snow_opt2 = 'netCDF'  # string identifying which version of output from python model 'netCDF' of 'pickle'
     catchment = 'Clutha'  # string identifying catchment modelled
     output_dem = 'nztm250m'  # identifier for output dem
-    run_id = 'norton_4'  # string identifying fortran dsc_snow run. everything after the year
+    run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
     years_to_take = range(2000, 2016 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered (mm w.e)
