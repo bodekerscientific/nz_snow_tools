@@ -7,23 +7,31 @@ from __future__ import division
 import numpy as np
 import pickle
 import matplotlib.pylab as plt
+from nz_snow_tools.util.utils import trim_data_to_mask
 
+plot_subcatchments = True
 average_scd = False  # boolean specifying if all years are to be averaged together - now plots difference between
 which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow', or 'all' # future will include 'fsm'
-catchment = 'Clutha'
+model_catchment = 'Clutha'
 output_dem = 'nztm250m'  # identifier for output dem
 years_to_take = range(2000, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
 model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered
 model_output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
-plot_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
+plot_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus/plots'
+
+output_subcatchments = ['Clutha', 'Wilkin', 'Wanaka northern inflows', 'Upper Dart', 'Rees', 'Shotover', 'Teviot', 'Taieri', 'Upper Matukituki', 'Roaring Meg', \
+                        'Pomahaka', 'Motutapu', 'Moonlight Creek', 'Matukituki', 'Manuherikia', 'Luggate Creek', 'Lochy', 'Lindis', \
+                        'Kawarau', 'Greenstone', 'Hawea', 'Fraser', 'Clutha above Clyde Dam', 'Cardrona', 'Arrow', 'Bannockburn Creek']
+mask_folder = 'T:/DSC-Snow/Masks'
 
 # run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
-run_ids = ['norton_4','jobst_ucc_4','vcsn_4'] #,
+run_ids = ['norton_4', 'jobst_ucc_4', 'vcsn_4']  # ,
 
 for run_id in run_ids:
-    ann = pickle.load(open(model_output_folder + '/summary_{}_{}_thres{}_swe{}_{}_{}.pkl'.format(catchment, output_dem, modis_sc_threshold, model_swe_sc_threshold,
-                                                                                                 which_model, run_id), 'rb'))
+    ann = pickle.load(
+        open(model_output_folder + '/summary_{}_{}_thres{}_swe{}_{}_{}.pkl'.format(model_catchment, output_dem, modis_sc_threshold, model_swe_sc_threshold,
+                                                                                   which_model, run_id), 'rb'))
     # indexes 0-3 modis, 4-8 model 1 and 9-13 model 2
     # ann = [ann_ts_av_sca_m, ann_hydro_days_m, ann_dt_m, ann_scd_m,
     # ann_ts_av_sca, ann_ts_av_swe, ann_hydro_days, ann_dt, ann_scd,
@@ -33,13 +41,11 @@ for run_id in run_ids:
     ann_scd = np.asarray(ann[7], dtype=np.double)
 
     ann_scd[(ann_scd == -999)] = np.nan
-    ann_scd[(ann_scd_m == -1)] = np.nan # set areas of water as nan
+    ann_scd[(ann_scd_m == -1)] = np.nan  # set areas of water as nan
 
     ann_scd_m[(ann_scd_m <= -1)] = np.nan  # set areas outside of catchment and in water to nan
 
-
     fig1 = plt.figure(figsize=[10, 4])
-
 
     # if average_scd == True:
     modis_scd = np.mean(ann_scd_m, axis=0)
@@ -62,14 +68,52 @@ for run_id in run_ids:
     # plt2[(plt2 > 100)] = 0  # some bad model points
     cmap = plt.cm.RdBu
     cmap.set_bad('0.5')
-    plt.imshow(plt2, origin=0, interpolation='none', vmin=-100, vmax=100,cmap=cmap)  # , vmin=0, vmax=365, cmap='viridis')
+    plt.imshow(plt2, origin=0, interpolation='none', vmin=-100, vmax=100, cmap=cmap)  # , vmin=0, vmax=365, cmap='viridis')
     plt.colorbar()
     plt.title('difference (days)')
 
     plt.tight_layout()
-    plt.savefig(plot_folder + '/SCD{}to{}_{}_{}_thres{}_swe{}_{}_{}.png'.format(years_to_take[0], years_to_take[-1], catchment, output_dem, modis_sc_threshold,
-                                                                                model_swe_sc_threshold, which_model, run_id), dpi=300)
+    plt.savefig(
+        plot_folder + '/SCD{}to{}_{}_{}_thres{}_swe{}_{}_{}.png'.format(years_to_take[0], years_to_take[-1], model_catchment, output_dem, modis_sc_threshold,
+                                                                        model_swe_sc_threshold, which_model, run_id), dpi=300)
     plt.close()
+
+    if plot_subcatchments:
+        main_mask = np.load(mask_folder + '/{}_clutha_dem_250m.npy'.format(model_catchment))
+        for subcatchment in output_subcatchments:
+
+            fig1 = plt.figure(figsize=[10, 4])
+            sub_mask = np.load(mask_folder + '/{}_clutha_dem_250m.npy'.format(subcatchment))
+            mask_sub = trim_data_to_mask(sub_mask,main_mask)
+            modis_sub = trim_data_to_mask(modis_scd,mask_sub)
+            mod1_sub = trim_data_to_mask(mod1_scd,mask_sub)
+
+            plt.subplot(1, 3, 1)
+            cmap = plt.cm.viridis
+            cmap.set_bad('0.5')
+            plt.imshow(modis_sub, origin=0, interpolation='none', vmin=0, vmax=365)
+            plt.colorbar()
+            plt.title('modis duration fsca > {}'.format(modis_sc_threshold))
+
+            plt.subplot(1, 3, 2)
+            plt.imshow(mod1_sub, origin=0, interpolation='none', vmin=0, vmax=365)
+            plt.colorbar()
+            plt.title('dsc_snow SWE thres= {}'.format(model_swe_sc_threshold))
+
+            plt.subplot(1, 3, 3)
+            plt2 = mod1_sub - modis_sub
+            # plt2[(plt2 > 100)] = 0  # some bad model points
+            cmap = plt.cm.RdBu
+            cmap.set_bad('0.5')
+            plt.imshow(plt2, origin=0, interpolation='none', vmin=-100, vmax=100, cmap=cmap)  # , vmin=0, vmax=365, cmap='viridis')
+            plt.colorbar()
+            plt.title('difference (days)')
+
+            plt.tight_layout()
+            plt.savefig(
+                plot_folder + '/SCD{}to{}_sub_{}_{}_thres{}_swe{}_{}_{}.png'.format(years_to_take[0], years_to_take[-1], subcatchment, output_dem,
+                                                                                modis_sc_threshold, model_swe_sc_threshold, which_model, run_id), dpi=300)
+            plt.close()
     # else:
     for i, year_to_take in enumerate(years_to_take):
         fig1 = plt.figure(figsize=[10, 4])
@@ -98,6 +142,7 @@ for run_id in run_ids:
         plt.title('difference (days)')
 
         plt.tight_layout()
-        plt.savefig(plot_folder + '/SCD{}_{}_{}_thres{}_swe{}_{}_{}.png'.format(year_to_take, catchment, output_dem, modis_sc_threshold, model_swe_sc_threshold,
-                                                                                which_model, run_id), dpi=300)
+        plt.savefig(
+            plot_folder + '/SCD{}_{}_{}_thres{}_swe{}_{}_{}.png'.format(year_to_take, model_catchment, output_dem, modis_sc_threshold, model_swe_sc_threshold,
+                                                                        which_model, run_id), dpi=300)
         plt.close()
