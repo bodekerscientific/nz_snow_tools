@@ -305,7 +305,7 @@ def calc_toa(lat_ref, lon_ref, hourly_dt):
     Declination_rad = np.arcsin(
         0.006918 - 0.399912 * np.cos(d0_rad) + 0.070257 * np.sin(d0_rad) - 0.006758 * np.cos(2 * d0_rad)
         + 0.000907 * np.sin(2 * d0_rad) - 0.002697 * np.cos(3 * d0_rad) + 0.00148 * np.sin(3 * d0_rad))
-    HourAngle_rad = (-1 * (180 + (dtstep / 3600 * 15 / 2) - hourdec * 15) + (longitude - 15 * timezone)) * np.pi / 180.
+    HourAngle_rad = (-1 * (180 - hourdec * 15) + (longitude - 15 * timezone)) * np.pi / 180.
     ZenithAngle_rad = np.arccos(np.cos(latitude * np.pi / 180) * np.cos(Declination_rad) * np.cos(HourAngle_rad)
                                 + np.sin(latitude * np.pi / 180) * np.sin(Declination_rad))
     ZenithAngle_deg = ZenithAngle_rad * 180 / np.pi

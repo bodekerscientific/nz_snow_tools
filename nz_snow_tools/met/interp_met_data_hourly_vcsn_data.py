@@ -246,7 +246,7 @@ if __name__ == '__main__':
     dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     # mask control
     mask_dem = True  # boolean to set whether or not to mask the output dem
-    catchment = 'Clutha'
+    catchment = 'Nevis'
     mask_created = True  # boolean to set whether or not the mask has already been created
     mask_folder = 'T:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
@@ -257,12 +257,12 @@ if __name__ == '__main__':
     save_by_timestep = False  # save one timestep per file? Needed for Fortran version of dsc_snow, only works with compute_by_day==False
     compute_by_day = True  # only compute hourly values one day at a time? Useful for large grids, as not enough memory to compute for whole grid at once.
     # input met data
-    nc_file_rain = 'T:/newVCSN/rain_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
-    nc_file_tmax = 'T:/newVCSN/tmax_N2_1980010100_2017073100_south-island_p05_daily.nc'
-    nc_file_tmin = 'T:/newVCSN/tmin_N2_1980010100_2017073100_south-island_p05_daily.nc'
+    nc_file_rain = 'Z:/newVCSN/rain_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    nc_file_tmax = 'Z:/newVCSN/tmax_N2_1980010100_2017073100_south-island_p05_daily.nc'
+    nc_file_tmin = 'Z:/newVCSN/tmin_N2_1980010100_2017073100_south-island_p05_daily.nc'
     # nc_file_tmax = 'T:/newVCSN/tmax_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
     # nc_file_tmin = 'T:/newVCSN/tmin_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
-    nc_file_srad = 'T:/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    nc_file_srad = 'Z:/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
     # output met data
     met_out_folder = 'T:/DSC-Snow/input_data_hourly'
 
