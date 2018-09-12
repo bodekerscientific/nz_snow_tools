@@ -6,7 +6,7 @@ import shutil
 import f90nml
 
 # compatibility for windows or linux
-projects =  '/shareddrive/Projects' #
+projects =  '/mnt/shareddrive/Projects' #
 temp = '/mnt/temp'
 # data2 =  '/mnt/data2'
 
