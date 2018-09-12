@@ -24,6 +24,7 @@ for inp_id in inp_ids:
         # read in namelist
         nml = f90nml.read(path_to_namelist)
         # modify for given run
+        nml['ddf_config']['TopographyFile'] = projects + '/DSC-Snow/runs/input_DEM/Clutha_nztm250m_topo_no_ice.nc'
         nml['ddf_config']['ClimateSource'] = temp + '/DSC-Snow/input_data_hourly/met_inp_Clutha_nztm250m_{}_{}.nc'.format(year, inp_id)
         nml['ddf_config']['OutputFile'] = temp + '/DSC-Snow/runs/output/clutha_nztm250m_erebus/Clutha_nztm250m_{}_{}_{}.nc'.format(year, inp_id, config_id_out)
         nml['ddf_config']['starttime'][0] = year
