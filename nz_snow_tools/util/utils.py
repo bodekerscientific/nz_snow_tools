@@ -318,7 +318,7 @@ def calc_toa(lat_ref, lon_ref, hourly_dt):
     return SRtoa
 
 
-def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, extent_s=4.82e6, resolution=250):
+def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, extent_s=4.82e6, resolution=250,origin='bottomleft'):
     """
     load dem tif file. defaults to clutha 250 dem.
     :param dem_file: string specifying path to dem
@@ -327,12 +327,16 @@ def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, ex
     :param extent_n: extent in nztm
     :param extent_s: extent in nztm
     :param resolution: resolution in m
+    :param origin: option to specify whether you want the dem to have its origin in the 'bottomleft' (i.e. xy) or in the 'topleft' ie. ij
     :return:
     """
     if dem_file is not None:
         nztm_dem = Image.open(dem_file)
-        # np.array(nztm_dem).shape is (1240L, 800L) but origin is in NW corner. Move to SW to align with increasing Easting and northing.
-        nztm_dem = np.flipud(np.array(nztm_dem))
+        if origin=='bottomleft':
+            # np.array(nztm_dem).shape is (1240L, 800L) but origin is in NW corner. Move to SW to align with increasing Easting and northing.
+            nztm_dem = np.flipud(np.array(nztm_dem))
+        if origin == 'topleft':
+            nztm_dem = np.array(nztm_dem)
     else:
         nztm_dem = None
     # extent_w = 1.2e6
@@ -343,7 +347,9 @@ def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, ex
     # create coordinates
     x_centres = np.arange(extent_w + resolution / 2, extent_e, resolution)
     y_centres = np.arange(extent_s + resolution / 2, extent_n, resolution)
-    y_array, x_array = np.meshgrid(y_centres, x_centres, indexing='ij')
+    y_array, x_array = np.meshgrid(y_centres, x_centres, indexing='ij') # this makes an array with northings and eastings increasing
+    if origin == 'topleft':
+        y_array= np.flipud(y_array) # flips so that northings decrease (i.e. like a map)
     lat_array, lon_array = nztm_to_wgs84(y_array, x_array)
     # plot to check the dem
     # plt.imshow(nztm_dem, origin=0, interpolation='none', cmap='terrain')

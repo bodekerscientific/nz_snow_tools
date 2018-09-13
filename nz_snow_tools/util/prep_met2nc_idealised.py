@@ -28,9 +28,10 @@ inp_elev = climate_file.variables['elevation'][y_point, x_point]
 hourly_dt = nc.num2date(climate_file.variables['time'][:], climate_file.variables['time'].units)
 
 # create new dem surface
-_, eastings, northings, lats, lons = setup_nztm_dem(dem_file=None, extent_w=1.235e6, extent_e=1.26e6, extent_n=5.05e6, extent_s=5.025e6, resolution=250)
+origin = 'topleft'
+_, eastings, northings, lats, lons = setup_nztm_dem(dem_file=None, extent_w=1.235e6, extent_e=1.26e6, extent_n=5.05e6, extent_s=5.025e6, resolution=250,origin=origin)
 
-for catchment in ['bell_4000']:#'flat_2000', 'north_facing', 'south_facing']:
+for catchment in ['flat_2000', 'north_facing', 'south_facing','bell_2000','bell_4000']:#]:
     if catchment == 'flat_2000':
         elev = np.ones((100, 100)) * 2000
     elif catchment == 'north_facing':
@@ -43,6 +44,13 @@ for catchment in ['bell_4000']:#'flat_2000', 'north_facing', 'south_facing']:
         sigma, mu = 0.25, 0.0
         g = np.exp(-((d - mu) ** 2 / (2.0 * sigma ** 2)))
         elev = g * 4000
+    elif catchment == 'bell_2000':
+        x, y = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
+        d = np.sqrt(x * x + y * y)
+        sigma, mu = 0.25, 0.0
+        g = np.exp(-((d - mu) ** 2 / (2.0 * sigma ** 2)))
+        elev = g * 2000
+
     # lapse onto new grid
     t_grid = inp_t[:, np.newaxis, np.newaxis] * np.ones((len(inp_t), elev.shape[0], elev.shape[1])) \
              + lapse * (elev[np.newaxis, :, :] * np.ones((len(inp_t), elev.shape[0], elev.shape[1])) - inp_elev)
@@ -51,7 +59,7 @@ for catchment in ['bell_4000']:#'flat_2000', 'north_facing', 'south_facing']:
 
     output_dem = 'nztm250m'  # identifier for output dem
     data_id = '{}_{}'.format(catchment, output_dem)  # name to identify the output data
-    out_file = 'P:/Projects/DSC-Snow/runs/idealised/met_inp_{}_{}.nc'.format(data_id, 2016)
+    out_file = 'P:/Projects/DSC-Snow/runs/idealised/met_inp_{}_{}_origin{}.nc'.format(data_id, 2016,origin)
     out_nc_file = setup_nztm_grid_netcdf(out_file, None, ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
                                          hourly_dt, northings, eastings, lats, lons, elev)
     for var, data in zip(['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],

@@ -13,9 +13,11 @@ import matplotlib.pylab as plt
 from nz_snow_tools.util.utils import setup_nztm_dem
 
 # create dem surface
-_, eastings, northings, lats, lons = setup_nztm_dem(dem_file=None, extent_w=1.235e6, extent_e=1.26e6, extent_n=5.05e6, extent_s=5.025e6, resolution=250)
+origin = 'topleft'  # or 'bottomleft'
+_, eastings, northings, lats, lons = setup_nztm_dem(dem_file=None, extent_w=1.235e6, extent_e=1.26e6, extent_n=5.05e6, extent_s=5.025e6, resolution=250,
+                                                    origin=origin)
 
-for catchment in ['flat_2000', 'north_facing', 'south_facing', 'bell_4000']:
+for catchment in ['flat_2000', 'north_facing', 'south_facing', 'bell_4000', 'bell_2000']:
     if catchment == 'flat_2000':
         elev = np.ones((100, 100)) * 2000
     elif catchment == 'north_facing':
@@ -28,13 +30,19 @@ for catchment in ['flat_2000', 'north_facing', 'south_facing', 'bell_4000']:
         sigma, mu = 0.25, 0.0
         g = np.exp(-((d - mu) ** 2 / (2.0 * sigma ** 2)))
         elev = g * 4000
+    elif catchment == 'bell_2000':
+        x, y = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
+        d = np.sqrt(x * x + y * y)
+        sigma, mu = 0.25, 0.0
+        g = np.exp(-((d - mu) ** 2 / (2.0 * sigma ** 2)))
+        elev = g * 2000
     # assume a square, axis-oriented grid
     gx, gy = np.gradient(elev, 250.0)
 
     # write out the topographic info to netcdf file
     output_dem = 'nztm250m'  # identifier for output dem
     data_id = '{}_{}'.format(catchment, output_dem)  # name to identify the output data
-    out_file = 'P:/Projects/DSC-Snow/runs/idealised/{}_topo_no_ice.nc'.format(data_id)
+    out_file = 'P:/Projects/DSC-Snow/runs/idealised/{}_topo_no_ice_origintopleft.nc'.format(data_id)
 
     file_out = netCDF4.Dataset(out_file, 'w')
     # nc_common_attr(file_out, JONO, title='topographic fields for snow model',source='prep_dem2nc.py')
@@ -76,7 +84,10 @@ for catchment in ['flat_2000', 'north_facing', 'south_facing', 'bell_4000']:
             data = np.arctan(np.sqrt(gx * gx + gy * gy))
             units = 'radians'
         if gname == 'aspect':
-            data = - np.pi / 2. - np.arctan2(gx, gy)
+            if origin == 'topleft':
+                data = - np.pi / 2. - np.arctan2(-gx, gy)
+            elif origin == 'bottomleft':
+                data = - np.pi / 2. - np.arctan2(gx, gy)
             data = np.where(data < -np.pi, data + 2 * np.pi, data)
             units = 'radians'
         if gname == 'catchment':
@@ -93,8 +104,6 @@ for catchment in ['flat_2000', 'north_facing', 'south_facing', 'bell_4000']:
         setattr(raster_out, 'units', units)
 
     file_out.close()
-
-
 
 x, y = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
 d = np.sqrt(x * x + y * y)
@@ -115,10 +124,18 @@ plt.xlabel('grid point')
 plt.ylabel('elevation (metres)')
 
 
-data = - np.pi / 2. - np.arctan2(gx, gy)
-data = np.where(data < -np.pi, data + 2 * np.pi, data)
-plt.imshow(np.rad2deg(data),origin=0)
+plt.figure()
+if origin == 'topleft':
+    data = - np.pi / 2. - np.arctan2(-gx, gy)
+    data = np.where(data < -np.pi, data + 2 * np.pi, data)
+    plt.imshow(np.rad2deg(data))
+elif origin == 'bottomleft':
+    data = - np.pi / 2. - np.arctan2(gx, gy)
+    data = np.where(data < -np.pi, data + 2 * np.pi, data)
+    plt.imshow(np.rad2deg(data),origin=0)
+plt.imshow(np.rad2deg(data))
 plt.colorbar()
 plt.xlabel('easting')
 plt.ylabel('northing')
 plt.title('aspect')
+plt.show()
