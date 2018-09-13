@@ -11,8 +11,8 @@ temp = '/mnt/temp'
 # data2 =  '/mnt/data2'
 
 path_to_ddf_run = "/home/bs/dsc_snow/ddf/ddf_run"  # path to fortran executable
-config_id_in = '4'  # string identifying suffix to the namelist configuration file used as default
-config_id_out = '4'  # string identifying suffix to the namelist configuration file used by the model
+config_id_in = '5'  # string identifying suffix to the namelist configuration file used as default
+config_id_out = '5'  # string identifying suffix to the namelist configuration file used by the model
 path_to_namelist = projects + '/DSC-Snow/runs/input/clutha_nztm250m_erebus/ddf_config_{}.txt'.format(config_id_in)
 years = [2016]
 
