@@ -10,30 +10,37 @@ import numpy as np
 # from gdalconst import *
 # import pyproj
 # import argparse
-from jc_scripts.dsc_snow.met_data.A2_interpolate_hourly_vcsn_data import setup_clutha_dem_250m,create_mask_from_shpfile,trim_lat_lon_bounds
-from bs.core import env
-from bs.core.util import nc_common_attr, JONO
+import matplotlib.pylab as plt
+from time import strftime, gmtime
+from nz_snow_tools.util.utils import setup_nztm_dem,create_mask_from_shpfile,trim_lat_lon_bounds
 
+origin = 'topleft'  # or 'bottomleft'
+dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
 mask_dem = True  # boolean to set whether or not to mask the output dem
 catchment = 'Clutha'
-MASK_SHPFILE = env.data('/GIS_DATA/Hydrology/Catchments/{} full WGS84.shp'.format(catchment))
+mask_shpfile = ('Z:/GIS_DATA/Hydrology/Catchments/{} full WGS84.shp'.format(catchment))
 mask_created = True  # boolean to set whether or not the mask has already been created
 input_dem = 'clutha_dem_250m'
 output_dem = 'nztm250m'  # identifier for output dem
 data_id = '{}_{}'.format(catchment, output_dem)  # name to identify the output data
-out_file = 'P:/Projects/DSC-Snow/runs/input_DEM/{}_topo_no_ice.nc'.format(data_id)
+out_file = 'P:/Projects/DSC-Snow/runs/input_DEM/{}_topo_no_ice_origin{}.nc'.format(data_id,origin)
 
-nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_clutha_dem_250m()
+nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file=dem_file,origin=origin)
 
 if mask_dem == True:
     # # Get the masks for the individual regions of interest
     if mask_created == True:  # load precalculated mask
         mask = np.load('T:/DSC-Snow/Masks/{}_{}.npy'.format(catchment, input_dem))
-        # mask = np.load(env.data('/GIS_DATA/Hydrology/Catchments/Masks/{}_{}.npy'.format(catchment, output_dem)))
+        if origin == 'topleft':
+            mask = np.flipud(mask)
     else:  # create mask and save to npy file
         # masks = get_masks() #TODO set up for multiple masks
-        mask = create_mask_from_shpfile(lat_array, lon_array, MASK_SHPFILE)
+        mask = create_mask_from_shpfile(lat_array, lon_array, mask_shpfile)
+        if origin == 'topleft':  # flip to save as bottom left
+            mask = np.flipud(mask)
         np.save('T:/DSC-Snow/Masks/{}_{}.npy'.format(catchment, input_dem), mask)
+        if origin == 'topleft':  # flip back to topleft
+            mask = np.flipud(mask)
         # np.save(env.data('/GIS_DATA/Hydrology/Catchments/Masks/{}_{}.npy'.format(catchment, output_dem)), mask)
     masks = [[data_id, mask]]
     # Trim down the number of latitudes requested so it all stays in memory
@@ -55,7 +62,14 @@ gx, gy = np.gradient(elev,250.0)
 # write out the topographic info to netcdf file
 
 file_out=netCDF4.Dataset(out_file,'w')
-nc_common_attr(file_out, JONO, title='topographic fields for snow model',source='prep_dem2nc.py')
+
+file_out.institution = 'Bodeker Scientific'
+file_out.title = 'topographic fields for snow model'
+file_out.source = 'prep_dem2nc.py'
+file_out.author = 'Jono Conway'
+file_out.email = 'jono@bodekerscientific.com'
+file_out.created = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+
 #setattr(file_out,'versionNumber',1)
 
 # start with georeferencing
@@ -95,7 +109,10 @@ for gname in grd_names:
         data = np.arctan(np.sqrt(gx*gx + gy*gy))
         units = 'radians'
     if gname=='aspect':
-        data = - np.pi/2. - np.arctan2(gx, gy)
+        if origin == 'topleft':
+            data = - np.pi / 2. - np.arctan2(-gx, gy)
+        elif origin == 'bottomleft':
+            data = - np.pi / 2. - np.arctan2(gx, gy)
         data = np.where(data < -np.pi, data + 2 * np.pi , data)
         units = 'radians'
     if gname == 'catchment':
@@ -112,4 +129,56 @@ for gname in grd_names:
     setattr(raster_out,'units',units)
 
 file_out.close()
+
+
+
+plt.figure()
+if origin == 'topleft':
+    plt.imshow(elev)
+elif origin == 'bottomleft':
+    plt.imshow(elev,origin=0)
+plt.colorbar()
+plt.xlabel('easting')
+plt.ylabel('northing')
+plt.title('elevation')
+plt.show()
+
+plt.figure()
+if origin == 'topleft':
+    plt.imshow(np.array(trimmed_mask,np.int))
+elif origin == 'bottomleft':
+    plt.imshow(np.array(trimmed_mask,np.int),origin=0)
+plt.colorbar()
+plt.xlabel('easting')
+plt.ylabel('northing')
+plt.title('mask')
+plt.show()
+
+plt.figure()
+data = np.arctan(np.sqrt(gx * gx + gy * gy))
+if origin == 'topleft':
+    plt.imshow(np.rad2deg(data))
+elif origin == 'bottomleft':
+    plt.imshow(np.rad2deg(data),origin=0)
+plt.colorbar()
+plt.xlabel('easting')
+plt.ylabel('northing')
+plt.title('slope')
+plt.show()
+
+plt.figure()
+if origin == 'topleft':
+    data = - np.pi / 2. - np.arctan2(-gx, gy)
+    data = np.where(data < -np.pi, data + 2 * np.pi, data)
+    plt.imshow(np.rad2deg(data))
+elif origin == 'bottomleft':
+    data = - np.pi / 2. - np.arctan2(gx, gy)
+    data = np.where(data < -np.pi, data + 2 * np.pi, data)
+    plt.imshow(np.rad2deg(data),origin=0)
+plt.colorbar()
+plt.xlabel('easting')
+plt.ylabel('northing')
+plt.title('aspect')
+plt.show()
+
 

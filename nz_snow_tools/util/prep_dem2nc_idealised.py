@@ -17,7 +17,7 @@ origin = 'topleft'  # or 'bottomleft'
 _, eastings, northings, lats, lons = setup_nztm_dem(dem_file=None, extent_w=1.235e6, extent_e=1.26e6, extent_n=5.05e6, extent_s=5.025e6, resolution=250,
                                                     origin=origin)
 
-for catchment in ['flat_2000', 'north_facing', 'south_facing', 'bell_4000', 'bell_2000']:
+for catchment in ['flat_2000', 'north_facing', 'south_facing', 'bell_4000', 'bell_2000','real']:
     if catchment == 'flat_2000':
         elev = np.ones((100, 100)) * 2000
     elif catchment == 'north_facing':
@@ -36,13 +36,17 @@ for catchment in ['flat_2000', 'north_facing', 'south_facing', 'bell_4000', 'bel
         sigma, mu = 0.25, 0.0
         g = np.exp(-((d - mu) ** 2 / (2.0 * sigma ** 2)))
         elev = g * 2000
+    elif catchment == 'real':
+        input_dem = 'nztm250m'
+        nc_file = netCDF4.Dataset('P:/Projects/DSC-Snow/runs/idealised/met_inp_{}_{}_{}_origin{}.nc'.format(catchment, input_dem, 2016, origin))
+        elev = nc_file.variables['elevation'][:]
     # assume a square, axis-oriented grid
     gx, gy = np.gradient(elev, 250.0)
 
     # write out the topographic info to netcdf file
     output_dem = 'nztm250m'  # identifier for output dem
     data_id = '{}_{}'.format(catchment, output_dem)  # name to identify the output data
-    out_file = 'P:/Projects/DSC-Snow/runs/idealised/{}_topo_no_ice_origintopleft.nc'.format(data_id)
+    out_file = 'P:/Projects/DSC-Snow/runs/idealised/{}_topo_no_ice_origin{}.nc'.format(data_id,origin)
 
     file_out = netCDF4.Dataset(out_file, 'w')
     # nc_common_attr(file_out, JONO, title='topographic fields for snow model',source='prep_dem2nc.py')
