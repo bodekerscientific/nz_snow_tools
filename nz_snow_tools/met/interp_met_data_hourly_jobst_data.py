@@ -23,10 +23,10 @@ from nz_snow_tools.util.write_fsca_to_netcdf import write_nztm_grids_to_netcdf, 
 
 from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, interpolate_met, daily_to_hourly_temp_grids, daily_to_hourly_swin_grids
 
-def load_jobst(variable, dts_to_take, nc_file_in, mask_dem):
 
-    nc_file = nc.Dataset(nc_file_in + '01-Jan-{}to31-dec-{}.nc'.format(dts_to_take[0].year,dts_to_take[0].year))
-    #nc_datetimes = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
+def load_jobst(variable, dts_to_take, nc_file_in, mask_dem):
+    nc_file = nc.Dataset(nc_file_in + '01-Jan-{}to31-dec-{}.nc'.format(dts_to_take[0].year, dts_to_take[0].year))
+    # nc_datetimes = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
     data = nc_file.variables[variable][:]
     # the data is in a funny grid - need to swap last two axes, then flip to align with vcsn grid
 
@@ -38,9 +38,8 @@ def load_jobst(variable, dts_to_take, nc_file_in, mask_dem):
             hi_res_precip_trimmed.append(trimmed_precip)
         data = np.asarray(hi_res_precip_trimmed)
 
-    if variable in ['tmin','tmax']:
+    if variable in ['tmin', 'tmax']:
         data = data + 273.15
-
 
     return data
 
@@ -48,23 +47,24 @@ def load_jobst(variable, dts_to_take, nc_file_in, mask_dem):
 if __name__ == '__main__':
 
     # dem control
+    origin = 'topleft'  # orientation of output dem options are 'topleft' or 'bottomleft'. assume that input Dem is 'topleft'
     output_dem = 'nztm250m'  # identifier for output dem
     dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     # mask control
-    mask_dem = True  # boolean to set whether or not to mask the output dem
-    catchment = 'Clutha'
-    mask_created = True  # boolean to set whether or not the mask has already been created
+    mask_dem = True  # boolean to set whether or not to mask the output dem - assume mask is bottom left
+    catchment = 'Nevis'
+    mask_created = True  # boolean to set whether or not the mask has already been created - assume mask is bottom left
     mask_folder = 'T:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
         catchment)  # shapefile containing polyline or polygon of catchment in WGS84. Not needed if mask_created==True
     # time control
     years_to_take = range(2000, 2016 + 1)  # range(2001, 2013 + 1)
-
+    ta_version = 'jobst_ucc'
     # input met data
-    nc_file_rain = 'Z:/JOBST_met_data/PRECIP_WITH_UCC/CLUTHA_PRECIP_250m_' # provide only partial filename up to 01-Jan-2000to31-dec-2000
+    nc_file_rain = 'Z:/JOBST_met_data/PRECIP_WITH_UCC/CLUTHA_PRECIP_250m_'  # provide only partial filename up to 01-Jan-2000to31-dec-2000
     nc_file_tmax = 'Z:/JOBST_met_data/Tmax/CLUTHA_Tmax_250m_'
     nc_file_tmin = 'Z:/JOBST_met_data/Tmin/CLUTHA_Tmin_250m_'
-    nc_file_srad = 'T:/sync_to_data/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    nc_file_srad = 'Z:/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
 
     # output met data
     met_out_folder = 'T:/DSC-Snow/input_data_hourly'
@@ -73,16 +73,22 @@ if __name__ == '__main__':
 
     # set up input and output DEM for processing
     # output DEM
-    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
+    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file, origin=origin)
     data_id = '{}_{}'.format(catchment, output_dem)  # name to identify the output data
     if mask_dem == True:
         # Get the masks for the individual regions of interest
         if mask_created == True:  # load precalculated mask
             mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, output_dem))
+            if origin == 'topleft':
+                mask = np.flipud(mask)
         else:  # create mask and save to npy file
             # masks = get_masks() #TODO set up for multiple masks
             mask = create_mask_from_shpfile(lat_array, lon_array, mask_shpfile)
+            if origin == 'topleft':  # flip to save as bottom left
+                mask = np.flipud(mask)
             np.save(mask_folder + '/{}_{}.npy'.format(catchment, output_dem), mask)
+            if origin == 'topleft':  # flip back to topleft
+                mask = np.flipud(mask)
         # Trim down the number of latitudes requested so it all stays in memory
         lats, lons, elev, northings, eastings = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
         _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
@@ -127,13 +133,13 @@ if __name__ == '__main__':
 
         if mask_dem:
             hi_res_precip[:, trimmed_mask == False] = np.nan
-            hi_res_max_temp[:,trimmed_mask==False] = np.nan
+            hi_res_max_temp[:, trimmed_mask == False] = np.nan
             hi_res_min_temp[:, trimmed_mask == False] = np.nan
             hi_res_sw_rad[:, trimmed_mask == False] = np.nan
 
         # process and write
         hourly_dt = np.asarray(make_regular_timeseries(start_dt + dt.timedelta(hours=1), finish_dt + dt.timedelta(days=1), 3600))
-        out_nc_file = setup_nztm_grid_netcdf(met_out_folder + '/met_inp_{}_{}_jobst_ucc.nc'.format(data_id, year_to_take),
+        out_nc_file = setup_nztm_grid_netcdf(met_out_folder + '/met_inp_{}_{}_{}_{}.nc'.format(data_id, year_to_take, ta_version, origin),
                                              None, ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
                                              hourly_dt, northings, eastings, lats, lons, elev)
         day_weightings = []
@@ -163,5 +169,4 @@ if __name__ == '__main__':
             day_weightings.extend(day_weightings_1)
         out_nc_file.close()
 
-        pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_{}_daywts_jobst_ucc.pkl'.format(data_id, year_to_take), 'wb'), -1)
-
+        pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_{}_{}_{}_daywts.pkl'.format(data_id, year_to_take, ta_version, origin), 'wb'), -1)

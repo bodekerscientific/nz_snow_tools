@@ -242,12 +242,13 @@ def load_new_vscn(variable, dt_out, nc_file_in, point=None, nc_opt=False, single
 if __name__ == '__main__':
 
     # dem control
+    origin = 'topleft'  # orientation of output dem options are 'topleft' or 'bottomleft'. assume that input Dem is 'topleft'
     output_dem = 'nztm250m'  # identifier for output dem
     dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     # mask control
-    mask_dem = True  # boolean to set whether or not to mask the output dem
+    mask_dem = True  # boolean to set whether or not to mask the output dem - assume mask is bottom left
     catchment = 'Nevis'
-    mask_created = True  # boolean to set whether or not the mask has already been created
+    mask_created = True  # boolean to set whether or not the mask has already been created - assume mask is bottom left
     mask_folder = 'T:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
         catchment)  # shapefile containing polyline or polygon of catchment in WGS84. Not needed if mask_created==True
@@ -256,12 +257,15 @@ if __name__ == '__main__':
     hydro_years_to_take = range(2000, 2016 + 1)  # range(2001, 2013 + 1)
     save_by_timestep = False  # save one timestep per file? Needed for Fortran version of dsc_snow, only works with compute_by_day==False
     compute_by_day = True  # only compute hourly values one day at a time? Useful for large grids, as not enough memory to compute for whole grid at once.
+    ta_version = 'norton'  # options for temperature vcsn and norton
     # input met data
     nc_file_rain = 'Z:/newVCSN/rain_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
-    nc_file_tmax = 'Z:/newVCSN/tmax_N2_1980010100_2017073100_south-island_p05_daily.nc'
-    nc_file_tmin = 'Z:/newVCSN/tmin_N2_1980010100_2017073100_south-island_p05_daily.nc'
-    # nc_file_tmax = 'T:/newVCSN/tmax_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
-    # nc_file_tmin = 'T:/newVCSN/tmin_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+    if ta_version == 'norton':
+        nc_file_tmax = 'Z:/newVCSN/tmax_N2_1980010100_2017073100_south-island_p05_daily.nc'
+        nc_file_tmin = 'Z:/newVCSN/tmin_N2_1980010100_2017073100_south-island_p05_daily.nc'
+    elif ta_version == 'vcsn':
+        nc_file_tmax = 'Z:/newVCSN/tmax_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
+        nc_file_tmin = 'Z:/newVCSN/tmin_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
     nc_file_srad = 'Z:/newVCSN/srad_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
     # output met data
     met_out_folder = 'T:/DSC-Snow/input_data_hourly'
@@ -270,16 +274,22 @@ if __name__ == '__main__':
 
     # set up input and output DEM for processing
     # output DEM
-    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
+    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file, origin=origin)
     data_id = '{}_{}'.format(catchment, output_dem)  # name to identify the output data
     if mask_dem == True:
         # Get the masks for the individual regions of interest
         if mask_created == True:  # load precalculated mask
             mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, output_dem))
+            if origin == 'topleft':
+                mask = np.flipud(mask)
         else:  # create mask and save to npy file
             # masks = get_masks() #TODO set up for multiple masks
             mask = create_mask_from_shpfile(lat_array, lon_array, mask_shpfile)
+            if origin == 'topleft':  # flip to save as bottom left
+                mask = np.flipud(mask)
             np.save(mask_folder + '/{}_{}.npy'.format(catchment, output_dem), mask)
+            if origin == 'topleft':  # flip back to topleft
+                mask = np.flipud(mask)
         # Trim down the number of latitudes requested so it all stays in memory
         lats, lons, elev, northings, eastings = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
         _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
@@ -329,7 +339,7 @@ if __name__ == '__main__':
         # make all the data outside catchment nan to save space
         if mask_dem:
             hi_res_precip[:, trimmed_mask == False] = np.nan
-            hi_res_max_temp[:,trimmed_mask==False] = np.nan
+            hi_res_max_temp[:, trimmed_mask == False] = np.nan
             hi_res_min_temp[:, trimmed_mask == False] = np.nan
             hi_res_sw_rad[:, trimmed_mask == False] = np.nan
 
@@ -339,7 +349,7 @@ if __name__ == '__main__':
             if hydro_years == True:
                 outfile = met_out_folder + '/met_inp_{}_hy{}.nc'.format(data_id, hydro_year_to_take)
             else:
-                outfile = met_out_folder + '/met_inp_{}_{}_norton.nc'.format(data_id, hydro_year_to_take)
+                outfile = met_out_folder + '/met_inp_{}_{}_{}_{}.nc'.format(data_id, hydro_year_to_take, ta_version, origin)
 
             out_nc_file = setup_nztm_grid_netcdf(outfile, None, ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
                                                  hourly_dt, northings, eastings, lats, lons, elev)
@@ -372,7 +382,8 @@ if __name__ == '__main__':
             if hydro_years == True:
                 pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_hy{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
             else:
-                pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_{}_daywts_norton.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
+                pickle.dump(day_weightings,
+                            open(met_out_folder + '/met_inp_{}_{}_{}_{}_daywts.pkl'.format(data_id, hydro_year_to_take, ta_version, origin), 'wb'), -1)
 
         else:  # compute all the values then write (takes too much memory for large grids)
             # Do the temporal downsampling
