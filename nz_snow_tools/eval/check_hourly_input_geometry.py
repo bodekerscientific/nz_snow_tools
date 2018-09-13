@@ -3,7 +3,9 @@ import netCDF4 as nc
 import numpy as np
 import matplotlib.pylab as plt
 #f326c54 # without TOA hack
-nc_file = nc.Dataset(r"T:\DSC-Snow\runs\output\nevis_2D_test_erebus\nevis_2D_test_erebus26_norton_f326c54_snow_zenith.nc") # with zentih hack
+nc_file = nc.Dataset(r"P:\Projects\DSC-Snow\runs\idealised\snow_out_2016_dembell_4000_metflat_2000_hourly.nc") #idealised
+#nc_file = nc.Dataset(r"T:\DSC-Snow\runs\output\nevis_2D_test_erebus\nevis_2D_test_erebus26_norton_9825edc_snow_zenith.nc") # with azumith hack
+#nc_file = nc.Dataset(r"T:\DSC-Snow\runs\output\nevis_2D_test_erebus\nevis_2D_test_erebus26_norton_f326c54_snow_zenith.nc") # with zentih hack
 #nc_file = nc.Dataset(r"T:\DSC-Snow\runs\output\nevis_2D_test_erebus\nevis_2D_test_erebus26_norton_f326c54_snow.nc") # without TOA hack
 # nc_file = nc.Dataset(r"T:\DSC-Snow\runs\output\nevis_2D_test_erebus\nevis_2D_test_erebus26_norton_425a1d2_snow.nc") # TOA hack to check TOA rad vs measured
 # nc_file = nc.Dataset(r"T:\DSC-Snow\runs\output\nevis_2D_test_erebus\nevis_2D_test_erebus26_norton_5bebe0e_snow.nc")
