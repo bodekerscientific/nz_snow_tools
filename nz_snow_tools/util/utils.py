@@ -347,9 +347,9 @@ def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, ex
     # create coordinates
     x_centres = np.arange(extent_w + resolution / 2, extent_e, resolution)
     y_centres = np.arange(extent_s + resolution / 2, extent_n, resolution)
-    y_array, x_array = np.meshgrid(y_centres, x_centres, indexing='ij') # this makes an array with northings and eastings increasing
     if origin == 'topleft':
-        y_array= np.flipud(y_array) # flips so that northings decrease (i.e. like a map)
+        y_centres = y_centres[::-1]
+    y_array, x_array = np.meshgrid(y_centres, x_centres, indexing='ij') # this makes an array with northings and eastings increasing
     lat_array, lon_array = nztm_to_wgs84(y_array, x_array)
     # plot to check the dem
     # plt.imshow(nztm_dem, origin=0, interpolation='none', cmap='terrain')
