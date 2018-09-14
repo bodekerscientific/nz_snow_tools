@@ -24,7 +24,7 @@ from nz_snow_tools.util.write_fsca_to_netcdf import write_nztm_grids_to_netcdf, 
 from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, interpolate_met, daily_to_hourly_temp_grids, daily_to_hourly_swin_grids
 
 
-def load_jobst(variable, dts_to_take, nc_file_in, mask_dem):
+def load_jobst(variable, dts_to_take, nc_file_in, mask_dem,origin):
     nc_file = nc.Dataset(nc_file_in + '01-Jan-{}to31-dec-{}.nc'.format(dts_to_take[0].year, dts_to_take[0].year))
     # nc_datetimes = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
     data = nc_file.variables[variable][:]
@@ -34,7 +34,10 @@ def load_jobst(variable, dts_to_take, nc_file_in, mask_dem):
     if mask_dem == True:
         hi_res_precip_trimmed = []
         for precip in data:
-            _, _, trimmed_precip, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, np.flipud(np.transpose(precip)), y_centres, x_centres)
+            if origin == 'topleft':
+                _, _, trimmed_precip, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, np.transpose(precip), y_centres, x_centres)
+            elif origin == 'bottomleft':
+                _, _, trimmed_precip, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, np.flipud(np.transpose(precip)), y_centres, x_centres)
             hi_res_precip_trimmed.append(trimmed_precip)
         data = np.asarray(hi_res_precip_trimmed)
 
@@ -126,9 +129,9 @@ if __name__ == '__main__':
         finish_dt = dts_to_take[-1]
 
         # interpolate data to fine grid
-        hi_res_precip = load_jobst('precipitation', dts_to_take, nc_file_rain, mask_dem)
-        hi_res_max_temp = load_jobst('tmax', dts_to_take, nc_file_tmax, mask_dem)
-        hi_res_min_temp = load_jobst('tmin', dts_to_take, nc_file_tmin, mask_dem)
+        hi_res_precip = load_jobst('precipitation', dts_to_take, nc_file_rain, mask_dem,origin=origin)
+        hi_res_max_temp = load_jobst('tmax', dts_to_take, nc_file_tmax, mask_dem,origin=origin)
+        hi_res_min_temp = load_jobst('tmin', dts_to_take, nc_file_tmin, mask_dem,origin=origin)
         hi_res_sw_rad = interpolate_met(sw_rad_daily, 'srad', vcsn_lons, vcsn_lats, np.ma.fix_invalid(vcsn_elev).data, lons, lats, elev)
 
         if mask_dem:
