@@ -75,13 +75,15 @@ y2 = 703 + 50
 x1 = 133 - 50
 x2 = 133 + 50
 assert climate_file.variables['easting'][x1:x2][:][0] == eastings[0]
-assert climate_file.variables['northing'][y1:y2][:][0] == northings[0]
+assert climate_file.variables['northing'][y1:y2][:][-1] == northings[0]
 
 t_grid = np.flipud(climate_file.variables['air_temperature'][:, y1:y2, x1:x2])
 p_grid = np.flipud(climate_file.variables['precipitation_amount'][:, y1:y2, x1:x2])
 sw_grid = np.flipud(climate_file.variables['surface_downwelling_shortwave_flux'][:, y1:y2, x1:x2])
 elev = np.flipud(climate_file.variables['elevation'][y1:y2, x1:x2])
 
+plt.plot(elev)
+plt.show()
 output_dem = 'nztm250m'  # identifier for output dem
 data_id = '{}_{}'.format(catchment, output_dem)  # name to identify the output data
 out_file = 'P:/Projects/DSC-Snow/runs/idealised/met_inp_{}_{}_origin{}.nc'.format(data_id, 2016, origin)

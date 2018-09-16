@@ -18,7 +18,7 @@ config_id_out = '5'  # string identifying suffix to the namelist configuration f
 path_to_namelist = projects + '/DSC-Snow/runs/input/clutha_nztm250m_erebus/ddf_config_{}.txt'.format(config_id_in)
 years = [2016]
 
-fig1 = plt.figure()
+#fig1 = plt.figure()
 
 # ax = fig1.subplots(2,2)
 # axs = ax.flatten()
@@ -39,7 +39,7 @@ met_inps = ['flat_2000', 'bell_4000', 'north_facing', 'south_facing' ]
 catchment = 'real'#'bell_4000'
 met_inp = 'real'#'flat_2000'
 topo_file = nc.Dataset(r"P:\Projects\DSC-Snow\runs\idealised\{}_nztm250m_topo_no_ice_origin{}.nc".format(catchment,origin))
-output_file = nc.Dataset(r"P:\Projects\DSC-Snow\runs\idealised\snow_out_2016_dem{}_met{}_5_12hourly.nc".format(catchment,met_inp))
+output_file = nc.Dataset(r"P:\Projects\DSC-Snow\runs\idealised\snow_out_2016_dem{}_met{}_5_12hourly_origintopleft.nc".format(catchment,met_inp))
 nc_dt = nc.num2date(output_file.variables['time'][:], output_file.variables['time'].units)
 # abl = output_file.variables['ablation_total'][:]
 # acc = output_file.variables['accumulation_total'][:]
@@ -55,8 +55,15 @@ swe = output_file.variables['snow_water_equivalent'][:]
 #     plt.savefig(projects + '/DSC-Snow/runs/idealised/p_swnet{}_{}_dem{}_met{}_{}.png'.format(i,2016, catchment, met_inp, config_id_out),dpi=300)
 #     plt.close()
 
+plt.imshow(topo_file.variables["DEM"][:])
+
+topo_file_clutha = nc.Dataset(r"P:\Projects\DSC-Snow\runs\input_DEM\Clutha_nztm250m_topo_no_ice_origintopleft.nc")
 plt.figure()
-plt.imshow(np.mean(swe, axis=0))
+plt.imshow(topo_file_clutha.variables["DEM"][:])
+
+plt.figure()
+
+plt.imshow(np.mean(swe, axis=0))#,origin=0
 plt.colorbar()
 plt.contour(topo_file.variables['DEM'][:], range(0, 4000, 500), colors='k', linewidths=0.5)
 plt.show()
