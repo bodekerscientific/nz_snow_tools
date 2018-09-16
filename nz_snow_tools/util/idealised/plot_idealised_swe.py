@@ -57,9 +57,9 @@ swe = output_file.variables['snow_water_equivalent'][:]
 
 plt.imshow(topo_file.variables["DEM"][:])
 
-topo_file_clutha = nc.Dataset(r"P:\Projects\DSC-Snow\runs\input_DEM\Clutha_nztm250m_topo_no_ice_origintopleft.nc")
-plt.figure()
-plt.imshow(topo_file_clutha.variables["DEM"][:])
+# topo_file_clutha = nc.Dataset(r"P:\Projects\DSC-Snow\runs\input_DEM\Clutha_nztm250m_topo_no_ice_origintopleft.nc")
+# plt.figure()
+# plt.imshow(topo_file_clutha.variables["DEM"][:])
 
 plt.figure()
 
