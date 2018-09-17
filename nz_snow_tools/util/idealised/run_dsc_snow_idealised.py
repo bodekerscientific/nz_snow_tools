@@ -17,7 +17,7 @@ config_id_out = '5'  # string identifying suffix to the namelist configuration f
 path_to_namelist = projects + '/DSC-Snow/runs/input/clutha_nztm250m_erebus/ddf_config_{}.txt'.format(config_id_in)
 years = [2016]
 
-met_inps = ['flat_2000', 'north_facing', 'south_facing', 'bell_4000', 'real']
+met_inps = ['flat_2000', 'north_facing', 'south_facing', 'bell_4000', 'bell_2000', 'real']
 
 for met_inp in met_inps:
     for year in years:
