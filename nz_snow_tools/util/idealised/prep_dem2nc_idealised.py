@@ -17,13 +17,17 @@ origin = 'topleft'  # or 'bottomleft'
 _, eastings, northings, lats, lons = setup_nztm_dem(dem_file=None, extent_w=1.235e6, extent_e=1.26e6, extent_n=5.05e6, extent_s=5.025e6, resolution=250,
                                                     origin=origin)
 
-for catchment in ['flat_2000', 'north_facing', 'south_facing', 'bell_4000', 'bell_2000','real']:
+for catchment in ['flat_2000', 'north_facing', 'south_facing', 'bell_4000', 'bell_2000', 'real']:
     if catchment == 'flat_2000':
         elev = np.ones((100, 100)) * 2000
     elif catchment == 'north_facing':
         elev = np.linspace(4000, 0, 100)[:, np.newaxis] * np.ones((100, 100))
+        if origin == 'topleft':
+            np.flipud(elev)
     elif catchment == 'south_facing':
         elev = np.linspace(0, 4000, 100)[:, np.newaxis] * np.ones((100, 100))
+        if origin == 'topleft':
+            np.flipud(elev)
     elif catchment == 'bell_4000':
         x, y = np.meshgrid(np.linspace(-1, 1, 100), np.linspace(-1, 1, 100))
         d = np.sqrt(x * x + y * y)
