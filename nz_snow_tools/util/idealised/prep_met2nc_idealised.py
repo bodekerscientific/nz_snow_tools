@@ -14,7 +14,7 @@ from nz_snow_tools.util.utils import setup_nztm_dem
 from nz_snow_tools.util.write_fsca_to_netcdf import setup_nztm_grid_netcdf
 
 lapse = -0.005
-climate_file = nc.Dataset(r"T:\DSC-Snow\input_data_hourly\met_inp_Clutha_nztm250m_2016_norton.nc")
+climate_file = nc.Dataset(r"T:\DSC-Snow\input_data_hourly\met_inp_Clutha_nztm250m_2016_norton_topleft.nc")
 origin = 'topleft' # origin of new DEM surface
 
 # create dem surface

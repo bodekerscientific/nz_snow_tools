@@ -17,24 +17,6 @@ config_id_out = '5'  # string identifying suffix to the namelist configuration f
 path_to_namelist = projects + '/DSC-Snow/runs/input/clutha_nztm250m_erebus/ddf_config_{}.txt'.format(config_id_in)
 years = [2016]
 
-fig1 = plt.figure()
-
-# ax = fig1.subplots(2,2)
-# axs = ax.flatten()
-
-met_inps = ['flat_2000', 'bell_4000', 'north_facing', 'south_facing' ]
-
-# for met_inp in met_inps:
-#     for year in years:
-#         for catchment in met_inps:
-#
-#             # paths to files
-#             topo_file = nc.Dataset(projects + '/DSC-Snow/runs/idealised/{}_nztm250m_topo_no_ice.nc'.format(catchment))
-#             climate_file = nc.Dataset(projects + '/DSC-Snow/runs/idealised/met_inp_{}_nztm250m_{}.nc'.format(met_inp, year))
-#             output_file = nc.Dataset(projects + '/DSC-Snow/runs/idealised/snow_out_{}_dem{}_met{}_{}_hourly.nc'.format(year, catchment, met_inp, config_id_out))
-#             namelist_file = projects + '/DSC-Snow/runs/idealised/ddf_config_{}_dem{}_met{}_{}.txt'.format(year, catchment, met_inp, config_id_out)
-#
-
 catchment = 'bell_4000'
 met_inp = 'flat_2000'
 topo_file = nc.Dataset(r"P:\Projects\DSC-Snow\runs\idealised\bell_4000_nztm250m_topo_no_ice.nc")
