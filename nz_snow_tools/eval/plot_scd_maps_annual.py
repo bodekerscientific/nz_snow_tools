@@ -26,7 +26,7 @@ output_subcatchments = ['Clutha', 'Wilkin', 'Wanaka northern inflows', 'Upper Da
 mask_folder = 'T:/DSC-Snow/Masks'
 
 # run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
-run_ids = ['norton_4', 'jobst_ucc_4', 'vcsn_4']  # ,
+run_ids = [ 'jobst_ucc_5_topleft','norton_5_topleft', 'vcsn_5_topleft']  # ,
 
 for run_id in run_ids:
     ann = pickle.load(

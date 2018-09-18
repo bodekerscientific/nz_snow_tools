@@ -9,13 +9,15 @@ import matplotlib.pylab as plt
 import datetime as dt
 import numpy as np
 
+origin = 'topleft'
 # infile = r"P:\Projects\DSC-Snow\runs\output\nevis_brew_hy12_new_units_test\nevis_brew_hy12_new_units_test18.nc"
 # nc_file18 = nc.Dataset(infile)
 # abl_18 = nc_file18.variables['ablation_total'][:]
 # acc_18 = nc_file18.variables['accumulation_total'][:]
 # swe_18 = nc_file18.variables['snow_water_equivalent'][:]
 # water_18 = nc_file18.variables['water_output_total'][:]
-infile = r"T:\DSC-Snow\runs\output\clutha_nztm250m_erebus\Clutha_nztm250m_2000_jobst_ucc_4.nc"
+infile = r"T:\DSC-Snow\runs\output\clutha_nztm250m_erebus\Clutha_nztm250m_2000_jobst_ucc_5_topleft.nc"
+#infile = r"T:\DSC-Snow\runs\output\clutha_nztm250m_erebus\Clutha_nztm250m_2000_jobst_ucc_4.nc"
 #infile = r"P:\Projects\DSC-Snow\runs\output\clutha_2D_test_erebus\Clutha_2D_2016_jobst_ucc.nc"
 # infile = r"P:\Projects\DSC-Snow\runs\output\nevis_brew_hy12_new_units_test\nevis_brew_hy12_new_units_test17.nc"
 nc_file17 = nc.Dataset(infile)
@@ -68,9 +70,12 @@ plt.plot(np.nanmean(swe_17, axis=(1, 2)), label='snow storage')
 # plot mean swe with contours over it
 plt.figure()
 #nc_file = nc.Dataset(r"T:\DSC-Snow\runs\output\nevis_2D_test_erebus\nevis_2D_test_erebus26_norton_9825edc_snow_zenith.nc") # with azumith hack
-topo_file = nc.Dataset(r"P:\Projects\DSC-Snow\runs\input_DEM\Clutha_nztm250m_topo_no_ice.nc")
-plt.imshow(np.mean(nc_file17.variables['snow_water_equivalent'][:],axis=0),origin=0)
+topo_file = nc.Dataset(r"P:\Projects\DSC-Snow\runs\input_DEM\Clutha_nztm250m_topo_no_ice_origin{}.nc".format(origin))
+if origin == 'topleft':
+    plt.imshow(np.mean(nc_file17.variables['snow_water_equivalent'][:],axis=0),cmap=plt.cm.Blues_r)#
+else:
+    plt.imshow(np.mean(nc_file17.variables['snow_water_equivalent'][:],axis=0),cmap=plt.cm.Blues_r,origin=0)
 plt.colorbar()
-plt.contour(topo_file.variables['DEM'][:],range(0,3000,100),colors='k',linewidths=0.5)
+plt.contour(topo_file.variables['DEM'][:],range(0,3000,500),colors='k',linewidths=0.5)
 
 plt.show()
