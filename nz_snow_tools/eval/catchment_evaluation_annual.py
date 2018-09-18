@@ -18,7 +18,7 @@ from nz_snow_tools.eval.catchment_evaluation import *
 from nz_snow_tools.util.utils import convert_date_hydro_DOY, trim_lat_lon_bounds, setup_nztm_dem
 
 
-def load_dsc_snow_output_annual(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder, dsc_snow_dem_folder, run_opt):
+def load_dsc_snow_output_annual(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder, dsc_snow_dem_folder, run_opt,origin='bottomleft'):
     """
     load output from dsc_snow model previously run from linux VM
     :param catchment: string giving catchment area to run model on
@@ -35,12 +35,22 @@ def load_dsc_snow_output_annual(catchment, output_dem, hydro_year_to_take, dsc_s
     st_swe = dsc_snow_output.variables['snow_water_equivalent'][:]
     st_melt_total = dsc_snow_output.variables['ablation_total'][:]
     st_acc_total = dsc_snow_output.variables['accumulation_total'][:]
+
+    if origin == 'topleft':
+        st_swe = np.flip(st_swe,axis=1)
+        st_melt_total = np.flip(st_melt_total, axis=1)
+        st_acc_total = np.flip(st_acc_total, axis=1)
+
     # convert to daily sums
     st_melt = np.concatenate((st_melt_total[:1, :], np.diff(st_melt_total, axis=0)))
     st_acc = np.concatenate((st_melt_total[:1, :], np.diff(st_acc_total, axis=0)))
+    if origin == 'topleft':
+        topo_file = nc.Dataset(dsc_snow_dem_folder + '/{}_topo_no_ice_origintopleft.nc'.format(data_id), 'r')
+        mask = np.flipud(topo_file.variables['catchment'][:].astype('int'))
+    else:
+        topo_file = nc.Dataset(dsc_snow_dem_folder + '/{}_topo_no_ice.nc'.format(data_id), 'r')
+        mask = topo_file.variables['catchment'][:].astype('int')
 
-    topo_file = nc.Dataset(dsc_snow_dem_folder + '/{}_topo_no_ice.nc'.format(data_id), 'r')
-    mask = topo_file.variables['catchment'][:].astype('int')
     mask = mask != 0  # convert to boolean
 
     # mask out values outside of catchment
@@ -84,13 +94,14 @@ def load_subset_modis_annual(catchment, output_dem, year_to_take, modis_folder, 
 
 if __name__ == '__main__':
 
+    origin = 'topleft'
     which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009' or 'dsc_snow'# future will include 'fsm'
     clark2009run = True  # boolean specifying if the run already exists
     dsc_snow_opt = 'fortran'  # string identifying which version of the dsc snow model to use output from 'python' or 'fortran'
     dsc_snow_opt2 = 'netCDF'  # string identifying which version of output from python model 'netCDF' of 'pickle'
     catchment = 'Clutha'  # string identifying catchment modelled
     output_dem = 'nztm250m'  # identifier for output dem
-    run_id = 'jobst_ucc_4'  # string identifying fortran dsc_snow run. everything after the year
+    run_id = 'jobst_ucc_5_topleft'  # string identifying fortran dsc_snow run. everything after the year
     years_to_take = range(2000, 2016 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered (mm w.e)
@@ -219,7 +230,7 @@ if __name__ == '__main__':
             if dsc_snow_opt == 'fortran':
                 # load previously run simulations from netCDF
                 st_swe, st_melt, st_acc, out_dt, mask = load_dsc_snow_output_annual(catchment, output_dem, year_to_take, dsc_snow_output_folder,
-                                                                                    dsc_snow_dem_folder, run_id)
+                                                                                    dsc_snow_dem_folder, run_id,origin=origin)
             elif dsc_snow_opt == 'python':
                 if dsc_snow_opt2 == 'netCDF':
                     st_swe, st_melt, st_acc, out_dt = load_dsc_snow_output_python_otf(catchment, output_dem, year_to_take, dsc_snow_output_folder)

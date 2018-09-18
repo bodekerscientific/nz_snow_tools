@@ -247,7 +247,7 @@ if __name__ == '__main__':
     dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     # mask control
     mask_dem = True  # boolean to set whether or not to mask the output dem - assume mask is bottom left
-    catchment = 'Nevis'
+    catchment = 'Clutha'
     mask_created = True  # boolean to set whether or not the mask has already been created - assume mask is bottom left
     mask_folder = 'T:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(
@@ -257,7 +257,7 @@ if __name__ == '__main__':
     hydro_years_to_take = range(2000, 2016 + 1)  # range(2001, 2013 + 1)
     save_by_timestep = False  # save one timestep per file? Needed for Fortran version of dsc_snow, only works with compute_by_day==False
     compute_by_day = True  # only compute hourly values one day at a time? Useful for large grids, as not enough memory to compute for whole grid at once.
-    ta_version = 'norton'  # options for temperature vcsn and norton
+    ta_version = 'vcsn'  # options for temperature vcsn and norton
     # input met data
     nc_file_rain = 'Z:/newVCSN/rain_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc'
     if ta_version == 'norton':
