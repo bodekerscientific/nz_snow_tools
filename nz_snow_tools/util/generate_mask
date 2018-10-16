@@ -17,7 +17,7 @@ from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, in
 
 catchments = ['Clutha','Wilkin','Wanaka northern inflows','Upper Dart','Rees', 'Shotover', 'Teviot','Taieri','Upper Matukituki','Roaring Meg','Pomahaka','Motutapu',\
               'Moonlight Creek','Matukituki', 'Manuherikia','Luggate Creek', 'Lochy','Lindis',\
-              'Kawarau','Greenstone','Hawea','Fraser','Clutha above Clyde Dam','Cardrona','Arrow' ,'Bannockburn Creek'] # string identifying the catchment to run. must match the naming of the catchment shapefile
+              'Kawarau','Greenstone','Hawea','Fraser','Clutha above Clyde Dam','Cardrona','Arrow' ,'Bannockburn Creek', 'Nevis'] # string identifying the catchment to run. must match the naming of the catchment shapefile
 
 output_dem = 'nztm250m'  # identifier for output dem
 dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
