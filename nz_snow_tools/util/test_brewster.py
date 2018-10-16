@@ -5,7 +5,7 @@ import matplotlib.pylab as plt
 projects = 'P:/Projects'
 # testing the brewster dataset
 
-# dem is 208 by 175, If brewster point was 69,73 before, it is 139,73 with grid starting in north. slope = 7.13 and azimuth -157, elevation 1780
+# dem is 208 by 175, If brewster point was 69,73 before, it is 139,73 with grid starting in north. slope = 7.13 and azimuth -157, elevation 1783.5814
 
 output_file = nc.Dataset(r"P:\Projects\DSC-Snow\runs\test_brewster\snow_out_BrewsterGlacierHourly_Apr11_Mar12_origintopleft.nc")
 nc_dt = nc.num2date(output_file.variables['time'][:], output_file.variables['time'].units)

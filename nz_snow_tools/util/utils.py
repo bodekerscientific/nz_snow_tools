@@ -1,7 +1,7 @@
 """
 a collection of utilities to handle dates / grids etc to support snow model
 """
-
+from __future__ import division
 import datetime
 import numpy as np
 import shapefile
@@ -281,6 +281,27 @@ def trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centr
     return lats, lons, elev, northings, eastings
 
 
+def resample_to_fsca(snow_grid, rl):
+    """
+
+    :param snow_grid: grid of fractional or binary (0/1 snow)
+    :param rl: resample length - the number of grid cells in each direction to include in new fsca. e.g. 5  = 25 grid points to fsca
+    :return: fcsa = fractional snow covered area for the same area as snow_grid, but may be smaller if grid size is not a multiple of resample length
+    """
+    ny = snow_grid.shape[0]
+    nx = snow_grid.shape[1]
+    ny_out = ny // rl # integer divide to ensure fits
+    nx_out = nx // rl
+
+    fsca = np.zeros((ny_out, nx_out))
+
+    for i in range(ny_out):
+        for j in range(nx_out):
+            snow = snow_grid[i*rl:(i+1)*rl,j*rl:(j+1)*rl]
+            fsca[i,j] = np.sum(snow) / (rl*rl)
+
+    return fsca
+
 # misc
 
 def calc_toa(lat_ref, lon_ref, hourly_dt):
@@ -318,7 +339,7 @@ def calc_toa(lat_ref, lon_ref, hourly_dt):
     return SRtoa
 
 
-def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, extent_s=4.82e6, resolution=250,origin='bottomleft'):
+def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, extent_s=4.82e6, resolution=250, origin='bottomleft'):
     """
     load dem tif file. defaults to clutha 250 dem.
     :param dem_file: string specifying path to dem
@@ -332,7 +353,7 @@ def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, ex
     """
     if dem_file is not None:
         nztm_dem = Image.open(dem_file)
-        if origin=='bottomleft':
+        if origin == 'bottomleft':
             # np.array(nztm_dem).shape is (1240L, 800L) but origin is in NW corner. Move to SW to align with increasing Easting and northing.
             nztm_dem = np.flipud(np.array(nztm_dem))
         if origin == 'topleft':
@@ -349,7 +370,7 @@ def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, ex
     y_centres = np.arange(extent_s + resolution / 2, extent_n, resolution)
     if origin == 'topleft':
         y_centres = y_centres[::-1]
-    y_array, x_array = np.meshgrid(y_centres, x_centres, indexing='ij') # this makes an array with northings and eastings increasing
+    y_array, x_array = np.meshgrid(y_centres, x_centres, indexing='ij')  # this makes an array with northings and eastings increasing
     lat_array, lon_array = nztm_to_wgs84(y_array, x_array)
     # plot to check the dem
     # plt.imshow(nztm_dem, origin=0, interpolation='none', cmap='terrain')
@@ -425,3 +446,17 @@ def rmsd(y_sim, y_obs):
     rs = np.sqrt(np.mean((y_sim - y_obs) ** 2))
 
     return rs
+
+def mean_absolute_error(y_sim, y_obs):
+    """
+    calculate the mean absolute error
+
+    :param y_sim: series of simulated values
+    :param y_obs: series of observed values
+    :return:
+    """
+    assert y_sim.ndim == 1 and y_obs.ndim == 1 and len(y_sim) == len(y_obs)
+
+    mbd = np.sum(np.abs(y_sim - y_obs)) / len(y_sim)
+
+    return mbd
