@@ -21,8 +21,8 @@ if __name__ == '__main__':
     origin = 'topleft'
     catchment = 'Clutha'  # string identifying catchment modelled
     output_dem = 'nztm250m'  # identifier for output dem
-    run_id = 'jobst_ucc_5_topleft'  # string identifying fortran dsc_snow run. everything after the year
-    years_to_take = range(2001, 2016 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+    run_id = 'norton_5_-5_topleft'  # string identifying fortran dsc_snow run. everything after the year
+    years_to_take = range(2000, 2016 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     # modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
     dsc_snow_output_folder = 'T:/DSC-Snow/runs/output/clutha_nztm250m_erebus'
@@ -82,6 +82,13 @@ if __name__ == '__main__':
         # load previously run simulations from netCDF
         st_swe, st_melt, st_acc, out_dt, mask = load_dsc_snow_output_annual(catchment, output_dem, year_to_take, dsc_snow_output_folder,
                                                                             dsc_snow_dem_folder, run_id, origin=origin)
+
+        if year_to_take == 2000:
+            # cut so that first day corresponds to first MODIS obs on 24th Feb i.e. 2000-02-25 00:00:00
+            st_swe = st_swe[54:, ]
+            st_melt = st_melt[54:, ]
+            st_acc = st_acc[54:, ]
+            out_dt = out_dt[54:]
 
         st_sc = np.zeros(st_swe.shape, dtype=np.float32)
         st_sc[st_swe > model_swe_sc_threshold] = 100
