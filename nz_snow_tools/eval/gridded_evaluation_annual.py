@@ -15,10 +15,20 @@ from nz_snow_tools.eval.catchment_evaluation import *
 from nz_snow_tools.eval.catchment_evaluation_annual import load_dsc_snow_output_annual, load_subset_modis_annual
 from nz_snow_tools.util.utils import resample_to_fsca, nash_sut, mean_bias, rmsd, mean_absolute_error
 
+def plot_point(i,j,name,year):
+    plt.figure()
+    plt.plot(np.convolve(model_fsca_rs[:, i, j], np.ones((smooth_period,)) / smooth_period, mode='same'))
+    plt.plot(np.convolve(modis_fsca_rs[:, i, j], np.ones((smooth_period,)) / smooth_period, mode='same'))
+    plt.ylabel('fsca (%)')
+    plt.xlabel('day of year')
+    plt.title(name)
+    plt.savefig('P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus/plots/timeseries/timeseries_{}_{}_{}_{}.png'.format(name,year,smooth_period,tempchange))
+    plt.close()
+
 if __name__ == '__main__':
 
     rl = 4  # resample length (i.e. how many grid cells in each direction to resample.
-    smooth_period = 5  # number of days to smooth model data
+    smooth_period = 10  # number of days to smooth model data
     origin = 'topleft'
     catchment = 'Clutha'  # string identifying catchment modelled
     output_dem = 'nztm250m'  # identifier for output dem
@@ -35,7 +45,7 @@ if __name__ == '__main__':
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
     output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
 
-    for tempchange in range(-5,2,1):
+    for tempchange in range(-4,2,1):
         run_id = 'norton_5_{}_topleft'.format(tempchange)  # string identifying fortran dsc_snow run. everything after the year
 
         # read in modis and model data for one year
@@ -118,7 +128,7 @@ if __name__ == '__main__':
 
             for i in range(ny_out):
                 for j in range(nx_out):
-                    obs = modis_fsca_rs[:, i, j]
+                    obs = np.convolve(modis_fsca_rs[:, i, j], np.ones((smooth_period,)) / smooth_period, mode='same')
                     mod = np.convolve(model_fsca_rs[:, i, j], np.ones((smooth_period,)) / smooth_period, mode='same')
                     ns_array[i, j] = nash_sut(mod, obs)
                     mbd_array[i, j] = mean_bias(mod, obs)
@@ -134,6 +144,9 @@ if __name__ == '__main__':
             s_mae.append(mae_array)
             s_obs.append(modis_mean)
             s_mod.append(model_mean)
+
+            for i,j,name in zip([161,147,127,107,186,125],[83,102,59,88,21,34],['Pisa','Dunstan','Hector','Old Man','Earnslaw','Lochy']):
+                plot_point(i,j,name,year_to_take)
 
         ann = [s_obs, s_mod, s_ns, s_bias, s_rmse, s_mae]
         pickle.dump(ann, open(
