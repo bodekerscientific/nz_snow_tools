@@ -87,7 +87,7 @@ plt.xlabel('QM - SWnet - Qprecip')
 plt.ylabel('Vapour pressure (hPa)')
 plt.savefig(r'D:\Snow project\Oct2018 Results\qm_wo_sw_prc vs ea.png')
 
-plt.show()
+#plt.show()
 
 print(
 np.sum(qm_wo_sw_prc[qm>0])/sw_net.shape,# average positive melt energy from temp dep fluxes
@@ -132,16 +132,19 @@ plt.figure()
 plt.hexbin(qm_wo_sw_prc[np.logical_and(ta_q>0,qm_wo_sw_prc>0)],ta_q[np.logical_and(ta_q>0,qm_wo_sw_prc>0)])
 plt.plot(range(300),range(300),'b--')
 plt.ylabel('mod'),plt.xlabel('obs'),plt.title('ta_q vs qm_wo_sw_prc')
+plt.savefig(r'D:\Snow project\Oct2018 Results\qm_wo_sw_prc vs ta_q.png')
 
 plt.figure()
 plt.hexbin(qm_wo_sw_prc[np.logical_and(ea_q>0,qm_wo_sw_prc>0)],ea_q[np.logical_and(ea_q>0,qm_wo_sw_prc>0)])
 plt.ylabel('mod'),plt.xlabel('obs'),plt.title('ea_q vs qm_wo_sw_prc')
 plt.plot(range(300),range(300),'b--')
+plt.savefig(r'D:\Snow project\Oct2018 Results\qm_wo_sw_prc vs ea_q.png')
 
 plt.figure()
 plt.hist(qm_wo_sw_prc[np.logical_and(ta_pos>0.5,qm_wo_sw_prc>0)]/ta_pos[np.logical_and(ta_pos>0.5,qm_wo_sw_prc>0)],20)
-
-plt.show()
+plt.xlabel('ta_q_factor (W m-2 K-1)')
+plt.savefig(r'D:\Snow project\Oct2018 Results\ta_q_factor_hist.png')
+#plt.show()
 
 print(
 rmsd(qm_wo_sw_prc,ta_q),
