@@ -17,7 +17,7 @@ from nz_snow_tools.util.utils import resample_to_fsca, nash_sut, mean_bias, rmsd
 if __name__ == '__main__':
 
     rl = 4  # resample length (i.e. how many grid cells in each direction to resample.
-    smooth_period = 7  # number of days to smooth model data
+    smooth_period = 10  # number of days to smooth model data
     origin = 'topleft'
     catchment = 'Clutha'  # string identifying catchment modelled
     output_dem = 'nztm250m'  # identifier for output dem

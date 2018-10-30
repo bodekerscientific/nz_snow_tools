@@ -45,7 +45,7 @@ if __name__ == '__main__':
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
     output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
 
-    for tempchange in range(-4,2,1):
+    for tempchange in range(-5,2,1):
         run_id = 'norton_5_{}_topleft'.format(tempchange)  # string identifying fortran dsc_snow run. everything after the year
 
         # read in modis and model data for one year
