@@ -290,17 +290,18 @@ def resample_to_fsca(snow_grid, rl):
     """
     ny = snow_grid.shape[0]
     nx = snow_grid.shape[1]
-    ny_out = ny // rl # integer divide to ensure fits
+    ny_out = ny // rl  # integer divide to ensure fits
     nx_out = nx // rl
 
     fsca = np.zeros((ny_out, nx_out))
 
     for i in range(ny_out):
         for j in range(nx_out):
-            snow = snow_grid[i*rl:(i+1)*rl,j*rl:(j+1)*rl]
-            fsca[i,j] = np.sum(snow) / (rl*rl)
+            snow = snow_grid[i * rl:(i + 1) * rl, j * rl:(j + 1) * rl]
+            fsca[i, j] = np.sum(snow) / (rl * rl)
 
     return fsca
+
 
 # misc
 
@@ -447,6 +448,7 @@ def rmsd(y_sim, y_obs):
 
     return rs
 
+
 def mean_absolute_error(y_sim, y_obs):
     """
     calculate the mean absolute error
@@ -460,3 +462,19 @@ def mean_absolute_error(y_sim, y_obs):
     mbd = np.sum(np.abs(y_sim - y_obs)) / len(y_sim)
 
     return mbd
+
+
+def coef_determ(y_sim, y_obs):
+    """
+    calculate the coefficient of determination
+
+    :param y_sim: series of simulated values
+    :param y_obs: series of observed values
+    :return:
+    """
+    assert y_sim.ndim == 1 and y_obs.ndim == 1 and len(y_sim) == len(y_obs)
+
+    r = np.corrcoef(y_sim, y_obs)
+    r2 = r[0, 1] ** 2
+
+    return r2

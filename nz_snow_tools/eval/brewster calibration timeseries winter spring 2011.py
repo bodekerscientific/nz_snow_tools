@@ -13,7 +13,7 @@ import matplotlib.dates as mdates
 config = {}
 config['num_secs_output']=1800
 config['tacc'] = 274.16
-config['tmelt'] = 273.16
+config['tmelt'] = 274.16
 
 # clark2009 melt parameters
 config['mf_mean'] = 5.0
