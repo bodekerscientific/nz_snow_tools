@@ -12,6 +12,9 @@ import datetime as dt
 import matplotlib.dates as mdates
 
 outfolder = 'P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/TT_TF'
+ros = False
+ta_m_tt = False
+
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
@@ -81,8 +84,8 @@ config['a_ice'] = 0.42
 config['a_freshsnow'] = 0.90
 config['a_firn'] = 0.62
 config['alb_swe_thres'] = 20
-config['ros'] = True
-config['ta_m_tt'] = False # use tmelt as baseline when calculating degree days
+config['ros'] = ros
+config['ta_m_tt'] = ta_m_tt # use tmelt as baseline when calculating degree days
 
 # use measured albedo
 config['inp_alb'] = inp_dat[start_t:end_t, 16][:, np.newaxis] * np.ones(grid_size)
@@ -132,55 +135,54 @@ np.savetxt(outfolder + '/hourly_sfc_mbd_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(c
 np.savetxt(outfolder + '/hourly_sfc_rmsd_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),h_rmsd_array)
 
 
-plt.figure(figsize=[8,3])
+plt.figure(figsize=[8,12])
 
-plt.subplot(1,3,1)
-CS = plt.contour(tmelt_list,tf_list,ns_array)
+plt.subplot(4,3,1)
+CS = plt.contour(tmelt_list,tf_list,ns_array,levels=np.linspace(-1,1,21),cmap=plt.cm.winter, vmax=1,vmin=-1)
 plt.clabel(CS,inline=1, fontsize=10)
 plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.title('Nash-Sutcliffe')
-plt.tight_layout()
+plt.title('NS daily 2010')
 
-plt.subplot(1,3,2)
-CS = plt.contour(tmelt_list,tf_list,mbd_array)
+plt.subplot(4,3,2)
+CS = plt.contour(tmelt_list,tf_list,mbd_array,levels=np.linspace(-20,20,21),cmap=plt.cm.copper, vmax=20,vmin=-20)
 plt.clabel(CS,inline=1, fontsize=10)
 plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.title('MBD (sim-obs)')
+plt.title('MBD daily 2010')
 
-plt.subplot(1,3,3)
-CS = plt.contour(tmelt_list,tf_list,rmsd_array)
+plt.subplot(4,3,3)
+CS = plt.contour(tmelt_list,tf_list,rmsd_array,levels=np.linspace(10,30,21),cmap=plt.cm.winter_r, vmax=30,vmin=10)
 plt.clabel(CS,inline=1, fontsize=10)
 plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.title('RMSD')
-
-plt.tight_layout()
-plt.savefig(outfolder + '/daily_sfc_fit_metrics2010_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
-
-plt.close()
-plt.figure(figsize=[8,3])
-
-plt.subplot(1,3,1)
-CS = plt.contour(tmelt_list,tf_list,h_ns_array)
-plt.clabel(CS,inline=1, fontsize=10)
-plt.title('Nash-Sutcliffe')
-plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.tight_layout()
-
-plt.subplot(1,3,2)
-CS = plt.contour(tmelt_list,tf_list,h_mbd_array)
-plt.clabel(CS,inline=1, fontsize=10)
-plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.title('MBD (sim-obs)')
-
-plt.subplot(1,3,3)
-CS = plt.contour(tmelt_list,tf_list,h_rmsd_array)
-plt.clabel(CS,inline=1, fontsize=10)
-plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.title('RMSD')
+plt.title('RMSD daily 2010')
 
 plt.tight_layout()
-plt.savefig(outfolder + '/hourly_SEB_fit_metrics2010_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
-plt.close()
+# plt.savefig(outfolder + '/daily_sfc_fit_metrics2010_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
+
+#plt.close()
+#plt.figure(figsize=[8,3])
+
+plt.subplot(4,3,7)
+CS = plt.contour(tmelt_list,tf_list,h_ns_array,levels=np.linspace(-1,1,21),cmap=plt.cm.winter, vmax=1,vmin=-1)
+plt.clabel(CS,inline=1, fontsize=10)
+plt.title('NS hourly 2010')
+plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
+plt.tight_layout()
+
+plt.subplot(4,3,8)
+CS = plt.contour(tmelt_list,tf_list,h_mbd_array,levels=np.linspace(-0.4,0.4,17),cmap=plt.cm.copper, vmax=0.4,vmin=-0.4)
+plt.clabel(CS,inline=1, fontsize=10)
+plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
+plt.title('MBD hourly 2010')
+
+plt.subplot(4,3,9)
+CS = plt.contour(tmelt_list,tf_list,h_rmsd_array,levels=np.linspace(0.2,1,17),cmap=plt.cm.winter_r, vmax=1,vmin=0.2)
+plt.clabel(CS,inline=1, fontsize=10)
+plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
+plt.title('RMSD hourly 2010')
+plt.tight_layout()
+# plt.tight_layout()
+# plt.savefig(outfolder + '/hourly_SEB_fit_metrics2010_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
+# plt.close()
 #repeat for 2011:
 
 
@@ -251,8 +253,8 @@ config['a_ice'] = 0.42
 config['a_freshsnow'] = 0.95
 config['a_firn'] = 0.62
 config['alb_swe_thres'] = 20
-config['ros'] = True
-config['ta_m_tt'] = False # use tmelt as baseline when calculating degree days
+config['ros'] = ros
+config['ta_m_tt'] = ta_m_tt # use tmelt as baseline when calculating degree days
 # use measured albedo
 config['inp_alb'] = inp_dat[start_t:end_t, 16][:, np.newaxis] * np.ones(grid_size)
 
@@ -301,52 +303,52 @@ np.savetxt(outfolder + '/hourly_sfc_ns_2011_TF_TT_ROS{}_ta_m_tt{}.txt'.format(co
 np.savetxt(outfolder + '/hourly_sfc_mbd_2011_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),h_mbd_array)
 np.savetxt(outfolder + '/hourly_sfc_rmsd_2011_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),h_rmsd_array)
 
-plt.figure(figsize=[8,3])
+#plt.figure(figsize=[8,3])
 
-ax = plt.subplot(1,3,1)
-CS = plt.contour(tmelt_list,tf_list,ns_array)
+ax = plt.subplot(4,3,4)
+CS = plt.contour(tmelt_list,tf_list,ns_array,levels=np.linspace(-1,1,21),cmap=plt.cm.winter, vmax=1,vmin=-1)
 plt.clabel(CS,inline=1, fontsize=10)
 plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.title('Nash-Sutcliffe')
+plt.title('NS daily 2011')
 plt.tight_layout()
 
-plt.subplot(1,3,2)
-CS = plt.contour(tmelt_list,tf_list,mbd_array)
+plt.subplot(4,3,5)
+CS = plt.contour(tmelt_list,tf_list,mbd_array,levels=np.linspace(-20,20,21),cmap=plt.cm.copper, vmax=20,vmin=-20)
 plt.clabel(CS,inline=1, fontsize=10)
 plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.title('MBD (sim-obs)')
+plt.title('MBD daily 2011')
 
-plt.subplot(1,3,3)
-CS = plt.contour(tmelt_list,tf_list,rmsd_array)
+plt.subplot(4,3,6)
+CS = plt.contour(tmelt_list,tf_list,rmsd_array,levels=np.linspace(10,30,21),cmap=plt.cm.winter_r, vmax=30,vmin=10)
 plt.clabel(CS,inline=1, fontsize=10)
 plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.title('RMSD')
+plt.title('RMSD daily 2011')
+
+# plt.tight_layout()
+# plt.savefig(outfolder + '/daily_sfc_fit_metrics2011_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
+
+# plt.close()
+# plt.figure(figsize=[8,9])
+
+plt.subplot(4,3,10)
+CS = plt.contour(tmelt_list,tf_list,h_ns_array,levels=np.linspace(-1,1,21),cmap=plt.cm.winter, vmax=1,vmin=-1)
+plt.clabel(CS,inline=1, fontsize=10)
+plt.title('NS hourly 2011')
+plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
+plt.tight_layout()
+
+plt.subplot(4,3,11)
+CS = plt.contour(tmelt_list,tf_list,h_mbd_array,levels=np.linspace(-0.4,0.4,17),cmap=plt.cm.copper, vmax=0.4,vmin=-0.4)#coolwarm
+plt.clabel(CS,inline=1, fontsize=10)
+plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
+plt.title('MBD hourly 2011')
+
+plt.subplot(4,3,12)
+CS = plt.contour(tmelt_list,tf_list,h_rmsd_array,levels=np.linspace(0.2,1,17),cmap=plt.cm.winter_r, vmax=1,vmin=0.2)
+plt.clabel(CS,inline=1, fontsize=10)
+plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
+plt.title('RMSD hourly 2011')
 
 plt.tight_layout()
-plt.savefig(outfolder + '/daily_sfc_fit_metrics2011_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
-
-plt.close()
-plt.figure(figsize=[8,3])
-
-plt.subplot(1,3,1)
-CS = plt.contour(tmelt_list,tf_list,h_ns_array)
-plt.clabel(CS,inline=1, fontsize=10)
-plt.title('Nash-Sutcliffe')
-plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.tight_layout()
-
-plt.subplot(1,3,2)
-CS = plt.contour(tmelt_list,tf_list,h_mbd_array)
-plt.clabel(CS,inline=1, fontsize=10)
-plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.title('MBD (sim-obs)')
-
-plt.subplot(1,3,3)
-CS = plt.contour(tmelt_list,tf_list,h_rmsd_array)
-plt.clabel(CS,inline=1, fontsize=10)
-plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
-plt.title('RMSD')
-
-plt.tight_layout()
-plt.savefig(outfolder + '/hourly_SEB_fit_metrics2011_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
+plt.savefig(outfolder + '/fit_metrics_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
 plt.close()
