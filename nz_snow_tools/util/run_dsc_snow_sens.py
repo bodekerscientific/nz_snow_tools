@@ -17,8 +17,8 @@ years = range(2000, 2016 + 1)
 
 
 inp_id = 'norton'  #['jobst_ucc', 'norton', 'vcsn']
-for tempchange in [-2, 0, 1]: # temperature change from -5 to + 1 K
-    for precipchange in [20, 50, 100]:
+for tempchange in [0]: # temperature change from -5 to + 1 K
+    for precipchange in [50, 100]:
         config_id_out = '5_t{}_p{}'.format(tempchange,precipchange)  # string identifying suffix to the namelist configuration file used by the model
         for year in years:
             # read in namelist
