@@ -11,7 +11,7 @@ import matplotlib.pylab as plt
 import datetime as dt
 import matplotlib.dates as mdates
 
-
+outfolder = 'P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/TT_TF'
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
@@ -124,12 +124,12 @@ for i, tf in enumerate(tf_list):
         h_mbd_array[i,j]= mean_bias(-1 *np.diff(st_swe3[:, 0]),hourly_seb_melt)
         h_rmsd_array[i,j]= rmsd(-1 *np.diff(st_swe3[:, 0]),hourly_seb_melt)
 
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/daily_sfc_ns_2010_TF_TT.txt',ns_array)
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/daily_sfc_mbd_2010_TF_TT.txt',mbd_array)
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/daily_sfc_rmsd_2010_TF_TT.txt',rmsd_array)
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/hourly_sfc_ns_2010_TF_TT.txt',h_ns_array)
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/hourly_sfc_mbd_2010_TF_TT.txt',h_mbd_array)
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/hourly_sfc_rmsd_2010_TF_TT.txt',h_rmsd_array)
+np.savetxt(outfolder + '/daily_sfc_ns_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),ns_array)
+np.savetxt(outfolder + '/daily_sfc_mbd_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),mbd_array)
+np.savetxt(outfolder + '/daily_sfc_rmsd_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),rmsd_array)
+np.savetxt(outfolder + '/hourly_sfc_ns_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),h_ns_array)
+np.savetxt(outfolder + '/hourly_sfc_mbd_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),h_mbd_array)
+np.savetxt(outfolder + '/hourly_sfc_rmsd_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),h_rmsd_array)
 
 
 plt.figure(figsize=[8,3])
@@ -154,7 +154,7 @@ plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
 plt.title('RMSD')
 
 plt.tight_layout()
-plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/daily_sfc_fit_metrics2010_TF_TT.png')
+plt.savefig(outfolder + '/daily_sfc_fit_metrics2010_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
 
 plt.close()
 plt.figure(figsize=[8,3])
@@ -179,7 +179,7 @@ plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
 plt.title('RMSD')
 
 plt.tight_layout()
-plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/hourly_SEB_fit_metrics2010_TF_TT.png')
+plt.savefig(outfolder + '/hourly_SEB_fit_metrics2010_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
 plt.close()
 #repeat for 2011:
 
@@ -294,12 +294,12 @@ for i, tf in enumerate(tf_list):
         h_mbd_array[i,j]= mean_bias(-1 *np.diff(st_swe3[:, 0]),hourly_seb_melt)
         h_rmsd_array[i,j]= rmsd(-1 *np.diff(st_swe3[:, 0]),hourly_seb_melt)
 
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/daily_sfc_ns_2011_TF_TT.txt',ns_array)
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/daily_sfc_mbd_2011_TF_TT.txt',mbd_array)
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/daily_sfc_rmsd_2011_TF_TT.txt',rmsd_array)
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/hourly_sfc_ns_2011_TF_TT.txt',h_ns_array)
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/hourly_sfc_mbd_2011_TF_TT.txt',h_mbd_array)
-np.savetxt('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/hourly_sfc_rmsd_2011_TF_TT.txt',h_rmsd_array)
+np.savetxt(outfolder + '/daily_sfc_ns_2011_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),ns_array)
+np.savetxt(outfolder + '/daily_sfc_mbd_2011_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),mbd_array)
+np.savetxt(outfolder + '/daily_sfc_rmsd_2011_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),rmsd_array)
+np.savetxt(outfolder + '/hourly_sfc_ns_2011_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),h_ns_array)
+np.savetxt(outfolder + '/hourly_sfc_mbd_2011_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),h_mbd_array)
+np.savetxt(outfolder + '/hourly_sfc_rmsd_2011_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'],config['ta_m_tt']),h_rmsd_array)
 
 plt.figure(figsize=[8,3])
 
@@ -323,7 +323,7 @@ plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
 plt.title('RMSD')
 
 plt.tight_layout()
-plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/daily_sfc_fit_metrics2011_TF_TT.png')
+plt.savefig(outfolder + '/daily_sfc_fit_metrics2011_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
 
 plt.close()
 plt.figure(figsize=[8,3])
@@ -348,5 +348,5 @@ plt.ylabel('TF (mm w.e. per hour)'),plt.xlabel('T melt threshold (C)')
 plt.title('RMSD')
 
 plt.tight_layout()
-plt.savefig('P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/rain_on_snow/hourly_SEB_fit_metrics2011_TF_TT.png')
+plt.savefig(outfolder + '/hourly_SEB_fit_metrics2011_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
 plt.close()
