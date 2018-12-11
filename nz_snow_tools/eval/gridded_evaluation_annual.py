@@ -22,7 +22,7 @@ def plot_point(i,j,name,year):
     plt.ylabel('fsca (%)')
     plt.xlabel('day of year')
     plt.title(name)
-    plt.savefig('P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus/plots/timeseries/timeseries_{}_{}_{}_{}.png'.format(name,year,smooth_period,tempchange))
+    plt.savefig('P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus/plots/timeseries/timeseries_{}_{}_{}_{}.png'.format(name,year,smooth_period,run_id))
     plt.close()
 
 if __name__ == '__main__':
@@ -45,110 +45,105 @@ if __name__ == '__main__':
     dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
     output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
 
-    for tempchange in range(-5,2,1):
-        run_id = 'norton_5_{}_topleft'.format(tempchange)  # string identifying fortran dsc_snow run. everything after the year
+    # load model data
+    for tempchange in [-2, 0, -1]:
+        for precipchange in [20, 50, 100]:
+            for year_to_take in years_to_take:
 
-        # read in modis and model data for one year
+                print('loading modis data {}'.format(year_to_take))
 
-        # average to large spatial scale
+                # load modis data for evaluation
+                modis_fsca, modis_dt, modis_mask = load_subset_modis_annual(catchment, output_dem, year_to_take, modis_folder, dem_folder, modis_dem, mask_folder,
+                                                                            catchment_shp_folder)
 
-        # compare timeseries of fsca at each point
+                # set up output array
+                nt = modis_fsca.shape[0]
+                ny = modis_fsca.shape[1]
+                nx = modis_fsca.shape[2]
+                ny_out = ny // rl  # integer divide to ensure fits
+                nx_out = nx // rl
+                modis_fsca_rs = np.zeros((nt, ny_out, nx_out))
 
-        # store statistics - for each point for each year dims = [year,y,x]
-        s_ns = []
-        s_bias = []
-        s_rmse = []
-        s_mae = []
-        s_obs = []
-        s_mod = []
+                for i in range(nt):
+                    modis_sub = modis_fsca[i,]
+                    fsca_rs = resample_to_fsca(modis_sub, rl=rl)
+                    modis_fsca_rs[i] = fsca_rs
 
-        # compute basin average timeseries for each sub-basin
+                run_id = 'norton_5_t{}_p{}_topleft'.format(tempchange,precipchange)  # string identifying fortran dsc_snow run. everything after the year
 
-        # store statistics - for each day for basin average
-        # ba_fsca_obs
-        # ba_fsca_mdl
+                # read in modis and model data for one year
 
-        for year_to_take in years_to_take:
+                # average to large spatial scale
 
-            print('loading modis data {}'.format(year_to_take))
+                # compare timeseries of fsca at each point
 
-            # load modis data for evaluation
-            modis_fsca, modis_dt, modis_mask = load_subset_modis_annual(catchment, output_dem, year_to_take, modis_folder, dem_folder, modis_dem, mask_folder,
-                                                                        catchment_shp_folder)
-
-            # set up output array
-            nt = modis_fsca.shape[0]
-            ny = modis_fsca.shape[1]
-            nx = modis_fsca.shape[2]
-            ny_out = ny // rl  # integer divide to ensure fits
-            nx_out = nx // rl
-            modis_fsca_rs = np.zeros((nt, ny_out, nx_out))
-
-            for i in range(nt):
-                modis_sub = modis_fsca[i,]
-                fsca_rs = resample_to_fsca(modis_sub, rl=rl)
-                modis_fsca_rs[i] = fsca_rs
-
-            # plt.plot(np.nanmean(modis_fsca_rs, axis=(1, 2)))
-
-            print('loading dsc_snow model data {}'.format(year_to_take))
-            # load previously run simulations from netCDF
-            st_swe, st_melt, st_acc, out_dt, mask = load_dsc_snow_output_annual(catchment, output_dem, year_to_take, dsc_snow_output_folder,
-                                                                                dsc_snow_dem_folder, run_id, origin=origin)
-
-            if year_to_take == 2000:
-                # cut so that first day corresponds to first MODIS obs on 24th Feb i.e. 2000-02-25 00:00:00
-                st_swe = st_swe[54:, ]
-                st_melt = st_melt[54:, ]
-                st_acc = st_acc[54:, ]
-                out_dt = out_dt[54:]
-
-            st_sc = np.zeros(st_swe.shape, dtype=np.float32)
-            st_sc[st_swe > model_swe_sc_threshold] = 100
-            st_sc[:, mask == False] = np.nan
-            model_fsca_rs = np.zeros((nt, ny_out, nx_out))
-
-            for i in range(nt):
-                model_sub = st_sc[i,]
-                fsca_rs = resample_to_fsca(model_sub, rl=rl)
-                model_fsca_rs[i] = fsca_rs
-
-            # plt.plot(np.nanmean(model_fsca_rs, axis=(1, 2)))
-            #
-            # plt.figure()
-            # plt.imshow(np.mean(modis_fsca_rs, axis=0),origin=0)
-            # plt.figure()
-            # plt.imshow(np.mean(model_fsca_rs, axis=0),origin=0)
-
-            ns_array = np.zeros((ny_out, nx_out))
-            mbd_array = np.zeros((ny_out, nx_out))
-            rmsd_array = np.zeros((ny_out, nx_out))
-            mae_array = np.zeros((ny_out, nx_out))
+                # store statistics - for each point for each year dims = [year,y,x]
+                s_ns = []
+                s_bias = []
+                s_rmse = []
+                s_mae = []
+                s_obs = []
+                s_mod = []
 
 
-            for i in range(ny_out):
-                for j in range(nx_out):
-                    obs = np.convolve(modis_fsca_rs[:, i, j], np.ones((smooth_period,)) / smooth_period, mode='same')
-                    mod = np.convolve(model_fsca_rs[:, i, j], np.ones((smooth_period,)) / smooth_period, mode='same')
-                    ns_array[i, j] = nash_sut(mod, obs)
-                    mbd_array[i, j] = mean_bias(mod, obs)
-                    rmsd_array[i, j] = rmsd(mod, obs)
-                    mae_array[i, j] = mean_absolute_error(mod, obs)
+                print('loading dsc_snow model data {}'.format(year_to_take))
+                # load previously run simulations from netCDF
+                st_swe, st_melt, st_acc, out_dt, mask = load_dsc_snow_output_annual(catchment, output_dem, year_to_take, dsc_snow_output_folder,
+                                                                                    dsc_snow_dem_folder, run_id, origin=origin)
 
-            modis_mean = np.mean(modis_fsca_rs, axis=0)
-            model_mean = np.mean(model_fsca_rs, axis=0)
+                if year_to_take == 2000:
+                    # cut so that first day corresponds to first MODIS obs on 24th Feb i.e. 2000-02-25 00:00:00
+                    st_swe = st_swe[54:, ]
+                    st_melt = st_melt[54:, ]
+                    st_acc = st_acc[54:, ]
+                    out_dt = out_dt[54:]
 
-            s_ns.append(ns_array)
-            s_bias.append(mbd_array)
-            s_rmse.append(rmsd_array)
-            s_mae.append(mae_array)
-            s_obs.append(modis_mean)
-            s_mod.append(model_mean)
+                st_sc = np.zeros(st_swe.shape, dtype=np.float32)
+                st_sc[st_swe > model_swe_sc_threshold] = 100
+                st_sc[:, mask == False] = np.nan
+                model_fsca_rs = np.zeros((nt, ny_out, nx_out))
 
-            for i,j,name in zip([161,147,127,107,186,125],[83,102,59,88,21,34],['Pisa','Dunstan','Hector','Old Man','Earnslaw','Lochy']):
-                plot_point(i,j,name,year_to_take)
+                for i in range(nt):
+                    model_sub = st_sc[i,]
+                    fsca_rs = resample_to_fsca(model_sub, rl=rl)
+                    model_fsca_rs[i] = fsca_rs
 
-        ann = [s_obs, s_mod, s_ns, s_bias, s_rmse, s_mae]
-        pickle.dump(ann, open(
-            output_folder + '/resample_fit_{}_swe{}_{}_rs{}_smooth{}.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl,smooth_period),
-            'wb'), -1)
+                # plt.plot(np.nanmean(model_fsca_rs, axis=(1, 2)))
+                #
+                # plt.figure()
+                # plt.imshow(np.mean(modis_fsca_rs, axis=0),origin=0)
+                # plt.figure()
+                # plt.imshow(np.mean(model_fsca_rs, axis=0),origin=0)
+
+                ns_array = np.zeros((ny_out, nx_out))
+                mbd_array = np.zeros((ny_out, nx_out))
+                rmsd_array = np.zeros((ny_out, nx_out))
+                mae_array = np.zeros((ny_out, nx_out))
+
+
+                for i in range(ny_out):
+                    for j in range(nx_out):
+                        obs = np.convolve(modis_fsca_rs[:, i, j], np.ones((smooth_period,)) / smooth_period, mode='same')
+                        mod = np.convolve(model_fsca_rs[:, i, j], np.ones((smooth_period,)) / smooth_period, mode='same')
+                        ns_array[i, j] = nash_sut(mod, obs)
+                        mbd_array[i, j] = mean_bias(mod, obs)
+                        rmsd_array[i, j] = rmsd(mod, obs)
+                        mae_array[i, j] = mean_absolute_error(mod, obs)
+
+                modis_mean = np.mean(modis_fsca_rs, axis=0)
+                model_mean = np.mean(model_fsca_rs, axis=0)
+
+                s_ns.append(ns_array)
+                s_bias.append(mbd_array)
+                s_rmse.append(rmsd_array)
+                s_mae.append(mae_array)
+                s_obs.append(modis_mean)
+                s_mod.append(model_mean)
+
+                for i,j,name in zip([161,147,127,107,186,125],[83,102,59,88,21,34],['Pisa','Dunstan','Hector','Old Man','Earnslaw','Lochy']):
+                    plot_point(i,j,name,year_to_take)
+
+            ann = [s_obs, s_mod, s_ns, s_bias, s_rmse, s_mae]
+            pickle.dump(ann, open(
+                output_folder + '/resample_fit_{}_swe{}_{}_rs{}_smooth{}.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl,smooth_period),
+                'wb'), -1)
