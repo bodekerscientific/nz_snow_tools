@@ -12,7 +12,7 @@ import datetime as dt
 import matplotlib.dates as mdates
 
 outfolder = 'P:/Projects/DSC-Snow/nz_snow_runs/brewster calibration/TT_TF'
-ros = False
+ros = True
 ta_m_tt = False
 
 
