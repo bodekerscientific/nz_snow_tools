@@ -70,7 +70,7 @@ def load_subset_modis_annual(catchment, output_dem, year_to_take, modis_folder, 
     :return: trimmed_fsca, modis_dt, trimmed_mask. The data, datetimes and catchment mask
     """
     # load a file
-    nc_file = nc.Dataset(modis_folder + '/DSC_MOD10A1_{}_v0_nosparse_interp.nc'.format(year_to_take))
+    nc_file = nc.Dataset(modis_folder + '/DSC_MOD10A1_{}_v0_nosparse_interp001.nc'.format(year_to_take))
     ndsi = nc_file.variables['NDSI_Snow_Cover_Cloudfree'][:]  # .astype('float32')  # nsdi in %
 
     # trim to only the catchment desired
@@ -224,7 +224,7 @@ if __name__ == '__main__':
             st_sc = None
             st_snow = None
 
-        if which_model == 'dsc_snow' or which_model == 'all':
+        if which_model == 'dsc_snow':
             print('loading dsc_snow model data {}'.format(year_to_take))
 
             if dsc_snow_opt == 'fortran':
