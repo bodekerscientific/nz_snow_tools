@@ -4,7 +4,6 @@ options to call a series of models then compute summary statistics
 reads in a computes statistics on MODIS data to evaluate against
 requires that dsc_snow model has been pre run using Fortran version
 
-
 Jono Conway
 """
 from __future__ import division
@@ -24,48 +23,67 @@ if __name__ == '__main__':
     years_to_take = range(2000, 2016 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     # modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
-    dsc_snow_output_folder = 'T:/DSC-Snow/runs/output/clutha_nztm250m_erebus'
-    mask_folder = 'T:/DSC-Snow/Masks'
-    catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-    modis_folder = 'T:/sync_to_data/MODIS_snow/NSDI_SI_cloudfilled'
-    dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
+    dsc_snow_output_folder = 'D:/DSC-Snow/runs/output/clutha_nztm250m_erebus'
+    mask_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Temp/DSC-Snow/Masks'
+    catchment_shp_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Hydrology/Catchments'
+    modis_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/MODIS_snow/NSDI_SI_cloudfilled'
+    dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS/'
     modis_dem = 'modis_si_dem_250m'
-    met_inp_folder = 'T:/DSC-Snow/input_data_hourly'
-    dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
-    output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
-    plot_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus/plots'
+    met_inp_folder = 'D:/DSC-Snow/input_data_hourly'
+    dsc_snow_dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/Projects-DSC-Snow/runs/input_DEM'
+    output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/Projects-DSC-Snow/runs/output/clutha_nztm250m_erebus'
+    plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/Projects-DSC-Snow/runs/output/clutha_nztm250m_erebus/plots'
 
     lists = [[] for _ in range(6)]
     a_obs, a_mod, a_ns, a_bias, a_rmse, a_mae = lists
 
-    for tempchange in range(-5, 2, 1):
-        run_id = 'norton_5_{}_topleft'.format(tempchange)  # string identifying fortran dsc_snow run. everything after the year
+    for tempchange in [-2, 0]:
+        for precipchange in [20, 50, 100]:
 
-        ann = pickle.load(open(
-            output_folder + '/resample_fit_{}_swe{}_{}_rs{}_smooth{}.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl,smooth_period), 'rb'))
+            s_ns = []
+            s_bias = []
+            s_rmse = []
+            s_mae = []
+            s_obs = []
+            s_mod = []
 
-        s_obs, s_mod, s_ns, s_bias, s_rmse, s_mae = ann
+            run_id = 'norton_5_t{}_p{}_topleft'.format(tempchange,precipchange)  # string identifying fortran dsc_snow run. everything after the year
 
-        a_obs.append(np.mean(np.asarray(s_obs), axis=0))
-        a_mod.append(np.mean(np.asarray(s_mod), axis=0))
-        a_ns.append(np.mean(np.asarray(s_ns), axis=0))
-        a_bias.append(np.mean(np.asarray(s_bias), axis=0))
-        a_rmse.append(np.mean(np.asarray(s_rmse), axis=0))
-        a_mae.append(np.mean(np.asarray(s_mae), axis=0))
+            for year_to_take in years_to_take:
+                ann = pickle.load(open(
+                    output_folder + '/resample_fit_{}_swe{}_{}_rs{}_smooth{}_{}.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl,smooth_period,year_to_take), 'rb'),encoding='latin1')
+
+                #
+                s_obs.append(ann[0][0])
+                s_mod.append(ann[1][0])
+                s_ns.append(ann[2][0])
+                s_bias.append(ann[3][0])
+                s_rmse.append(ann[4][0])
+                s_mae.append(ann[5][0])
+
+            # s_obs, s_mod, s_ns, s_bias, s_rmse, s_mae = ann
+
+            a_obs.append(np.mean(np.asarray(s_obs), axis=0))
+            a_mod.append(np.mean(np.asarray(s_mod), axis=0))
+            a_ns.append(np.mean(np.asarray(s_ns), axis=0))
+            a_bias.append(np.mean(np.asarray(s_bias), axis=0))
+            a_rmse.append(np.mean(np.asarray(s_rmse), axis=0))
+            a_mae.append(np.mean(np.asarray(s_mae), axis=0))
 
 
     # plot parameter set that gives lowest average absolute bias in FSCA
     cmap = plt.get_cmap('cubehelix',7)
     cmap.set_bad('0.5')
     plt.figure(figsize=(6,8))
-    plot_var = np.argmin(np.abs(np.asarray(a_bias)), axis=0).astype(np.float32) - 5
+    plot_var = np.argmin(np.abs(np.asarray(a_bias)), axis=0).astype(np.float32) # set to number of simulation
     plot_var[np.isnan(np.min(np.asarray(a_bias), axis=0))] = np.nan  # set values outside domain etc to nan
     # plot_var[a_obs[0] < 20] = np.nan
     plot_var[np.logical_and(a_obs[0] < 10,
                             ~(np.any(np.asarray(a_mod) > 10, axis=0)))] = np.nan  # exclude areas with very low modis fsca(< 10) and no modelled fsca(> 10)
-    plt.imshow(plot_var, origin=0, vmax=1.5, vmin=-5.5, cmap=cmap)
-    plt.yticks([]), plt.xticks([]), plt.title('T bias for lowest average absolute FSCA bias')
+    plt.imshow(plot_var, origin=0, vmax=6.5, vmin=-0.5, cmap=cmap)
     plt.colorbar(label='T bias (C)')
+    plt.yticks([]), plt.xticks([]), plt.title('T bias for lowest average absolute FSCA bias')
+
     plt.tight_layout()
     plt.savefig(
         plot_folder + '/t_bias_optim_t_bias_{}_swe{}_{}_rs{}_smooth{}.png'.format(catchment, model_swe_sc_threshold, run_id, rl,smooth_period), dpi=300)
@@ -74,12 +92,12 @@ if __name__ == '__main__':
     cmap = plt.get_cmap('cubehelix',7)
     cmap.set_bad('0.5')
     plt.figure(figsize=(6,8))
-    plot_var = np.argmax(np.asarray(a_ns), axis=0).astype(np.float32) - 5
+    plot_var = np.argmax(np.asarray(a_ns), axis=0).astype(np.float32)
     plot_var[np.isnan(np.max(np.asarray(a_ns), axis=0))] = np.nan  # set values outside domain etc to nan
     # plot_var[a_obs[0] < 20] = np.nan
     plot_var[np.logical_and(a_obs[0] < 10,
                             ~(np.any(np.asarray(a_mod) > 10, axis=0)))] = np.nan  # exclude areas with very low modis fsca(< 10) and no modelled fsca(> 10)
-    plt.imshow(plot_var, origin=0, vmax=1.5, vmin=-5.5, cmap=cmap)
+    plt.imshow(plot_var, origin=0, vmax=6.5, vmin=-0.5, cmap=cmap)
     plt.yticks([]), plt.xticks([]), plt.title('T bias for highest average FSCA NS')
     cbar = plt.colorbar(label='T bias (C)')
     plt.tight_layout()

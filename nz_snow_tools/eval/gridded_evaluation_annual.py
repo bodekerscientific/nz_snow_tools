@@ -35,15 +35,15 @@ if __name__ == '__main__':
     years_to_take = range(2000, 2016 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     # modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
-    dsc_snow_output_folder = 'T:/DSC-Snow/runs/output/clutha_nztm250m_erebus'
-    mask_folder = 'T:/DSC-Snow/Masks'
-    catchment_shp_folder = 'Z:/GIS_DATA/Hydrology/Catchments'
-    modis_folder = 'T:/sync_to_data/MODIS_snow/NSDI_SI_cloudfilled'
-    dem_folder = 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
+    dsc_snow_output_folder = 'D:/DSC-Snow/runs/output/clutha_nztm250m_erebus'
+    mask_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Temp/DSC-Snow/Masks'
+    catchment_shp_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Hydrology/Catchments'
+    modis_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/MODIS_snow/NSDI_SI_cloudfilled'
+    dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS/'
     modis_dem = 'modis_si_dem_250m'
-    met_inp_folder = 'T:/DSC-Snow/input_data_hourly'
-    dsc_snow_dem_folder = 'P:/Projects/DSC-Snow/runs/input_DEM'
-    output_folder = 'P:/Projects/DSC-Snow/runs/output/clutha_nztm250m_erebus'
+    met_inp_folder = 'D:/DSC-Snow/input_data_hourly'
+    dsc_snow_dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/Projects-DSC-Snow/runs/input_DEM'
+    output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/Projects-DSC-Snow/runs/output/clutha_nztm250m_erebus'
 
 
     for year_to_take in years_to_take:
