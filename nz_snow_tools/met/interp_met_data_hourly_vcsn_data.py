@@ -246,8 +246,8 @@ if __name__ == '__main__':
     output_dem = 'nztm250m'  # identifier for output dem
     dem_file = 'Z:/GIS_DATA/Topography/DEM_NZSOS/clutha_dem_250m.tif'
     # mask control
-    mask_dem = True  # boolean to set whether or not to mask the output dem - assume mask is bottom left
-    catchment = 'Clutha'
+    mask_dem = False  # boolean to set whether or not to mask the output dem - assume mask is bottom left
+    catchment = 'SI_DEM'
     mask_created = True  # boolean to set whether or not the mask has already been created - assume mask is bottom left
     mask_folder = 'T:/DSC-Snow/Masks'  # location of numpy catchment mask. must be writeable if mask_created == False
     mask_shpfile = 'Z:/GIS_DATA/Hydrology/Catchments/{}.shp'.format(

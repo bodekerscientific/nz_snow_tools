@@ -183,7 +183,7 @@ def process_temp(max_temp_daily, min_temp_daily):
     scaling_factors = hour_func(np.arange(1., 25.))
 
     hourly_data = np.zeros((max_temp_daily.shape[0] * 24, max_temp_daily.shape[1]), dtype=np.float32)
-    hours = np.array(range(1, 25) * max_temp_daily.shape[0])
+    hours = np.array(list(range(1, 25)) * max_temp_daily.shape[0])
 
     # Calculate each piecewise element seperately as some need the previous days data
     mask = hours < 8

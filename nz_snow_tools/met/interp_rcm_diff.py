@@ -252,8 +252,8 @@ def load_new_vscn(variable, dt_out, nc_file_in, point=None, nc_opt=False, single
 if __name__ == '__main__':
     # code to get elevation and lat/lon - assumes VCSN and RCM use same lat/lon
     # nc_file_rain = nc.Dataset('/mnt/data/RCMData/Version6/Annual/Ann_WS10_VCSN_xairj_1971-2005c0_RCPpast.nc', 'r')
-    in_lats = np.genfromtxt(r"C:\Users\conwayjp\OneDrive - NIWA\Desktop\diff\lats.dat")#nc_file_rain.variables['latitude'][::-1]  # source.RCM_file.latitudes()
-    in_lons = np.genfromtxt(r"C:\Users\conwayjp\OneDrive - NIWA\Desktop\diff\lons.dat")#nc_file_rain.variables['longitude'][:]  # source.RCM_file.longitudes()
+    in_lats = np.genfromtxt(r"C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\RCM_differences\diff\lats.dat")#nc_file_rain.variables['latitude'][::-1]  # source.RCM_file.latitudes()
+    in_lons = np.genfromtxt(r"C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\RCM_differences\diff\lons.dat")#nc_file_rain.variables['longitude'][:]  # source.RCM_file.longitudes()
     # vcsn_elev = np.flipud(nc_file_rain.variables['elevation'][:])
     # vcsn_elev_interp = np.ma.fix_invalid(vcsn_elev).data
     # in_elev = vcsn_elev_interp
@@ -299,10 +299,11 @@ if __name__ == '__main__':
     # out_lons = out_lons[northing_mask][:, easting_mask]
 
     for sce in ['RCP2.6', 'RCP4.5', 'RCP6.0','RCP8.5']:#
-        for v in ['T', 'P']:#
+        for v in ['T']:#
             for year in ['2045','2095']:# '
                 # note: don't lapse the temperature e.g., call it 'rain' variable rather than temperature or use 0 lapse rate
-                dat_file = r'C:\Users\conwayjp\OneDrive - NIWA\Desktop\diff\NEW_{}diff_{}_{}_mean.npy'.format(v, sce, year)
+                dat_file = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\RCM_differences\diff\NEW_{}diff_{}_{}_mean.npy'.format(v, sce, year)
+                # dat_file = 'D:/NEW_{}diff_{}_{}_percent.npy'.format(v, sce, year)
                 inp_dat = np.load(dat_file)
                 inp_dat = np.flipud(inp_dat)
                 in_dat = np.ma.masked_invalid(inp_dat)
@@ -326,13 +327,10 @@ if __name__ == '__main__':
                 # with open('/mnt/temp/CODC/metric_plots/SavedData-change/{}diff_{}_{}_mean_downscaled_v2.npy'.format(v, sce, year), 'w') as fh:
 
                     # np.save(fh, hi_res_temp_2095)
+                # plt.imshow(hi_res_temp_2095.data)
+                # plt.colorbar()
+                # plt.show()
+                np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\RCM_differences\diff\{}diff_{}_{}_mean_downscaled_v4.npy'.format(v, sce, year), hi_res_temp_2095.data)
+                # np.save('D:/{}diff_{}_{}_mean_downscaled_v3.npy'.format(v, sce, year), hi_res_temp_2095.data)
 
-                np.save(r'C:\Users\conwayjp\OneDrive - NIWA\Desktop\diff\{}diff_{}_{}_mean_downscaled_v3.npy'.format(v, sce, year), hi_res_temp_2095.data)
 
-                # :param in_elev: 2D array containing elevation of input data, dimesions [in_lats, in_lons] or same as in_lons
-
-                # :param out_lons: 1D array containing longitudes of output data
-                # :param out_lats: 1D array containing latitudes of output data
-                # :param out_elev: 2D array containing elevation of output data, dimension [out_lats, out_lons]
-                # :param lapse: lapse rate used to reduce data to sea level before interpolation
-                # :return: out_dat: 3D array with interpolated data has dimensions [time, out_lats, out_lons]
