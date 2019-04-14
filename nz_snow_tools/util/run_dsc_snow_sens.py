@@ -31,7 +31,7 @@ for tempchange in [0]: # temperature change from -5 to + 1 K
             nml['ddf_config']['starttime'][0] = year
             nml['ddf_config']['endtime'][0] = year + 1
             nml['ddf_config']['tempchange'] = tempchange
-            nml['ddf_config']['tempchange'] = precipchange
+            nml['ddf_config']['precipchange'] = precipchange
 
             # write namelist
             path_to_output_namelist = projects + '/DSC-Snow/runs/input/clutha_nztm250m_erebus/ddf_config_{}_{}_{}_{}.txt'.format(year, inp_id, config_id_out,
