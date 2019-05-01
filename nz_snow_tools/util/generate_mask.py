@@ -7,7 +7,7 @@ import numpy as np
 from nz_snow_tools.util.utils import create_mask_from_shpfile, setup_nztm_dem
 # from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import
 import os
-os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow_tools36\Library\share'
+os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
 
 catchments = ['Wilkin']
 # catchments = ['Clutha','Wilkin','Wanaka northern inflows','Upper Dart','Rees', 'Shotover', 'Teviot','Taieri','Upper Matukituki','Roaring Meg','Pomahaka','Motutapu',\

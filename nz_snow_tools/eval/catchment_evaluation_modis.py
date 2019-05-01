@@ -13,7 +13,7 @@ import pickle
 from nz_snow_tools.eval.catchment_evaluation_annual import load_subset_modis_annual
 
 import os
-os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow_tools36\Library\share'
+os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
 
 if __name__ == '__main__':
 

@@ -19,7 +19,7 @@ import pickle
 import matplotlib.pylab as plt
 
 import os
-os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow_tools36\Library\share'
+os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
 
 import mpl_toolkits.basemap as basemap
 from scipy import interpolate
@@ -330,7 +330,7 @@ if __name__ == '__main__':
                 # plt.imshow(hi_res_temp_2095.data)
                 # plt.colorbar()
                 # plt.show()
-                np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\RCM_differences\diff\{}diff_{}_{}_mean_downscaled_v4.npy'.format(v, sce, year), hi_res_temp_2095.data)
+                np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\RCM_differences\diff\{}diff_{}_{}_mean_downscaled_v5.npy'.format(v, sce, year), hi_res_temp_2095.data)
                 # np.save('D:/{}diff_{}_{}_mean_downscaled_v3.npy'.format(v, sce, year), hi_res_temp_2095.data)
 
 
