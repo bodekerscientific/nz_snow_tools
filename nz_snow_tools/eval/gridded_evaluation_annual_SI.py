@@ -32,15 +32,15 @@ if __name__ == '__main__':
     rl = 4  # resample length (i.e. how many grid cells in each direction to resample.
     smooth_period = 10  # number of days to smooth model data
     origin = 'topleft'  # should be 'topleft'
-    catchment = 'SI_DEM'  # string identifying catchment modelled
+    catchment = 'SouthIsland'  # string identifying catchment modelled
     output_dem = 'nztm250m'  # identifier for output dem
-    years_to_take = range(2001, 2003 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+    years_to_take = range(2003, 2003 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
-    dsc_snow_output_folder = ''  # path to snow model output
+    dsc_snow_output_folder = r'C:\Users\conwayjp\Downloads'  # path to snow model output
     mask_folder = None  # path to masks - set to None if you don't want to mask the data
     modis_folder = ''  # Path to modis data
     modis_dem = 'modis_si_dem_250m'  # version of modis dem
-    dsc_snow_dem_folder = ''  # path to netCDF topography file used in model run
+    dsc_snow_dem_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\Projects-DSC-Snow\runs\input_DEM'  # path to netCDF topography file used in model run
     output_folder = ''  # location where you want pickle files output from this script to go.
 
     for year_to_take in years_to_take:
@@ -57,7 +57,7 @@ if __name__ == '__main__':
         nx = modis_fsca.shape[2]
         ny_out = ny // rl  # integer divide to ensure fits
         nx_out = nx // rl
-        modis_fsca_rs = np.zeros((nt, ny_out, nx_out))
+        modis_fsca_rs = np.zeros((nt, ny_out, nx_out), dtype=np.float32)
 
         for i in range(nt):
             modis_sub = modis_fsca[i,]
@@ -90,6 +90,7 @@ if __name__ == '__main__':
 
         # cut to same shape as MODIS data(2800L, 2540L), compared to SI dem of (2800L, 2560L), the W edge is further east in modis, so remove first 20 columns
         st_swe = st_swe[:, :, 20:]
+        mask = mask[:, 20:]
 
         if year_to_take == 2000:
             # cut so that first day corresponds to first MODIS obs on 24th Feb i.e. 2000-02-25 00:00:00
@@ -126,10 +127,10 @@ if __name__ == '__main__':
         model_mean = np.mean(model_fsca_rs, axis=0)
 
         # generate mask for comparing modis and model areal average timeseries. basically if any timesteps have a nan in either modis or model data, they are masked out.
-        final_mask = ~np.logical_or(np.any(np.isnan(obs), axis=0), np.any(np.isnan(mod), axis=0))
+        final_mask = ~np.logical_or(np.any(np.isnan(modis_fsca_rs), axis=0), np.any(np.isnan(model_fsca_rs), axis=0))
         # plot areal average timeseries
-        plt.plot(np.mean(obs[:, final_mask], axis=1), label='obs')
-        plt.plot(np.mean(mod[:, final_mask], axis=1), label='mod')
+        plt.plot(np.mean(modis_fsca_rs[:, final_mask], axis=1), label='obs')
+        plt.plot(np.mean(model_fsca_rs[:, final_mask], axis=1), label='mod')
         plt.legend()
         plt.savefig(
             output_folder + 'timeseries_{}_swe{}_{}_rs{}_smooth{}_{}.png'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period, year_to_take))
@@ -141,6 +142,7 @@ if __name__ == '__main__':
 
         plt.figure()  # plot mean modis snow covered fraction
         plt.imshow(modis_mean, origin=0, cmap=plt.cm.cubehelix, vmax=1, vmin=0)
+        plt.colorbar()
         plt.savefig(output_folder + 'modis_{}_swe{}_{}_rs{}_smooth{}_{}.png'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period, year_to_take))
 
         plt.figure()  # plot mean modelled snow covered fraction
@@ -149,7 +151,8 @@ if __name__ == '__main__':
 
         plt.figure()  # plot difference in average snow covered fraction (mod-obs)
         plt.imshow(model_mean - modis_mean, origin=0, cmap=plt.cm.RdBu, vmax=1, vmin=-1)
-        plt.savefig(output_folder + 'model_bias_{}_swe{}_{}_rs{}_smooth{}_{}.png'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period, year_to_take))
+        plt.savefig(
+            output_folder + 'model_bias_{}_swe{}_{}_rs{}_smooth{}_{}.png'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period, year_to_take))
 
         # plt.show()
 
@@ -163,7 +166,10 @@ if __name__ == '__main__':
         # for i,j,name in zip([161,147,127,107,186,125],[83,102,59,88,21,34],['Pisa','Dunstan','Hector','Old Man','Earnslaw','Lochy']):
         #     plot_point(i,j,name,year_to_take)
 
-        ann = [s_obs, s_mod, s_ns, s_bias, s_rmse, s_mae]
+        ts_modis = np.mean(modis_fsca_rs[:, final_mask], axis=1)
+        ts_model = np.mean(model_fsca_rs[:, final_mask], axis=1)
+
+        ann = [s_obs, s_mod, s_ns, s_bias, s_rmse, s_mae, ts_modis, ts_model, final_mask]
         pickle.dump(ann, open(
             output_folder + '/resample_fit_{}_swe{}_{}_rs{}_smooth{}_{}.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period, year_to_take),
             'wb'), -1)
