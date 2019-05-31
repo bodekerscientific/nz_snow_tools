@@ -174,3 +174,82 @@ if __name__ == '__main__':
     plt.tight_layout()
     plt.savefig(
         plot_folder + '/t_bias_optim_NS_{}_swe{}_{}_rs{}_smooth{}.png'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period), dpi=300)
+
+    cmap = plt.get_cmap('cubehelix', 3)
+    cmap.set_bad('0.5')
+
+    # generate a 250m grid of bias and save. set areas previously nan to 0 bias
+    plot_var = np.argmax(np.asarray(a_ns), axis=0).astype(np.float32) * -1
+    plot_var[plot_var == -0] = 0  # _all
+    plot_var[np.isnan(np.max(np.asarray(a_ns), axis=0))] = np.nan  # _all_valid
+    plot_var[np.logical_and(a_obs[0] < 10, ~(np.any(np.asarray(a_mod) > 10, axis=0)))] = np.nan  # trimmed
+    final_grid = np.zeros((2800, 2540))
+    for i in range(plot_var.shape[0]):
+        for j in range(plot_var.shape[1]):
+            final_grid[i * 4:(i + 1) * 4, j * 4:(j + 1) * 4] = plot_var[i, j]
+    final_grid2 = np.zeros((2800, 2560))
+    final_grid2[:, 20:] = final_grid
+
+    plt.figure(figsize=(8, 8))
+    plt.imshow(final_grid2, origin=0, vmax=0.5, vmin=-2.5, cmap=cmap, interpolation='none')
+    plt.yticks([]), plt.xticks([]), plt.title('T bias for highest average FSCA NS')
+    cbar = plt.colorbar(label='T bias (C)')
+    plt.tight_layout()
+    plt.savefig(
+        plot_folder + '/t_bias_optim_t_NS_{}_swe{}_{}_rs{}_smooth{}_trimmed_fullres.png'.format(catchment, model_swe_sc_threshold, run_id, rl,
+                                                                                                smooth_period), dpi=300)
+
+    # reset nan to 0 and dump
+    final_grid2[np.isnan(final_grid2)] = 0  # _all
+    pickle.dump(final_grid2, open(
+        plot_folder + '/t_bias_optim_t_NS_{}_swe{}_{}_rs{}_smooth{}_trimmed_fullres.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period),
+        'wb'), -1)
+
+    plt.figure(figsize=(8, 8))
+    plt.imshow(final_grid2, origin=0, vmax=0.5, vmin=-2.5, cmap=cmap, interpolation='none')
+    plt.yticks([]), plt.xticks([]), plt.title('T bias for highest average FSCA NS')
+    cbar = plt.colorbar(label='T bias (C)')
+    plt.tight_layout()
+    plt.savefig(
+        plot_folder + '/t_bias_optim_t_NS_{}_swe{}_{}_rs{}_smooth{}_trimmed_fullres_nonan.png'.format(catchment, model_swe_sc_threshold, run_id, rl,
+                                                                                                      smooth_period), dpi=300)
+
+    # generate a 250m grid of bias and save. set areas previously nan to 0 bias - trim to only areas with NS>0
+    plot_var = np.argmax(np.asarray(a_ns), axis=0).astype(np.float32) * -1
+    plot_var[plot_var == -0] = 0  # _all
+    plot_var[np.isnan(np.max(np.asarray(a_ns), axis=0))] = np.nan  # _all_valid
+    plot_var[np.max(np.asarray(a_ns), axis=0) <= 0] = np.nan  # only areas with ok model performance
+    plot_var[np.logical_and(a_obs[0] < 10, ~(np.any(np.asarray(a_mod) > 10, axis=0)))] = np.nan  # trimmed
+    final_grid = np.zeros((2800, 2540))
+    for i in range(plot_var.shape[0]):
+        for j in range(plot_var.shape[1]):
+            final_grid[i * 4:(i + 1) * 4, j * 4:(j + 1) * 4] = plot_var[i, j]
+    final_grid2 = np.zeros((2800, 2560))
+    final_grid2[:, 20:] = final_grid
+
+    # plot
+    plt.figure(figsize=(8, 8))
+    plt.imshow(final_grid2, origin=0, vmax=0.5, vmin=-2.5, cmap=cmap, interpolation='none')
+    plt.yticks([]), plt.xticks([]), plt.title('T bias for highest average FSCA NS')
+    cbar = plt.colorbar(label='T bias (C)')
+    plt.tight_layout()
+    plt.savefig(
+        plot_folder + '/t_bias_optim_t_NS_{}_swe{}_{}_rs{}_smooth{}_trimmed2_fullres.png'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period),
+        dpi=300)
+
+    # reset nan to 0 and dump
+    final_grid2[np.isnan(final_grid2)] = 0  # _all
+    pickle.dump(final_grid2, open(
+        plot_folder + '/t_bias_optim_t_NS_{}_swe{}_{}_rs{}_smooth{}_trimmed2_fullres.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period),
+        'wb'), -1)
+
+    # plot
+    plt.figure(figsize=(8, 8))
+    plt.imshow(final_grid2, origin=0, vmax=0.5, vmin=-2.5, cmap=cmap, interpolation='none')
+    plt.yticks([]), plt.xticks([]), plt.title('T bias for highest average FSCA NS')
+    cbar = plt.colorbar(label='T bias (C)')
+    plt.tight_layout()
+    plt.savefig(
+        plot_folder + '/t_bias_optim_t_NS_{}_swe{}_{}_rs{}_smooth{}_trimmed2_fullres_nonan.png'.format(catchment, model_swe_sc_threshold, run_id, rl,
+                                                                                                       smooth_period), dpi=300)
+
