@@ -20,7 +20,7 @@ inp_time1 = np.genfromtxt("C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2014
                           dtype=(str), delimiter=',', skip_header=9, skip_footer=14)
 inp_dt1 = np.asarray([dt.datetime.strptime(t, '%Y%m%d:%H%M') for t in inp_time1])
 
-radiation = inp_dat1[:, 2]
+radiation = inp_dat1[:, 2]*1e6/3600
 
 # load precipitation data
 inp_dat2 = np.genfromtxt("C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2014-2019_Rain.txt", delimiter=',',
@@ -54,8 +54,8 @@ plt.ylabel('Wind Speed (m/s)')
 
 
 ax3 = plt.subplot(513, sharex=ax2)
-plt.plot(inp_dt2, precip, label="Precipitation")
-plt.ylabel('Precipitation (mm)')
+plt.plot(inp_dt2, np.cumsum(precip), label="Precipitation")
+plt.ylabel('cummulative Precipitation (mm)')
 
 
 ax4 = plt.subplot(514, sharex=ax3)

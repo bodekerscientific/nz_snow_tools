@@ -4,14 +4,14 @@ code to call the snow model for a simple test case using brewster glacier data
 
 import numpy as np
 from nz_snow_tools.snow.clark2009_snow_model import snow_main_simple
-from nz_snow_tools.util.utils import make_regular_timeseries
+from nz_snow_tools.util.utils import make_regular_timeseries,convert_datetime_julian_day,convert_dt_to_hourdec,nash_sut, mean_bias, rmsd, mean_absolute_error
 import matplotlib.pylab as plt
 import datetime as dt
 import matplotlib.dates as mdates
 
 # configuration dictionary containing model parameters.
 config = {}
-config['num_secs_output']=1800
+config['num_secs_output']=3600
 config['tacc'] = 274.16
 config['tmelt'] = 274.16
 
@@ -37,62 +37,47 @@ config['alb_swe_thres'] = 10
 config['ros'] = True
 config['ta_m_tt'] = False
 
-# load brewster glacier data
-inp_dat = np.genfromtxt(
-    "C:/Users/Bonnamourar/OneDrive - NIWA/for Ambre/BrewsterGlacier_Oct10_Sep12_mod3.dat")
-start_t = 9600 -1# 9456 = start of doy 130 10th May 2011 9600 = end of 13th May,18432 = start of 11th Nov 2013,19296 = 1st december 2011
-end_t = 21360  # 20783 = end of doy 365, 21264 = end of 10th January 2012, 21360 = end of 12th Jan
-inp_dt = make_regular_timeseries(dt.datetime(2010,10,25,00,30),dt.datetime(2012,9,2,00,00),1800)
+# load data
+inp_dat = np.load("C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller_2016.npy",allow_pickle=True)
 
 
-inp_doy = inp_dat[start_t:end_t, 2]
-inp_hourdec = inp_dat[start_t:end_t, 3]
+inp_doy = np.asarray(convert_datetime_julian_day(inp_dat[:, 0]))
+inp_hourdec = convert_dt_to_hourdec(inp_dat[:, 0])
+plot_dt = inp_dat[:, 0] # model stores initial state
 # make grids of input data
 grid_size = 1
 grid_id = np.arange(grid_size)
-inp_ta = inp_dat[start_t:end_t, 7][:, np.newaxis] * np.ones(grid_size) + 273.16  # 2 metre air temp in C
-inp_precip = inp_dat[start_t:end_t, 21][:, np.newaxis] * np.ones(grid_size)  # precip in mm
-inp_sw = inp_dat[start_t:end_t, 15][:, np.newaxis] * np.ones(grid_size)
-inp_sfc = inp_dat[start_t-1:end_t, 19] # surface height change
-inp_sfc -= inp_sfc[0]# reset to 0 at beginning of period
+inp_ta = np.asarray(inp_dat[:,2],dtype=np.float)[:, np.newaxis] * np.ones(grid_size) + 273.16  # 2 metre air temp in C
+inp_precip = np.asarray(inp_dat[:,4],dtype=np.float)[:, np.newaxis] * np.ones(grid_size)  # precip in mm
+inp_sw = np.asarray(inp_dat[:,3],dtype=np.float)[:, np.newaxis] * np.ones(grid_size)
 
-# validation data
-seb_dat = np.genfromtxt(
-    'C:/Users/Bonnamourar/OneDrive - NIWA/for Ambre/modelOUT_br1_headings.txt',skip_header=3)
-seb_mb = seb_dat[start_t-1:end_t, -1]
-seb_mb -= seb_mb[0] # reset to 0
 
-# read in measured daily SEB change
-mb_dat = np.genfromtxt(
-    'C:/Users/Bonnamourar/OneDrive - NIWA/for Ambre/mchange.dat')
-# note that the measured MB interprets surface height loss in the winter as mass loss, rather than compaction.
-mb_dt = make_regular_timeseries(dt.datetime(2010,10,26,00,00),dt.datetime(2012,9,2,00,00),86400)
-ts_mb = plt.cumsum(mb_dat[:,0])
-np.where(np.asarray(mb_dt)==dt.datetime(2011,5,13,00,00))
-ts_mb -= ts_mb[199]
-#
-
-init_swe = np.ones(inp_ta.shape[1:]) * 0  # give initial value of swe as starts in spring
-init_d_snow = np.ones(inp_ta.shape[1:]) * 30  # give initial value of days since snow
+init_swe = np.ones(inp_ta.shape[1:],dtype=np.float) * 0  # give initial value of swe as starts in spring
+init_d_snow = np.ones(inp_ta.shape[1:],dtype=np.float) * 30  # give initial value of days since snow
 
 # call main function once hourly/sub-hourly temp and precip data available.
-st_swe, st_melt, st_acc, st_alb = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
+st_swe, st_melt, st_acc, st_alb = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=3600,init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='clark2009', **config)
 
-st_swe1, st_melt1, st_acc1, st_alb1 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
+st_swe1, st_melt1, st_acc1, st_alb1 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=3600, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
+# load observed data
+inp_datobs = np.genfromtxt("C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Mueller SWE.csv", delimiter=',',usecols=(1),
+                        skip_header=4)*1000
+inp_timeobs = np.genfromtxt("C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Mueller SWE.csv", usecols=(0),
+                         dtype=(str), delimiter=',', skip_header=4)
+inp_dtobs = np.asarray([dt.datetime.strptime(t, '%d/%m/%Y %H:%M') for t in inp_timeobs])
 
-config['inp_alb'] = inp_dat[start_t:end_t, 16][:, np.newaxis] * np.ones(grid_size)
-st_swe3, st_melt3, st_acc3, st_alb3 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
-                                           init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
+ind = np.logical_and(inp_dtobs >= plot_dt[0],inp_dtobs <= plot_dt[-1])
 
-plot_dt = inp_dt[start_t-1:end_t] # model stores initial state
-#plt.plot(plot_dt,st_swe[:, 0],label='clark2009')
-plt.plot(plot_dt,st_swe1[:, 0],label='dsc_snow-param albedo')
-plt.plot(plot_dt,st_swe3[:, 0],label='dsc_snow-obs albedo')
-plt.plot(plot_dt,seb_mb, label='SEB')
-plt.plot(plot_dt,inp_sfc*492,label='sfc*492')
-plt.plot([dt.datetime(2011,7,18),dt.datetime(2011,10,27),dt.datetime(2011,11,13)],[577,1448,1291],'o',label='stake_mb') # measured accumualation to 27th November 2011
+# print('rmsd = {}'.format(rmsd(mod,obs)))
+plt.plot(inp_dtobs[ind],inp_datobs[ind],"o")
+
+plt.plot(plot_dt,st_swe[1:, 0],label='clark2009')
+plt.plot(plot_dt,st_swe1[1:, 0],label='dsc_snow-param albedo')
+ax1 = plt.gca()
+ax2 = ax1.twinx()
+ax2.plot(plot_dt,np.cumsum(inp_precip))
 #plt.xticks(range(0,len(st_swe[:, 0]),48*30),np.linspace(inp_doy[0],inp_doy[-1]+365+1,len(st_swe[:, 0])/(48*30.)+1,dtype=int))
 plt.gcf().autofmt_xdate()
 months = mdates.MonthLocator()  # every month
@@ -106,7 +91,7 @@ plt.xlabel('month')
 plt.ylabel('SWE mm w.e.')
 plt.legend()
 plt.title('cumulative mass balance TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}'.format(config['tf'],config['rf'],config['tmelt']))
-plt.savefig('C:/Users/Bonnamourar/OneDrive - NIWA/for Ambre/winter spring 2011 daily TF{:2.4f}RF{:2.4f}Tmelt{:3.2f}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
+plt.savefig('C:/Users/Bonnamourar/OneDrive - NIWA/for Ambre/SIN calibration daily TF{:2.4f}RF{:2.4f}Tmelt{:3.2f}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
 plt.show()
 plt.close()
 
