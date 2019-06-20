@@ -38,7 +38,7 @@ config['ros'] = True
 config['ta_m_tt'] = False
 
 # load data
-inp_dat = np.load("C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller_2016.npy",allow_pickle=True)
+inp_dat = np.load("C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2016.npy",allow_pickle=True)
 
 
 inp_doy = np.asarray(convert_datetime_julian_day(inp_dat[:, 0]))
@@ -71,13 +71,14 @@ inp_dtobs = np.asarray([dt.datetime.strptime(t, '%d/%m/%Y %H:%M') for t in inp_t
 ind = np.logical_and(inp_dtobs >= plot_dt[0],inp_dtobs <= plot_dt[-1])
 
 # print('rmsd = {}'.format(rmsd(mod,obs)))
-plt.plot(inp_dtobs[ind],inp_datobs[ind],"o")
+plt.plot(inp_dtobs[ind],inp_datobs[ind],"o", label = "Observed SWE")
 
 plt.plot(plot_dt,st_swe[1:, 0],label='clark2009')
 plt.plot(plot_dt,st_swe1[1:, 0],label='dsc_snow-param albedo')
+plt.legend()
 ax1 = plt.gca()
 ax2 = ax1.twinx()
-ax2.plot(plot_dt,np.cumsum(inp_precip))
+ax2.plot(plot_dt,np.cumsum(inp_precip), label = "Precipitation")
 #plt.xticks(range(0,len(st_swe[:, 0]),48*30),np.linspace(inp_doy[0],inp_doy[-1]+365+1,len(st_swe[:, 0])/(48*30.)+1,dtype=int))
 plt.gcf().autofmt_xdate()
 months = mdates.MonthLocator()  # every month
@@ -89,8 +90,8 @@ ax.xaxis.set_major_formatter(monthsFmt)
 
 plt.xlabel('month')
 plt.ylabel('SWE mm w.e.')
-plt.legend()
-plt.title('cumulative mass balance TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}'.format(config['tf'],config['rf'],config['tmelt']))
+plt.legend(loc = 'upper right')
+plt.title('cumulative mass balance TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}, year : 2016'.format(config['tf'],config['rf'],config['tmelt']))
 plt.savefig('C:/Users/Bonnamourar/OneDrive - NIWA/for Ambre/SIN calibration daily TF{:2.4f}RF{:2.4f}Tmelt{:3.2f}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
 plt.show()
 plt.close()
