@@ -14,6 +14,15 @@ from pyproj import Proj, transform
 
 ### Date utilities
 
+def convert_dt_to_timestamp(dt_list):
+    """
+    returns a list with the timesince unix time for a given list of datetimes
+    :param dt_list:
+    :return:
+    """
+    timestamp= [(dt - datetime.datetime(1970, 1, 1)).total_seconds() for dt in dt_list]
+    return timestamp
+
 def convert_datetime_julian_day(dt_list):
     """ returns the day number for each date object in d_list
     :param d_list: list of dateobjects to evaluate
@@ -482,9 +491,7 @@ def coef_determ(y_sim, y_obs):
     return r2
 
 
-
-def basemap_interp(datain,xin,yin,xout,yout,interpolation='NearestNeighbour'):
-
+def basemap_interp(datain, xin, yin, xout, yout, interpolation='NearestNeighbour'):
     """
        Interpolates a 2D array onto a new grid (only works for linear grids),
        with the Lat/Lon inputs of the old and new grid. Can perfom nearest
@@ -494,37 +501,90 @@ def basemap_interp(datain,xin,yin,xout,yout,interpolation='NearestNeighbour'):
     """
 
     # Mesh Coordinates so that they are both 2D arrays
-    xout,yout = np.meshgrid(xout,yout)
+    xout, yout = np.meshgrid(xout, yout)
 
-   # compute grid coordinates of output grid.
-    delx = xin[1:]-xin[0:-1]
-    dely = yin[1:]-yin[0:-1]
+    # compute grid coordinates of output grid.
+    delx = xin[1:] - xin[0:-1]
+    dely = yin[1:] - yin[0:-1]
 
-    xcoords = (len(xin)-1)*(xout-xin[0])/(xin[-1]-xin[0])
-    ycoords = (len(yin)-1)*(yout-yin[0])/(yin[-1]-yin[0])
+    xcoords = (len(xin) - 1) * (xout - xin[0]) / (xin[-1] - xin[0])
+    ycoords = (len(yin) - 1) * (yout - yin[0]) / (yin[-1] - yin[0])
 
-    xcoords = np.clip(xcoords,0,len(xin)-1)
-    ycoords = np.clip(ycoords,0,len(yin)-1)
+    xcoords = np.clip(xcoords, 0, len(xin) - 1)
+    ycoords = np.clip(ycoords, 0, len(yin) - 1)
 
     # Interpolate to output grid using nearest neighbour
     if interpolation == 'NearestNeighbour':
         xcoordsi = np.around(xcoords).astype(np.int32)
         ycoordsi = np.around(ycoords).astype(np.int32)
-        dataout = datain[ycoordsi,xcoordsi]
+        dataout = datain[ycoordsi, xcoordsi]
 
     # Interpolate to output grid using bilinear interpolation.
     elif interpolation == 'Bilinear':
         xi = xcoords.astype(np.int32)
         yi = ycoords.astype(np.int32)
-        xip1 = xi+1
-        yip1 = yi+1
-        xip1 = np.clip(xip1,0,len(xin)-1)
-        yip1 = np.clip(yip1,0,len(yin)-1)
-        delx = xcoords-xi.astype(np.float32)
-        dely = ycoords-yi.astype(np.float32)
-        dataout = (1.-delx)*(1.-dely)*datain[yi,xi] + \
-                  delx*dely*datain[yip1,xip1] + \
-                  (1.-delx)*dely*datain[yip1,xi] + \
-                  delx*(1.-dely)*datain[yi,xip1]
+        xip1 = xi + 1
+        yip1 = yi + 1
+        xip1 = np.clip(xip1, 0, len(xin) - 1)
+        yip1 = np.clip(yip1, 0, len(yin) - 1)
+        delx = xcoords - xi.astype(np.float32)
+        dely = ycoords - yi.astype(np.float32)
+        dataout = (1. - delx) * (1. - dely) * datain[yi, xi] + \
+                  delx * dely * datain[yip1, xip1] + \
+                  (1. - delx) * dely * datain[yip1, xi] + \
+                  delx * (1. - dely) * datain[yi, xip1]
 
     return dataout
+
+
+def fill_timeseries_dud(inp_dt, inp_dat, tstep, max_gap=None):
+    """
+        fill in gaps in a timeseries using linear interpolation between valid points (method doesn't work that well)
+
+    :param inp_dt: array or list of datetimes corresponding to your data
+    :param inp_dat: variable you wish to fill
+    :param tstep: timestep of data in seconds
+    :param max_gap: maximum gap  to fill (seconds)
+    :return: out_dt, out_dat (datetimes and data)
+    """
+    assert len(inp_dt)==len(inp_dat)
+
+    out_dt = []
+    out_dat = []
+    if max_gap==None:
+        max_gap=tstep*1.
+    for j in range(len(inp_dt) - 1):
+        gap = (inp_dt[j + 1] - inp_dt[j]).total_seconds()
+        if gap != tstep and gap <= max_gap:
+            fill_dt = make_regular_timeseries(inp_dt[j],inp_dt[j+1],tstep)
+            fill_dat = np.interp(convert_dt_to_timestamp(fill_dt),convert_dt_to_timestamp(inp_dt[j:j+2]),inp_dat[j:j+2])
+            out_dt.extend(fill_dt[1:-1])
+            out_dat.extend(fill_dat[1:-1])
+        elif gap != tstep and gap >= max_gap:
+            fill_dt = make_regular_timeseries(inp_dt[j], inp_dt[j + 1], tstep)
+            fill_dat = np.ones(len(fill_dt))*np.nan
+            out_dt.extend(fill_dt[1:-1])
+            out_dat.extend(fill_dat[1:-1])
+        else:
+            out_dt.extend([inp_dt[j]])
+            out_dat.extend([inp_dat[j]])
+
+    return np.asarray(out_dt), np.asarray(out_dat,dtype=inp_dat.dtype)
+
+
+
+def fill_timeseries(inp_dt, inp_dat, tstep):
+    """
+    fill in gaps in a timeseries using linear interpolation between valid points
+
+    :param inp_dt: array or list of datetimes corresponding to your data
+    :param inp_dat: variable you wish to fill
+    :param tstep: timestep of data in seconds
+    :return: out_dt, out_dat (datetimes and data)
+    """
+    assert len(inp_dt)==len(inp_dat)
+
+    out_dt = make_regular_timeseries(inp_dt[0],inp_dt[-1],tstep)
+    out_dat = np.interp(convert_dt_to_timestamp(out_dt), convert_dt_to_timestamp(inp_dt), inp_dat)
+
+    return out_dt, out_dat
