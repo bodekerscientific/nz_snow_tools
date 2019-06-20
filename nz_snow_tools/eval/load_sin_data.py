@@ -48,8 +48,6 @@ inp_dt3 = np.asarray([dt.datetime.strptime(t, '%Y%m%d:%H%M') for t in inp_time3]
 wind = inp_dat3[:, 3]
 
 
-
-
 ax1 = plt.subplot(511)
 plt.plot(inp_dt,ta,label = "Temperature", color = "red")
 plt.ylabel('Temperature (C)')

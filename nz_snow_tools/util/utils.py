@@ -551,7 +551,8 @@ def fill_timeseries_dud(inp_dt, inp_dat, tstep, max_gap=None):
 
     out_dt = []
     out_dat = []
-
+    if max_gap==None:
+        max_gap=tstep*1.
     for j in range(len(inp_dt) - 1):
         gap = (inp_dt[j + 1] - inp_dt[j]).total_seconds()
         if gap != tstep and gap <= max_gap:
@@ -565,8 +566,8 @@ def fill_timeseries_dud(inp_dt, inp_dat, tstep, max_gap=None):
             out_dt.extend(fill_dt[1:-1])
             out_dat.extend(fill_dat[1:-1])
         else:
-            out_dt.append(inp_dt[j])
-            out_dat.append(inp_dat[j])
+            out_dt.extend([inp_dt[j]])
+            out_dat.extend([inp_dat[j]])
 
     return np.asarray(out_dt), np.asarray(out_dat,dtype=inp_dat.dtype)
 
