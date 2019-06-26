@@ -111,7 +111,7 @@ north_out[:] = northings
 setattr(north_out, 'units', 'm NZTM')
 
 # and now the grids themselves
-grd_names = ['DEM', 'ice', 'catchment', 'viewfield', 'debris', 'slope', 'aspect']
+grd_names = ['dem', 'ice', 'catchment', 'viewfield', 'debris', 'slope', 'aspect']
 
 for gname in grd_names:
     if gname == 'debris' or gname == 'ice':
@@ -137,7 +137,7 @@ for gname in grd_names:
         else:
             data = np.ones(elev.shape, dtype='float32')  # set all to ones TODO: use actual sky view grid
         units = 'fraction 0-1'
-    if gname == 'DEM':
+    if gname == 'dem':
         data = elev
         units = 'metres asl'
     raster_out = file_out.createVariable(gname, 'f', ('rows', 'columns'))
