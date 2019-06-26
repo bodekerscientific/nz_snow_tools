@@ -11,16 +11,16 @@ wind_mueller_file = "C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2007-2019/
 save_mueller_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_{}"
 
 #CASTLE MOUNT files
-ta_file = "C:/Users/Bonnamourar/Desktop/SIN/Castle Mount/Castel Mount_2007-2019/CastleMt_2007-2019_MaxMinTemp.txt"
-radiation_cstmount_file = "C:/Users/Bonnamourar/Desktop/SIN/Castle Mount/Castel Mount_2007-2019/CastleMt_2007-2019_Radiation.txt"
-precipitation__cstmount_file = "C:/Users/Bonnamourar/Desktop/SIN/Castle Mount/Castel Mount_2007-2019/CastleMt_2007-2019_Rain.txt"
-wind_cstmount_file = "C:/Users/Bonnamourar/Desktop/SIN/Castle Mount/Castel Mount_2007-2019/CastleMt_2007-2019_Wind.txt"
-save_cstmount_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_{}"
+#ta_file = "C:/Users/Bonnamourar/Desktop/SIN/Castle Mount/Castel Mount_2007-2019/CastleMt_2007-2019_MaxMinTemp.txt"
+#radiation_cstmount_file = "C:/Users/Bonnamourar/Desktop/SIN/Castle Mount/Castel Mount_2007-2019/CastleMt_2007-2019_Radiation.txt"
+#precipitation__cstmount_file = "C:/Users/Bonnamourar/Desktop/SIN/Castle Mount/Castel Mount_2007-2019/CastleMt_2007-2019_Rain.txt"
+#wind_cstmount_file = "C:/Users/Bonnamourar/Desktop/SIN/Castle Mount/Castel Mount_2007-2019/CastleMt_2007-2019_Wind.txt"
+#save_cstmount_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_{}"
 #change the name
 # load maxmin temperature data
-inp_dat = np.genfromtxt(ta_cstmount_file, delimiter=',',
+inp_dat = np.genfromtxt(ta_file, delimiter=',',
                         skip_header=9, skip_footer=8)
-inp_time = np.genfromtxt(ta_cstmount_file, usecols=(1),
+inp_time = np.genfromtxt(ta_file, usecols=(1),
                          dtype=(str), delimiter=',', skip_header=9, skip_footer=8)
 inp_dt = np.asarray([dt.datetime.strptime(t, '%Y%m%d:%H%M') for t in inp_time])
 
@@ -28,27 +28,27 @@ ta = inp_dat[:, 8]
 rh = inp_dat[:, 9]
 
 # load radiation data
-inp_dat1 = np.genfromtxt(radiation_cstmount_file, delimiter=',',
+inp_dat1 = np.genfromtxt(radiation_mueller_file, delimiter=',',
                          skip_header=9, skip_footer=8)
-inp_time1 = np.genfromtxt(radiation_cstmount_file, usecols=(1),
+inp_time1 = np.genfromtxt(radiation_mueller_file, usecols=(1),
                           dtype=(str), delimiter=',', skip_header=9, skip_footer=9)
 inp_dt1 = np.asarray([dt.datetime.strptime(t, '%Y%m%d:%H%M') for t in inp_time1])
 
 radiation = inp_dat1[:, 2]*1e6/3600
 
 # load precipitation data
-inp_dat2 = np.genfromtxt(precipitation__cstmount_file, delimiter=',',
+inp_dat2 = np.genfromtxt(precipitation__mueller_file, delimiter=',',
                          skip_header=9, skip_footer=8)
-inp_time2 = np.genfromtxt(precipitation__cstmount_file, usecols=(1),
+inp_time2 = np.genfromtxt(precipitation__mueller_file, usecols=(1),
                           dtype=(str), delimiter=',', skip_header=9, skip_footer=8)
 inp_dt2 = np.asarray([dt.datetime.strptime(t, '%Y%m%d:%H%M') for t in inp_time2])
 
 precip = inp_dat2[:, 2]
 
 # load wind speed data
-inp_dat3 = np.genfromtxt(wind_cstmount_file, delimiter=',',
+inp_dat3 = np.genfromtxt(wind_mueller_file, delimiter=',',
                          skip_header=9, skip_footer=8)
-inp_time3 = np.genfromtxt(wind_cstmount_file, usecols=(1),
+inp_time3 = np.genfromtxt(wind_mueller_file, usecols=(1),
                           dtype=(str), delimiter=',', skip_header=9, skip_footer=8)
 inp_dt3 = np.asarray([dt.datetime.strptime(t, '%Y%m%d:%H%M') for t in inp_time3])
 
@@ -104,7 +104,7 @@ for i in range(0,13):
         print(inp_dt1[start_t1:end_t1].shape)
         print(inp_dt2[start_t2:end_t2].shape)
         output = np.transpose(np.vstack((inp_dt[start_t:end_t],rh[start_t:end_t],ta[start_t:end_t],radiation[start_t1:end_t1],precip[start_t2:end_t2])))
-        np.save(save_cstmount_file.format(date0),output)
+        np.save(save_mueller_file.format(date0),output)
     except:
         print("Missing data for {}".format(date0))
 
