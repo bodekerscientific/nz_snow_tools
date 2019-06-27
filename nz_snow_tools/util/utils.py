@@ -587,4 +587,4 @@ def fill_timeseries(inp_dt, inp_dat, tstep):
     out_dt = make_regular_timeseries(inp_dt[0],inp_dt[-1],tstep)
     out_dat = np.interp(convert_dt_to_timestamp(out_dt), convert_dt_to_timestamp(inp_dt), inp_dat)
 
-    return out_dt, out_dat
+    return np.asarray(out_dt), out_dat
