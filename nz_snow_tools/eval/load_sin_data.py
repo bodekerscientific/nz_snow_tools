@@ -4,11 +4,11 @@ import matplotlib.pylab as plt
 import datetime as dt
 
 #MUELLER files
-# ta_file = "C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2007-2019/Mueller_2007-2019_MaxMinTemp.txt"
-# radiation_file = "C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2007-2019/Mueller_2007-2019_Radiation.txt"
-# precipitation_file = "C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2007-2019/Mueller_2007-2019_Rain.txt"
-# wind_file = "C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2007-2019/Mueller_2007-2019_Wind.txt"
-# save_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_{}"
+ta_file = "C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2007-2019/Mueller_2007-2019_MaxMinTemp.txt"
+radiation_file = "C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2007-2019/Mueller_2007-2019_Radiation.txt"
+precipitation_file = "C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2007-2019/Mueller_2007-2019_Rain.txt"
+wind_file = "C:/Users/Bonnamourar/Desktop/SIN/Mueller/Mueller_2007-2019/Mueller_2007-2019_Wind.txt"
+save_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_{}"
 
 # CASTLE MOUNT files
 # ta_file = "C:/Users/Bonnamourar/Desktop/SIN/Castle Mount/Castel Mount_2007-2019/CastleMt_2007-2019_MaxMinTemp.txt"
@@ -25,11 +25,11 @@ import datetime as dt
 # save_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_{}"
 
 # MAHANGA files
-ta_file = "C:/Users/Bonnamourar/Desktop/SIN/Mahanga/2007-2019/Mahanga_2007-2019_MaxMinTemp.txt"
-radiation_file ="C:/Users/Bonnamourar/Desktop/SIN/Mahanga/2007-2019/Mahanga_2007-2019_Radiation.txt"
-precipitation_file ="C:/Users/Bonnamourar/Desktop/SIN/Mahanga/2007-2019/Mahanga_2007-2019_Rain.txt"
-wind_file ="C:/Users/Bonnamourar/Desktop/SIN/Mahanga/2007-2019/Mahanga_2007-2019_Wind.txt"
-save_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_{}"
+# ta_file = "C:/Users/Bonnamourar/Desktop/SIN/Mahanga/2007-2019/Mahanga_2007-2019_MaxMinTemp.txt"
+# radiation_file ="C:/Users/Bonnamourar/Desktop/SIN/Mahanga/2007-2019/Mahanga_2007-2019_Radiation.txt"
+# precipitation_file ="C:/Users/Bonnamourar/Desktop/SIN/Mahanga/2007-2019/Mahanga_2007-2019_Rain.txt"
+# wind_file ="C:/Users/Bonnamourar/Desktop/SIN/Mahanga/2007-2019/Mahanga_2007-2019_Wind.txt"
+# save_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_{}"
 
 # MURCHISON files
 # ta_file ="C:/Users/Bonnamourar/Desktop/SIN/Murchison/2007-2019/Murchison_2007-2019_Min-Max.txt"
@@ -39,10 +39,10 @@ save_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_{}
 # save_file="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_{}"
 
 # PHILISTINE files
-# ta_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN/Philistine/2007-2019/Philistine_2007-2019_MinMaxTemp.txt"
-# radiation_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN/Philistine/2007-2019/Philistine_2007-2019_Radiation.txt"
-# precipitation_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN/Philistine/2007-2019/Philistine_2007-2019_Rain.txt"
-# wind_file="C:/Users/Bonnamourar/OneDrive - NIWA/SIN/Philistine/2007-2019/Philistine_2007-2019_Wind.txt"
+# ta_file ="C:/Users/Bonnamourar/Desktop/SIN/Philistine/2007-2019/Philistine_2007-2019_MinMaxTemp.txt"
+# radiation_file ="C:/Users/Bonnamourar/Desktop/SIN/Philistine/2007-2019/Philistine_2007-2019_Radiation.txt"
+# precipitation_file ="C:/Users/Bonnamourar/Desktop/SIN/Philistine/2007-2019/Philistine_2007-2019_Rain.txt"
+# wind_file="C:/Users/Bonnamourar/Desktop/SIN/Philistine/2007-2019/Philistine_2007-2019_Wind.txt"
 # save_file="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_{}"
 
 # load maxmin temperature data
@@ -88,7 +88,7 @@ wind = inp_dat3[:, 3]
 ax1 = plt.subplot(511)
 plt.plot(inp_dt,ta,label = "Temperature", color = "darkred")
 plt.ylabel('Temperature (C)')
-plt.title("Mahanga")
+plt.title("Mueller")
 
 ax2 = plt.subplot(512, sharex=ax1)
 plt.plot(inp_dt3,wind, label = "Wind Speed", color = "aquamarine")
@@ -97,7 +97,7 @@ plt.ylabel('Wind Speed (m/s)')
 
 ax3 = plt.subplot(513, sharex=ax2)
 plt.plot(inp_dt2, np.cumsum(precip), label="Precipitation", color = "mediumblue")
-plt.ylabel('cummulative Precipitation (mm)')
+plt.ylabel('Cumulative Precipitation (mm)')
 
 
 ax4 = plt.subplot(514, sharex=ax3)
@@ -130,15 +130,15 @@ for i in range(0,14):
         end_t1 = np.where(inp_dt1_clean == dt.datetime(date1,4,1,00,00))[0][0]
         start_t2 = np.where(inp_dt2_clean == dt.datetime(date0,4,1,00,00))[0][0]
         end_t2 = np.where(inp_dt2_clean == dt.datetime(date1,4,1,00,00))[0][0]
-        start_t3 = np.where(inp_dt3_clean == dt.datetime(date0,4,1,00,00))[0][0]
-        end_t3 = np.where(inp_dt3_clean == dt.datetime(date1,4,1,00,00))[0][0]
+        #start_t3 = np.where(inp_dt3_clean == dt.datetime(date0,4,1,00,00))[0][0]
+        #end_t3 = np.where(inp_dt3_clean == dt.datetime(date1,4,1,00,00))[0][0]
 
         print(np.all(inp_dt_clean[start_t:end_t]==inp_dt1_clean[start_t1:end_t1]))
         print(np.all(inp_dt_clean[start_t:end_t]==inp_dt2_clean[start_t2:end_t2]))
         print(inp_dt_clean[start_t:end_t].shape)
         print(inp_dt1_clean[start_t1:end_t1].shape)
         print(inp_dt2_clean[start_t2:end_t2].shape)
-        output = np.transpose(np.vstack((inp_dt_clean[start_t:end_t],rh[start_t:end_t],ta[start_t:end_t],radiation[start_t1:end_t1],precip[start_t2:end_t2])))
+        output = np.transpose(np.vstack((inp_dt_clean[start_t:end_t],rh_clean[start_t:end_t],ta_clean[start_t:end_t],radiation_clean[start_t1:end_t1],precip_clean[start_t2:end_t2])))
         np.save(save_file.format(date0),output)
     except:
         print("Missing data for {}".format(date0))

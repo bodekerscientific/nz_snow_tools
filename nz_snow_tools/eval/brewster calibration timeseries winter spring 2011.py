@@ -105,6 +105,6 @@ plt.xlabel('month')
 plt.ylabel('SWE mm w.e.')
 plt.legend()
 plt.title('cumulative mass balance TF:{}, RF: {}, Tmelt:{}'.format(config['tf'],config['rf'],config['tmelt']))
-plt.savefig('C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Hydro/winter spring 2011 daily TF{}RF{}Tmelt{}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
+plt.savefig('C:/Users/Bonnamourar/OneDrive - NIWA/Winter Spring 2011 TF{}RF{}Tmelt{}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
 plt.close()
 

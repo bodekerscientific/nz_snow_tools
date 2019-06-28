@@ -37,13 +37,70 @@ config['alb_swe_thres'] = 10
 config['ros'] = True
 config['ta_m_tt'] = False
 
+#MUELLER station data for each year
+# Y2011_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2011.npy"
+# Y2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2012.npy"
+# Y2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2013.npy"
+# Y2014_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2014.npy"
+# Y2015_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2015.npy"
+# Y2016_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2016.npy"
+# Y2017_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2017.npy"
+# Y2018_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2018.npy"
+
+#MAHANGA station data for each year
+# Y2009_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2009.npy"
+# Y2010_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2010.npy"
+# Y2011_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2011.npy"
+# Y2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2012.npy"
+# Y2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2013.npy"
+# Y2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2014.npy"
+# Y2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2015.npy"
+# Y2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2016.npy"
+# Y2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2017.npy"
+# Y2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2018.npy"
+
+#LARKINS station data for each year
+# Y2014_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_2014.npy"
+# Y2015_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_2015.npy"
+# Y2016_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_2016.npy"
+# Y2017_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_2017.npy"
+# Y2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_2018.npy"
+
+#CASTLE MOUNT station data for each year
+# Y2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_2012.npy"
+# Y2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_2013.npy"
+# Y2014_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_2014.npy"
+# Y2015_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_2015.npy"
+# Y2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_2016.npy"
+
+#MURCHISON station data for each year
+# Y2009_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2009.npy"
+# Y2010_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2010.npy"
+# Y2011_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2011.npy"
+# Y2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2012.npy"
+# Y2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2013.npy"
+# Y2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2014.npy"
+# Y2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2015.npy"
+# Y2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2016.npy"
+# Y2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2017.npy"
+# Y2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2018.npy"
+
+#PHILISTINE station data for each year
+Y2011_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2011.npy"
+Y2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2012.npy"
+Y2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2013.npy"
+Y2014_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2014.npy"
+Y2015_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2015.npy"
+Y2016_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2016.npy"
+Y2017_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2017.npy"
+Y2018_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2018.npy"
+
 # load data
-inp_dat = np.load("C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2016.npy",allow_pickle=True)
-
-
+inp_dat = np.load(Y2011_file,allow_pickle=True)
 inp_doy = np.asarray(convert_datetime_julian_day(inp_dat[:, 0]))
 inp_hourdec = convert_dt_to_hourdec(inp_dat[:, 0])
 plot_dt = inp_dat[:, 0] # model stores initial state
+
 # make grids of input data
 grid_size = 1
 grid_id = np.arange(grid_size)
@@ -61,10 +118,24 @@ st_swe, st_melt, st_acc, st_alb = snow_main_simple(inp_ta, inp_precip, inp_doy, 
 
 st_swe1, st_melt1, st_acc1, st_alb1 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=3600, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
+
+#MUELLER SWE csv file
+#csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Mueller SWE.csv"
+#MAHANGA SWE csv file
+#csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Mahanga SWE.csv"
+#LARKINS SWE csv file
+#csv_file ="C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Larkins SWE.csv"
+#CASTLE MOUNT SWE csv file
+#csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Castle Mount SWE.csv"
+#MURCHISON SWE csv file
+#csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Murchison SWE.csv"
+#PHILISTINE SWE csv file
+csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Philistine SWE.csv"
+
 # load observed data
-inp_datobs = np.genfromtxt("C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Mueller SWE.csv", delimiter=',',usecols=(1),
+inp_datobs = np.genfromtxt(csv_file, delimiter=',',usecols=(1),
                         skip_header=4)*1000
-inp_timeobs = np.genfromtxt("C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Mueller SWE.csv", usecols=(0),
+inp_timeobs = np.genfromtxt(csv_file, usecols=(0),
                          dtype=(str), delimiter=',', skip_header=4)
 inp_dtobs = np.asarray([dt.datetime.strptime(t, '%d/%m/%Y %H:%M') for t in inp_timeobs])
 
@@ -88,11 +159,13 @@ ax = plt.gca()
 ax.xaxis.set_major_locator(months)
 ax.xaxis.set_major_formatter(monthsFmt)
 
-plt.xlabel('month')
+plt.xlabel('Month')
 plt.ylabel('SWE mm w.e.')
 plt.legend(loc = 'upper right')
-plt.title('cumulative mass balance TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}, year : 2016'.format(config['tf'],config['rf'],config['tmelt']))
-plt.savefig('C:/Users/Bonnamourar/OneDrive - NIWA/for Ambre/SIN calibration daily TF{:2.4f}RF{:2.4f}Tmelt{:3.2f}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
+#Change the DATE
+plt.title('Cumulative mass balance TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}, Year : 2011'.format(config['tf'],config['rf'],config['tmelt']))
+#Change the DATE on the name for each year
+plt.savefig("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine 2011 daily TF{:2.4f}RF{:2.4f}Tmelt{:3.2f}_ros.png".format(config['tf'],config['rf'],config['tmelt']))
 plt.show()
 plt.close()
 
