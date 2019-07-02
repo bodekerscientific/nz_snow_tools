@@ -8,6 +8,7 @@ from nz_snow_tools.util.utils import make_regular_timeseries,convert_datetime_ju
 import matplotlib.pylab as plt
 import datetime as dt
 import matplotlib.dates as mdates
+import netCDF4 as nc
 
 # configuration dictionary containing model parameters.
 config = {}
@@ -95,8 +96,11 @@ Y2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2
 # Y2017_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2017.npy"
 # Y2018_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2018.npy"
 
+year = 2009
+Stname = ['Mahanga']
+
 # load data
-inp_dat = np.load(Y2018_file,allow_pickle=True)
+inp_dat = np.load(Y2009_file,allow_pickle=True)
 inp_doy = np.asarray(convert_datetime_julian_day(inp_dat[:, 0]))
 inp_hourdec = convert_dt_to_hourdec(inp_dat[:, 0])
 plot_dt = inp_dat[:, 0] # model stores initial state
@@ -163,34 +167,70 @@ plt.xlabel('Month')
 plt.ylabel('SWE mm w.e.')
 plt.legend(loc = 'upper right')
 #Change the DATE
-plt.title('Cumulative mass balance TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}, Year : 2018'.format(config['tf'],config['rf'],config['tmelt']))
+plt.title('Cumulative mass balance TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}, Year : {}'.format(config['tf'],config['rf'],config['tmelt'], year))
 #Change the DATE on the name for each year
-plt.savefig("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga 2018 daily TF{:2.4f}RF{:2.4f}Tmelt{:3.2f}_ros.png".format(config['tf'],config['rf'],config['tmelt']))
+plt.savefig("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/{}/{} {} daily TF{:2.4f}RF{:2.4f}Tmelt{:3.2f}_ros.png".format(Stname[0],Stname[0],year, config['tf'],config['rf'],config['tmelt']))
 plt.show()
 plt.close()
 
+# load VCSN files
+# CASTLE MOUNT
+# nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_CastleMo_strahler3-VC.nc",'r')
+# nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_CastleMo_strahler3-VN.nc",'r')
+# LARKINS
+# nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Larkins_strahler3-VC.nc",'r')
+# nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_Larkins_strahler3-VN.nc",'r')
+#MAHANGA
+# nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Mahanga_strahler3-VC.nc",'r')
+#MUELLER
+# nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Mueller_strahler3-VC.nc",'r')
+# nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_Mueller_strahler3-VN.nc",'r')
+#PHILISTINE
+nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Philisti_strahler3-VC.nc",'r')
+nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_Philisti_strahler3-VN.nc",'r')
+
+swe_VC = nc_file_VC.variables['snwstor'][:,0,0,0] #snow storage VC files
+swe_VN = nc_file_VN.variables['snwstor'][:,0,0,0] #snow storage VN files
+nc_datetimes_VC = nc.num2date(nc_file_VC.variables['time'][:], nc_file_VC.variables['time'].units) #VC dates
+nc_datetimes_VN = nc.num2date(nc_file_VN.variables['time'][:], nc_file_VN.variables['time'].units) #VN dates
+
+ind_VC = np.logical_and(nc_datetimes_VC >= plot_dt[0],nc_datetimes_VC <= plot_dt[-1])
+ind_VN = np.logical_and(nc_datetimes_VN >= plot_dt[0],nc_datetimes_VN <= plot_dt[-1])
+
+swe_VC_year = swe_VC[ind_VC]
+swe_VN_year = swe_VN[ind_VN]
+year_VC = nc_datetimes_VC[ind_VC] #one year VC
+year_VN = nc_datetimes_VN[ind_VN] #one year VN
+
+plt.title('Models VC and VN for the year {}, Station : {}'.format(year, Stname[0]))
+plt.plot(year_VC, swe_VC_year, label = 'VC', color = "magenta")
+plt.plot(year_VN, swe_VN_year, label = 'VN', color = "salmon")
+plt.legend()
+plt.show()
+
 # saved files
 # LARKINS
-# save_file_clark2009 ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_clark2009_2018"
-# save_file_albedo ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_dsc_snow-param albedo_2018"
+# save_file_clark2009 ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_clark2009_{}"
+# save_file_albedo ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_dsc_snow-param albedo_{}"
 # PHILISTINE
-# save_file_clark2009 ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_2018"
-# save_file_albedo ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_2018"
+# save_file_clark2009 ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_{}"
+# save_file_albedo ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_{}"
 # CASTLE MOUNT
-# save_file_clark2009 ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_clark2009_2016"
-# save_file_albedo ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_dsc_snow-param albedo_2016"
+# save_file_clark2009 ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_clark2009_{}"
+# save_file_albedo ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_dsc_snow-param albedo_{}"
 # MUELLER
-# save_file_clark2009 = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mueller/Mueller_npy files/Mueller_clark2009_2018"
-# save_file_albedo = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mueller/Mueller_npy files/Mueller_dsc_snow-param albedo_2018"
+# save_file_clark2009 = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mueller/Mueller_npy files/Mueller_clark2009_{}"
+# save_file_albedo = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mueller/Mueller_npy files/Mueller_dsc_snow-param albedo_{}"
 # MURCHISON
-# save_file_clark2009 ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2018"
-# save_file_albedo ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2018"
+# save_file_clark2009 ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_{}"
+# save_file_albedo ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_{}"
 # MAHANGA
-save_file_clark2009 = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2018"
-save_file_albedo = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2018"
+save_file_clark2009 = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_{}"
+save_file_albedo = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_{}"
 # save the data : Clark 2009
 output1 = np.transpose(np.vstack((plot_dt,st_swe[1:, 0])))
-np.save(save_file_clark2009,output1)
+np.save(save_file_clark2009.format(year),output1)
 # save the data : Albedo
 output2 = np.transpose(np.vstack((plot_dt,st_swe1[1:, 0])))
-np.save(save_file_albedo,output2)
+np.save(save_file_albedo.format(year),output2)
+
