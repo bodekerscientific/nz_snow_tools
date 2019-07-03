@@ -151,3 +151,14 @@ plt.show()
 
 #mean = mean_bias(inp_swe1,inp_datobs[ind])
 
+
+# Max and Min values
+maximum = np.max(inp_datobs_clean)
+minimum = np.min(inp_datobs_clean)
+print('maximum :',maximum, 'minimum:', minimum)
+
+index_of_maximum = np.where(inp_datobs_clean == maximum)
+index_of_minimum = np.where(inp_datobs_clean == minimum)
+
+print('index max', index_of_maximum[0][0])
+print('index min', index_of_minimum[0][0])
