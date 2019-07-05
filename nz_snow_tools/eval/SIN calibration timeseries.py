@@ -38,194 +38,196 @@ config['alb_swe_thres'] = 10
 config['ros'] = True
 config['ta_m_tt'] = False
 
-#MUELLER station data for each year
-# Y2011_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2011.npy"
-# Y2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2012.npy"
-# Y2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2013.npy"
-# Y2014_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2014.npy"
-# Y2015_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2015.npy"
-# Y2016_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2016.npy"
-# Y2017_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2017.npy"
-# Y2018_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_2018.npy"
+#MUELLER station data for each year [2011-2018]
+# Y_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mueller/Mueller_{}.npy"
+#MAHANGA station data for each year [2009-2018]
+# Y_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_{}.npy"
+#LARKINS station data for each year [2014-2018]
+# Y_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_{}.npy"
+#CASTLE MOUNT station data for each year [2012-2016]
+# Y_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_{}.npy"
+#MURCHISON station data for each year [2009-2018]
+# Y_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_{}.npy"
+#PHILISTINE station data for each year [2011-2018]
+Y_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_{}.npy"
 
-#MAHANGA station data for each year
-# Y2009_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2009.npy"
-# Y2010_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2010.npy"
-# Y2011_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2011.npy"
-# Y2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2012.npy"
-# Y2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2013.npy"
-# Y2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2014.npy"
-# Y2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2015.npy"
-# Y2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2016.npy"
-# Y2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2017.npy"
-# Y2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Mahanga/Mahanga_2018.npy"
-
-#LARKINS station data for each year
-# Y2014_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_2014.npy"
-# Y2015_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_2015.npy"
-# Y2016_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_2016.npy"
-# Y2017_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_2017.npy"
-# Y2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Larkins/Larkins_2018.npy"
-
-#CASTLE MOUNT station data for each year
-# Y2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_2012.npy"
-# Y2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_2013.npy"
-# Y2014_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_2014.npy"
-# Y2015_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_2015.npy"
-# Y2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Castle Mount/CastleMount_2016.npy"
-
-#MURCHISON station data for each year
-Y2009_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2009.npy"
-Y2010_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2010.npy"
-Y2011_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2011.npy"
-Y2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2012.npy"
-Y2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2013.npy"
-Y2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2014.npy"
-Y2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2015.npy"
-Y2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2016.npy"
-Y2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2017.npy"
-Y2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Murchison/Murchison_2018.npy"
-#
-#PHILISTINE station data for each year
-# Y2011_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2011.npy"
-# Y2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2012.npy"
-# Y2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2013.npy"
-# Y2014_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2014.npy"
-# Y2015_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2015.npy"
-# Y2016_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2016.npy"
-# Y2017_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2017.npy"
-# Y2018_file = "C:/Users/Bonnamourar/OneDrive - NIWA/Station data/Philistine/Philistine_2018.npy"
-
-year = 2018
-Stname = ['Murchison']
-
-# load data
-inp_dat = np.load(Y2018_file,allow_pickle=True)
-inp_doy = np.asarray(convert_datetime_julian_day(inp_dat[:, 0]))
-inp_hourdec = convert_dt_to_hourdec(inp_dat[:, 0])
-plot_dt = inp_dat[:, 0] # model stores initial state
-
-# make grids of input data
-grid_size = 1
-grid_id = np.arange(grid_size)
-inp_ta = np.asarray(inp_dat[:,2],dtype=np.float)[:, np.newaxis] * np.ones(grid_size) + 273.16  # 2 metre air temp in C
-inp_precip = np.asarray(inp_dat[:,4],dtype=np.float)[:, np.newaxis] * np.ones(grid_size)  # precip in mm
-inp_sw = np.asarray(inp_dat[:,3],dtype=np.float)[:, np.newaxis] * np.ones(grid_size)
+Stname = ['Philistine']
+for i in range (0,8) :
+    year = 2011 + i
 
 
-init_swe = np.ones(inp_ta.shape[1:],dtype=np.float) * 0  # give initial value of swe as starts in spring
-init_d_snow = np.ones(inp_ta.shape[1:],dtype=np.float) * 30  # give initial value of days since snow
+    # load data
+    inp_dat = np.load(Y_file.format(year),allow_pickle=True)
+    inp_doy = np.asarray(convert_datetime_julian_day(inp_dat[:, 0]))
+    inp_hourdec = convert_dt_to_hourdec(inp_dat[:, 0])
+    plot_dt = inp_dat[:, 0] # model stores initial state
 
-# call main function once hourly/sub-hourly temp and precip data available.
-st_swe, st_melt, st_acc, st_alb = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=3600,init_swe=init_swe,
-                                           init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='clark2009', **config)
-
-st_swe1, st_melt1, st_acc1, st_alb1 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=3600, init_swe=init_swe,
-                                           init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-
-# MUELLER SWE csv file
-# csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Mueller SWE.csv"
-# MAHANGA SWE csv file
-# csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Mahanga SWE.csv"
-# LARKINS SWE csv file
-# csv_file ="C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Larkins SWE.csv"
-# CASTLE MOUNT SWE csv file
-# csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Castle Mount SWE.csv"
-# MURCHISON SWE csv file
-csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Murchison SWE.csv"
-# PHILISTINE SWE csv file
-# csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Philistine SWE.csv"
-
-# load observed data
-inp_datobs = np.genfromtxt(csv_file, delimiter=',',usecols=(1),
-                        skip_header=4)*1000
-inp_timeobs = np.genfromtxt(csv_file, usecols=(0),
-                         dtype=(str), delimiter=',', skip_header=4)
-inp_dtobs = np.asarray([dt.datetime.strptime(t, '%d/%m/%Y %H:%M') for t in inp_timeobs])
-
-ind = np.logical_and(inp_dtobs >= plot_dt[0],inp_dtobs <= plot_dt[-1])
-
-# print('rmsd = {}'.format(rmsd(mod,obs)))
-plt.plot(inp_dtobs[ind],inp_datobs[ind],"o", label = "Observed SWE")
-
-plt.plot(plot_dt,st_swe[1:, 0],label='clark2009')
-plt.plot(plot_dt,st_swe1[1:, 0],label='dsc_snow-param albedo')
-plt.legend()
-ax1 = plt.gca()
-ax2 = ax1.twinx()
-ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3)
-ax2.plot(plot_dt,np.cumsum(inp_precip), label = "Precipitation")
-#plt.xticks(range(0,len(st_swe[:, 0]),48*30),np.linspace(inp_doy[0],inp_doy[-1]+365+1,len(st_swe[:, 0])/(48*30.)+1,dtype=int))
-plt.gcf().autofmt_xdate()
-months = mdates.MonthLocator()  # every month
-# days = mdates.DayLocator(interval=1)  # every day interval = 7 every week
-monthsFmt = mdates.DateFormatter('%b')
-
-ax = plt.gca()
-ax.xaxis.set_major_locator(months)
-ax.xaxis.set_major_formatter(monthsFmt)
+    # make grids of input data
+    grid_size = 1
+    grid_id = np.arange(grid_size)
+    inp_ta = np.asarray(inp_dat[:,2],dtype=np.float)[:, np.newaxis] * np.ones(grid_size) + 273.16  # 2 metre air temp in C
+    inp_precip = np.asarray(inp_dat[:,4],dtype=np.float)[:, np.newaxis] * np.ones(grid_size)  # precip in mm
+    inp_sw = np.asarray(inp_dat[:,3],dtype=np.float)[:, np.newaxis] * np.ones(grid_size)
 
 
-plt.xlabel('Month')
-plt.ylabel('SWE mm w.e.')
-plt.legend()
-plt.title('Cumulative mass balance TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}, Year : {}, Station : {}'.format(config['tf'],config['rf'],config['tmelt'], year, Stname[0]))
+    init_swe = np.ones(inp_ta.shape[1:],dtype=np.float) * 0  # give initial value of swe as starts in spring
+    init_d_snow = np.ones(inp_ta.shape[1:],dtype=np.float) * 30  # give initial value of days since snow
 
-manager = plt.get_current_fig_manager()
-manager.window.showMaximized()
+    # call main function once hourly/sub-hourly temp and precip data available.
+    st_swe, st_melt, st_acc, st_alb = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=3600,init_swe=init_swe,
+                                               init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='clark2009', **config)
 
-# plt.savefig("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/{}/{} {} daily TF{:2.4f}RF{:2.4f}Tmelt{:3.2f}_ros.png".format(Stname[0],Stname[0],year, config['tf'],config['rf'],config['tmelt']))
-plt.show()
-plt.close()
+    st_swe1, st_melt1, st_acc1, st_alb1 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=3600, init_swe=init_swe,
+                                               init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
 
-# load VCSN files
-# CASTLE MOUNT
-# nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_CastleMo_strahler3-VC.nc",'r')
-# nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_CastleMo_strahler3-VN.nc",'r')
-# LARKINS
-# nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Larkins_strahler3-VC.nc",'r')
-# nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_Larkins_strahler3-VN.nc",'r')
-#MAHANGA
-# nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Mahanga_strahler3-VC.nc",'r')
-#MUELLER
-# nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Mueller_strahler3-VC.nc",'r')
-# nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_Mueller_strahler3-VN.nc",'r')
-#PHILISTINE
-# nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Philisti_strahler3-VC.nc",'r')
-# nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_Philisti_strahler3-VN.nc",'r')
+    # MUELLER SWE csv file
+    # csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Mueller SWE.csv"
+    # MAHANGA SWE csv file
+    # csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Mahanga SWE.csv"
+    # LARKINS SWE csv file
+    # csv_file ="C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Larkins SWE.csv"
+    # CASTLE MOUNT SWE csv file
+    # csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Castle Mount SWE.csv"
+    # MURCHISON SWE csv file
+    # csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Murchison SWE.csv"
+    # PHILISTINE SWE csv file
+    csv_file = "C:/Users/Bonnamourar/OneDrive - NIWA/CSV SWE/Philistine SWE.csv"
 
-swe_VC = nc_file_VC.variables['snwstor'][:,0,0,0] #snow storage VC files
-# swe_VN = nc_file_VN.variables['snwstor'][:,0,0,0] #snow storage VN files
-nc_datetimes_VC = nc.num2date(nc_file_VC.variables['time'][:], nc_file_VC.variables['time'].units) #VC dates
-# nc_datetimes_VN = nc.num2date(nc_file_VN.variables['time'][:], nc_file_VN.variables['time'].units) #VN dates
+    # load observed data
+    inp_datobs = np.genfromtxt(csv_file, delimiter=',',usecols=(1),
+                            skip_header=4)*1000
+    inp_timeobs = np.genfromtxt(csv_file, usecols=(0),
+                             dtype=(str), delimiter=',', skip_header=4)
+    inp_dtobs = np.asarray([dt.datetime.strptime(t, '%d/%m/%Y %H:%M') for t in inp_timeobs])
 
-ind_VC = np.logical_and(nc_datetimes_VC >= plot_dt[0],nc_datetimes_VC <= plot_dt[-1])
-# ind_VN = np.logical_and(nc_datetimes_VN >= plot_dt[0],nc_datetimes_VN <= plot_dt[-1])
+    ind = np.logical_and(inp_dtobs >= plot_dt[0],inp_dtobs <= plot_dt[-1])
 
-swe_VC_year = swe_VC[ind_VC]
-# swe_VN_year = swe_VN[ind_VN]
-year_VC = nc_datetimes_VC[ind_VC] #one year VC
-# year_VN = nc_datetimes_VN[ind_VN] #one year VN
+    plt.plot(inp_dtobs[ind],inp_datobs[ind],"o", label = "Observed SWE")
 
-# plt.get_backend() -> to determine the backend used
-plt.title('Models VC and VN for the year {}, Station : {},TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}'.format(year, Stname[0],config['tf'],config['rf'],config['tmelt']))
-plt.plot(inp_dtobs[ind],inp_datobs[ind],"o", label = "Observed SWE")
-plt.plot(year_VC, swe_VC_year, label = 'VC', color = "magenta")
-# plt.plot(year_VN, swe_VN_year, label = 'VN', color = "salmon")
-plt.legend()
-ax1 = plt.gca()
-ax2 = ax1.twinx()
-ax2.plot(plot_dt,np.cumsum(inp_precip), label = "Precipitation")
-ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3)
-plt.ylabel('SWE mm w.e.')
-plt.legend()
-manager1 = plt.get_current_fig_manager()
-manager1.window.showMaximized()
+    plt.plot(plot_dt,st_swe[1:, 0],label='clark2009')
+    plt.plot(plot_dt,st_swe1[1:, 0],label='dsc_snow-param albedo')
+    plt.legend()
+    ax1 = plt.gca()
+    ax2 = ax1.twinx()
+    ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3)
+    ax2.plot(plot_dt,np.cumsum(inp_precip), label = "Precipitation")
 
-# plt.savefig("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_VCSN plots/{} VCSN_{}.png".format(Stname[0], year), dpi =600)
-plt.show()
-plt.close()
+    plt.gcf().autofmt_xdate()
+    months = mdates.MonthLocator()  # every month
 
+    monthsFmt = mdates.DateFormatter('%b')
+
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(months)
+    ax.xaxis.set_major_formatter(monthsFmt)
+    ax1.set_ylabel(r"SWE mm w.e.")
+    ax2.set_ylabel(r"Precipitation mm")
+    plt.xlabel('Month')
+
+    plt.legend()
+    plt.title('Cumulative mass balance TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}, Year : {}, Station : {}'.format(config['tf'],config['rf'],config['tmelt'], year, Stname[0]))
+
+    manager = plt.get_current_fig_manager()
+    manager.window.showMaximized()
+
+    # plt.savefig("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/{}_clark&albedo plots/{} {} daily TF{:2.4f}RF{:2.4f}Tmelt{:3.2f}_ros.png".format(Stname[0],Stname[0],year, config['tf'],config['rf'],config['tmelt']))
+    plt.show()
+    plt.close()
+
+    # load VCSN files
+    # CASTLE MOUNT
+    # nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_CastleMo_strahler3-VC.nc",'r')
+    # nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_CastleMo_strahler3-VN.nc",'r')
+    # LARKINS
+    # nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Larkins_strahler3-VC.nc",'r')
+    # nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_Larkins_strahler3-VN.nc",'r')
+    # MAHANGA
+    # nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Mahanga_strahler3-VC.nc",'r')
+    # MUELLER
+    # nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Mueller_strahler3-VC.nc",'r')
+    # nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_Mueller_strahler3-VN.nc",'r')
+    # PHILISTINE
+    nc_file_VC = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VC_2007-2019/tseries_2007010122_2019013121_utc_topnet_Philisti_strahler3-VC.nc",'r')
+    nc_file_VN = nc.Dataset(r"C:/Users/Bonnamourar/Desktop/SIN/VCSN/VN_2007-2017/tseries_2007010122_2017123121_utc_topnet_Philisti_strahler3-VN.nc",'r')
+
+    # snow storage VC&VN files
+    swe_VC = nc_file_VC.variables['snwstor'][:,0,0,0]
+    swe_VN = nc_file_VN.variables['snwstor'][:,0,0,0]
+
+    # time VC&VN files
+    nc_datetimes_VC = nc.num2date(nc_file_VC.variables['time'][:], nc_file_VC.variables['time'].units)
+    nc_datetimes_VN = nc.num2date(nc_file_VN.variables['time'][:], nc_file_VN.variables['time'].units)
+
+    # accumulate precipitation VCSN files
+    precip_VC = nc_file_VC.variables['aprecip'][:,0,0,0]
+
+    # keep the same time than the other files
+    ind_VC = np.logical_and(nc_datetimes_VC >= plot_dt[0],nc_datetimes_VC <= plot_dt[-1])
+    ind_VN = np.logical_and(nc_datetimes_VN >= plot_dt[0],nc_datetimes_VN <= plot_dt[-1])
+    swe_VC_year = swe_VC[ind_VC]
+    swe_VN_year = swe_VN[ind_VN]
+    year_VC = nc_datetimes_VC[ind_VC]
+    year_VN = nc_datetimes_VN[ind_VN]
+    precip_VC_year = precip_VC[ind_VC]
+    cum_precip_VC = np.cumsum(precip_VC_year)*1000
+
+    # plt.get_backend() -> to determine the backend used
+    plt.title('Models VC and VN for the year {}, Station : {},TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}'.format(year, Stname[0],config['tf'],config['rf'],config['tmelt']))
+    plt.plot(inp_dtobs[ind],inp_datobs[ind],"o", label = "Observed SWE")
+    plt.plot(year_VC, swe_VC_year, label = 'VC', color = "magenta")
+    plt.plot(year_VN, swe_VN_year, label = 'VN', color = "salmon")
+    plt.legend()
+    ax1 = plt.gca()
+    ax2 = ax1.twinx()
+    ax2.plot(plot_dt,np.cumsum(inp_precip), label = "Precipitation")
+    ax2.plot(year_VC,cum_precip_VC, label = "Precipitation VCSN", color = 'purple')
+    ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=3)
+
+    ax1.set_ylabel(r"SWE mm w.e.")
+    ax2.set_ylabel(r"Precipitation mm")
+
+    plt.legend()
+    manager1 = plt.get_current_fig_manager()
+    manager1.window.showMaximized()
+
+    # plt.savefig("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_VCSN plots/{} VCSN_{}.png".format(Stname[0], year), dpi =600)
+    plt.show()
+    plt.close()
+
+    # plot summarising every other plots
+    plt.plot(inp_dtobs[ind],inp_datobs[ind],"o", label = "Observed SWE")
+    plt.plot(plot_dt,st_swe[1:, 0],linewidth = 2,label='clark2009')
+    plt.plot(plot_dt,st_swe1[1:, 0],linewidth = 2,label='dsc_snow-param albedo')
+    plt.plot(year_VC, swe_VC_year,linewidth = 3,  label = 'VC', color = "magenta")
+    plt.plot(year_VN, swe_VN_year, linewidth = 3, label = 'VN', color = "crimson")
+    plt.legend()
+    ax1 = plt.gca()
+    ax2 = ax1.twinx()
+
+    ax2.plot(plot_dt,np.cumsum(inp_precip), label = "Precipitation", color = 'navy')
+    ax2.plot(year_VC,cum_precip_VC, label = "Precipitation VCSN", color = 'darkorchid')
+
+    ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05), ncol=5)
+    ax1.set_ylabel(r"SWE mm w.e.")
+    ax2.set_ylabel(r"Precipitation mm")
+    plt.legend()
+
+    plt.gcf().autofmt_xdate()
+    months = mdates.MonthLocator()  # every month
+    monthsFmt = mdates.DateFormatter('%b')
+    ax = plt.gca()
+    ax.xaxis.set_major_locator(months)
+    ax.xaxis.set_major_formatter(monthsFmt)
+    ax.set_xlabel(r"Month")
+
+    plt.title('Cumulative mass balance TF:{:2.4f}, RF: {:2.4f}, Tmelt:{:3.2f}, Year : {}, Station : {}'.format(config['tf'],config['rf'],config['tmelt'], year, Stname[0]))
+    plt.legend()
+
+    manager2 = plt.get_current_fig_manager()
+    manager2.window.showMaximized()
+    # plt.savefig("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/{}/{} {} daily TF{:2.4f}RF{:2.4f}Tmelt{:3.2f}_ros_VCSN.png".format(Stname[0],Stname[0],year, config['tf'],config['rf'],config['tmelt']))
+    plt.show()
+    plt.close()
 
 # saved files
 # LARKINS
@@ -249,22 +251,25 @@ plt.close()
 # save_file_VC = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mueller/Mueller_npy files/Mueller_VC_{}"
 # save_file_VN = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mueller/Mueller_npy files/Mueller_VN_{}"
 # MURCHISON
-save_file_clark2009 ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_{}"
-save_file_albedo ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_{}"
+# save_file_clark2009 ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_{}"
+# save_file_albedo ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_{}"
 # MAHANGA
 # save_file_clark2009 = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_{}"
 # save_file_albedo = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_{}"
 # save_file_VC ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_VC_{}"
 
-# save the data : Clark 2009
-output1 = np.transpose(np.vstack((plot_dt,st_swe[1:, 0])))
-np.save(save_file_clark2009.format(year),output1)
-# save the data : Albedo
-output2 = np.transpose(np.vstack((plot_dt,st_swe1[1:, 0])))
-np.save(save_file_albedo.format(year),output2)
-# save the data : VC
-output3 = np.transpose(np.vstack((year_VC,swe_VC_year)))
-np.save(save_file_VC.format(year),output3)
+# # save the data : Clark 2009
+# output1 = np.transpose(np.vstack((plot_dt,st_swe[1:, 0])))
+# np.save(save_file_clark2009.format(year),output1)
+#
+# # save the data : Albedo
+# output2 = np.transpose(np.vstack((plot_dt,st_swe1[1:, 0])))
+# np.save(save_file_albedo.format(year),output2)
+#
+# # save the data : VC
+# output3 = np.transpose(np.vstack((year_VC,swe_VC_year)))
+# np.save(save_file_VC.format(year),output3)
+
 # save the data : VN
 # if year <= 2017 :
 #     output4 = np.transpose(np.vstack((year_VN,swe_VN_year)))

@@ -7,92 +7,34 @@ import matplotlib.dates as mdates
 from nz_snow_tools.util.utils import fill_timeseries
 from nz_snow_tools.eval.utils_Ambre import maxmin
 
-#CASTLE MOUNT Clark2009 and Albedo
-# C2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_clark2009_2012.npy"
-# C2013_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_clark2009_2013.npy"
-# C2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_clark2009_2014.npy"
-# C2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_clark2009_2015.npy"
-# C2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_clark2009_2016.npy"
-# A2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_dsc_snow-param albedo_2012.npy"
-# A2013_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_dsc_snow-param albedo_2013.npy"
-# A2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_dsc_snow-param albedo_2014.npy"
-# A2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_dsc_snow-param albedo_2015.npy"
-# A2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_dsc_snow-param albedo_2016.npy"
-# LARKINS Clark2009 and Albedo
-# C2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_clark2009_2014.npy"
-# C2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_clark2009_2015.npy"
-# C2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_clark2009_2016.npy"
-# C2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_clark2009_2017.npy"
-# C2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_clark2009_2018.npy"
-# A2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_dsc_snow-param albedo_2014.npy"
-# A2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_dsc_snow-param albedo_2015.npy"
-# A2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_dsc_snow-param albedo_2016.npy"
-# A2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_dsc_snow-param albedo_2017.npy"
-# A2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_dsc_snow-param albedo_2018.npy"
-# MAHANGA Clark2009 and Albedo
-# C2009_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2009.npy"
-# C2010_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2010.npy"
-# C2011_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2011.npy"
-# C2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2012.npy"
-# C2013_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2013.npy"
-# C2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2014.npy"
-# C2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2015.npy"
-# C2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2016.npy"
-# C2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2017.npy"
-# C2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_2018.npy"
-# A2009_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2009.npy"
-# A2010_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2010.npy"
-# A2011_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2011.npy"
-# A2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2012.npy"
-# A2013_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2013.npy"
-# A2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2014.npy"
-# A2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2015.npy"
-# A2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2016.npy"
-# A2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2017.npy"
-# A2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_2018.npy"
-# MUELLER Clark2009, Albedo and VCSN
+#CASTLE MOUNT Clark2009, Albedo and VCSN [2012-2016]
+# C_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_clark2009_{}.npy"
+# A_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_dsc_snow-param albedo_{}.npy"
+# VC_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_VC_{}.npy"
+# VN_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Castle Mount/CastleMount_npy files/Castle Mount_VN_{}.npy"
+# LARKINS Clark2009, Albedo and VCSN [2014-2018]
+# C_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_clark2009_{}.npy"
+# A_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_dsc_snow-param albedo_{}.npy"
+# VC_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_VC_{}.npy"
+# VN_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Larkins/Larkins_npy files/Larkins_VN_{}.npy"
+# MAHANGA Clark2009, Albedo and VCSN [2009-2018]
+# C_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_clark2009_{}.npy"
+# A_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_dsc_snow-param albedo_{}.npy"
+# VC_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_VC_{}.npy"
+# VN_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mahanga/Mahanga_npy files/Mahanga_VN_{}.npy"
+# MUELLER Clark2009, Albedo and VCSN [2011-2018]
 C_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mueller/Mueller_npy files/Mueller_clark2009_{}.npy"
 A_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mueller/Mueller_npy files/Mueller_dsc_snow-param albedo_{}.npy"
 VC_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mueller/Mueller_npy files/Mueller_VC_{}.npy"
 VN_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Mueller/Mueller_npy files/Mueller_VN_{}.npy"
-# MURCHISON Clark2009 and Albedo
-# C2009_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2009.npy"
-# C2010_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2010.npy"
-# C2011_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2011.npy"
-# C2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2012.npy"
-# C2013_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2013.npy"
-# C2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2014.npy"
-# C2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2015.npy"
-# C2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2016.npy"
-# C2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2017.npy"
-# C2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_2018.npy"
-# A2009_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2009.npy"
-# A2010_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2010.npy"
-# A2011_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2011.npy"
-# A2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2012.npy"
-# A2013_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2013.npy"
-# A2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2014.npy"
-# A2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2015.npy"
-# A2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2016.npy"
-# A2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2017.npy"
-# A2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_2018.npy"
-# PHILISTINE Clark2009 and Albedo
-# C2011_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_2011.npy"
-# C2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_2012.npy"
-# C2013_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_2013.npy"
-# C2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_2014.npy"
-# C2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_2015.npy"
-# C2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_2016.npy"
-# C2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_2017.npy"
-# C2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_2018.npy"
-# A2011_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_2011.npy"
-# A2012_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_2012.npy"
-# A2013_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_2013.npy"
-# A2014_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_2014.npy"
-# A2015_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_2015.npy"
-# A2016_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_2016.npy"
-# A2017_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_2017.npy"
-# A2018_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_2018.npy"
+# MURCHISON Clark2009 and Albedo [2009-2018]
+# C_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_clark2009_{}.npy"
+# A_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Murchison/Murchison_npy files/Murchison_dsc_snow-param albedo_{}.npy"
+# PHILISTINE Clark2009, Albedo and VCSN [2011-2018]
+# C_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_clark2009_{}.npy"
+# A_file ="C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_dsc_snow-param albedo_{}.npy"
+# VC_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_VC_{}.npy"
+# VN_file = "C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Philistine/Philistine_npy files/Philistine_VN_{}.npy"
 
 import csv
 Stname = ['Mueller']
@@ -113,7 +55,7 @@ with open("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Analy
         # plt.show()
 
 
-            # load dsc_param_albedo model
+        # load dsc_param_albedo model
         inp_albedo = np.load(A_file.format(Year),allow_pickle=True)
         inp_time2 = inp_albedo[:,0]
         inp_swe2 = np.asarray(inp_albedo[:,1],dtype=np.float)
@@ -121,7 +63,7 @@ with open("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Analy
         # plt.plot(inp_time2, inp_swe2, color ="aquamarine")
         # plt.show()
 
-            # load VC model
+        # load VC model
         inp_VC = np.load(VC_file.format(Year),allow_pickle=True)
         inp_time3 = inp_VC[:,0]
         inp_swe3 = np.asarray(inp_VC[:,1],dtype=np.float)
@@ -168,7 +110,8 @@ with open("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Analy
         # plt.plot(inp_dtobs_clean,inp_datobs_clean,"o", label = "Observed SWE", color = "blue")
         # plt.show()
 
-        #mean = mean_bias(inp_swe1,inp_datobs[ind])
+        # mean = np.mean(inp_datobs_clean)
+        # print('mean observed :',mean)
 
         # Max and Min values, observed data
         try :
@@ -202,13 +145,12 @@ with open("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Analy
         except :
             print('ERROR {}'.format(Year))
         import csv
+        plt.plot(inp_dtobs_clean,inp_datobs_clean)
 
-        # with open("C:/Users/Bonnamourar/OneDrive - NIWA/SIN calibration timeseries/Analysis/{}_Max&Min.csv".format(Stname[0]), mode='w', newline ='') as maxmin_file:
-        #     maxmin_writer = csv.writer(maxmin_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        #     fieldnames = ['Data', 'Year', 'SWE max', 'Date max', 'SWE min', 'Date min']
-        # maxmin_writer = csv.writer(maxmin_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-        # maxmin_writer.writerow(['Data', 'Year', 'SWE max', 'Date max', 'SWE min', 'Date min'])
-        # maxmin_writer = csv.DictWriter(maxmin_file, fieldnames=fieldnames)
+
+
+
+        # csv file writing
         try :
             maxmin_writer.writerow({'Data' : 'Observed', 'Year': Year, 'SWE max' : maximum_observed, 'Date max' : date_max_observed, 'SWE min' : minimum_observed, 'Date min' : date_min_observed})
         except :
