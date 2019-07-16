@@ -120,28 +120,28 @@ inp_dt3_clean, wind_clean = fill_timeseries(inp_dt3, wind, 3600)
 
 
 # load each year
-for i in range(0,14):
-    date0 = 2006+ i
-    date1 = 2007 + i
-    try:
-        start_t = np.where(inp_dt_clean == dt.datetime(date0,4,1,00,00))[0][0]
-        end_t = np.where(inp_dt_clean == dt.datetime(date1,4,1,00,00))[0][0]
-        start_t1 = np.where(inp_dt1_clean == dt.datetime(date0,4,1,00,00))[0][0]
-        end_t1 = np.where(inp_dt1_clean == dt.datetime(date1,4,1,00,00))[0][0]
-        start_t2 = np.where(inp_dt2_clean == dt.datetime(date0,4,1,00,00))[0][0]
-        end_t2 = np.where(inp_dt2_clean == dt.datetime(date1,4,1,00,00))[0][0]
-        #start_t3 = np.where(inp_dt3_clean == dt.datetime(date0,4,1,00,00))[0][0]
-        #end_t3 = np.where(inp_dt3_clean == dt.datetime(date1,4,1,00,00))[0][0]
-
-        print(np.all(inp_dt_clean[start_t:end_t]==inp_dt1_clean[start_t1:end_t1]))
-        print(np.all(inp_dt_clean[start_t:end_t]==inp_dt2_clean[start_t2:end_t2]))
-        print(inp_dt_clean[start_t:end_t].shape)
-        print(inp_dt1_clean[start_t1:end_t1].shape)
-        print(inp_dt2_clean[start_t2:end_t2].shape)
-        output = np.transpose(np.vstack((inp_dt_clean[start_t:end_t],rh_clean[start_t:end_t],ta_clean[start_t:end_t],radiation_clean[start_t1:end_t1],precip_clean[start_t2:end_t2])))
-        np.save(save_file.format(date0),output)
-    except:
-        print("Missing data for {}".format(date0))
+# for i in range(0,14):
+#     date0 = 2006+ i
+#     date1 = 2007 + i
+#     try:
+#         start_t = np.where(inp_dt_clean == dt.datetime(date0,4,1,00,00))[0][0]
+#         end_t = np.where(inp_dt_clean == dt.datetime(date1,4,1,00,00))[0][0]
+#         start_t1 = np.where(inp_dt1_clean == dt.datetime(date0,4,1,00,00))[0][0]
+#         end_t1 = np.where(inp_dt1_clean == dt.datetime(date1,4,1,00,00))[0][0]
+#         start_t2 = np.where(inp_dt2_clean == dt.datetime(date0,4,1,00,00))[0][0]
+#         end_t2 = np.where(inp_dt2_clean == dt.datetime(date1,4,1,00,00))[0][0]
+#         #start_t3 = np.where(inp_dt3_clean == dt.datetime(date0,4,1,00,00))[0][0]
+#         #end_t3 = np.where(inp_dt3_clean == dt.datetime(date1,4,1,00,00))[0][0]
+#
+#         print(np.all(inp_dt_clean[start_t:end_t]==inp_dt1_clean[start_t1:end_t1]))
+#         print(np.all(inp_dt_clean[start_t:end_t]==inp_dt2_clean[start_t2:end_t2]))
+#         print(inp_dt_clean[start_t:end_t].shape)
+#         print(inp_dt1_clean[start_t1:end_t1].shape)
+#         print(inp_dt2_clean[start_t2:end_t2].shape)
+#         output = np.transpose(np.vstack((inp_dt_clean[start_t:end_t],rh_clean[start_t:end_t],ta_clean[start_t:end_t],radiation_clean[start_t1:end_t1],precip_clean[start_t2:end_t2])))
+#         np.save(save_file.format(date0),output)
+#     except:
+#         print("Missing data for {}".format(date0))
 
 
 
