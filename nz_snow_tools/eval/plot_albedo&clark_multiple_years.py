@@ -19,7 +19,7 @@ import netCDF4 as nc
 
 
 data_folder = "C:/Users/conwayjp/NIWA/Ambre Bonnamour - SIN calibration timeseries"
-
+swe_folder = "C:/Users/conwayjp/NIWA/Ambre Bonnamour - CSV SWE"
 
 # npy files
 # clark_file with different VCSN parameters
@@ -318,7 +318,7 @@ maxswe = [3000,1000,1000,2000,600,1500]
 
 for Stname,ymax in zip(sites,maxswe):
 # csv file
-    csv_file = "C:/Users/conwayjp/NIWA/Ambre Bonnamour - CSV SWE/{}_SWE.csv".format(Stname)
+    csv_file = swe_folder + "/{}_SWE.csv".format(Stname)
 
     f2, axs2 = plt.subplots(4, 3, figsize=(12, 12))  # sets number of rows and columns of subplot as well as figure size in inches
     axs = axs2.ravel()
