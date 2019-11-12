@@ -1,14 +1,10 @@
 import numpy as np
-from nz_snow_tools.snow.clark2009_snow_model import snow_main_simple
-from nz_snow_tools.util.utils import make_regular_timeseries,convert_datetime_julian_day,convert_dt_to_hourdec,nash_sut, mean_bias, rmsd, mean_absolute_error
-import matplotlib.pylab as plt
 import datetime as dt
-import matplotlib.dates as mdates
 from nz_snow_tools.util.utils import fill_timeseries
-from nz_snow_tools.eval.utils_Ambre import maxmin
-from nz_snow_tools.eval.utils_Ambre import amount_snowmelt
+from nz_snow_tools.util.SIN.utils_Ambre import maxmin
+from nz_snow_tools.util.SIN.utils_Ambre import amount_snowmelt
 import netCDF4 as nc
-from nz_snow_tools.eval.utils_Ambre import amount_precipitation
+from nz_snow_tools.util.SIN.utils_Ambre import amount_precipitation
 
 #CASTLE MOUNT [2012-2016]
 # LARKINS [2014-2018]
