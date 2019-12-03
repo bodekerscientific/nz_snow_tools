@@ -1,3 +1,7 @@
+"""
+loads meteorological data from SIN sites in numpy files
+"""
+
 import numpy as np
 from nz_snow_tools.util.utils import make_regular_timeseries
 import matplotlib.pylab as plt

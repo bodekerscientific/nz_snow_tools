@@ -17,7 +17,7 @@ import matplotlib.dates as mdates
 import netCDF4 as nc
 
 
-
+plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Hydro/all_years_plots'
 data_folder = "C:/Users/conwayjp/NIWA/Ambre Bonnamour - SIN calibration timeseries"
 swe_folder = "C:/Users/conwayjp/NIWA/Ambre Bonnamour - CSV SWE"
 
@@ -190,19 +190,31 @@ def plot_year(j, Stname):
     inp_timeobs = np.genfromtxt(csv_file, usecols=(0), dtype=(str), delimiter=',', skip_header=4)
     inp_dtobs = np.asarray([dt.datetime.strptime(t, '%d/%m/%Y %H:%M') for t in inp_timeobs])
     ind = np.logical_and(inp_dtobs >= dt.datetime(year, 4, 1), inp_dtobs <= dt.datetime(year + 1, 4, 1))
+
+    if Stname == 'Mueller': # clearly wrong as snow depth >> 1 m over this period
+        ind = np.logical_and(ind,~np.logical_and(inp_dtobs > dt.datetime(2012, 10, 20), inp_dtobs < dt.datetime(2012, 12, 4)))
+
+    if Stname == 'Philistine': # clearly wrong as snow depth < 1 m during this period
+        ind = np.logical_and(ind, ~np.logical_and(inp_dtobs > dt.datetime(2014, 6, 1), inp_dtobs < dt.datetime(2014, 10, 1)))
+
     datobs_year = inp_datobs[ind]
     dtobs_year = inp_dtobs[ind]
 
+
     # plot data in new frame
-    plt.sca(axs[j])  # set the plot to the correct subplot
+
     plt.title('Year : April {} - March {}'.format(year, year+1))
+    try:
+        plt.plot(dtobs_year, datobs_year, 'o', markersize=2, color='b', label='Observed')
+    except:
+        print('No obs for {}'.format(year))
     # plot
 
-    try:
-        plt.plot(inp_dt1_obs, inp_swe1_obs, linewidth=2, color='r', label='Obs precip')
-    except:
-        plt.plot(dt.datetime(year, 4, 1),0, linewidth=2, color='r', label='Obs precip')
-        print('No Obs precip for {}'.format(year))
+    # try:
+    #     plt.plot(inp_dt1_obs, inp_swe1_obs, linewidth=2, color='r', label='Obs precip')
+    # except:
+    #     plt.plot(dt.datetime(year, 4, 1),0, linewidth=2, color='r', label='Obs precip')
+    #     print('No Obs precip for {}'.format(year))
 
     try:
         plt.plot(inp_dt1_precip, inp_swe1_precip, linewidth=2, color='firebrick', label='VCSN precip')
@@ -272,10 +284,7 @@ def plot_year(j, Stname):
         plt.plot(dt.datetime(year, 4, 1), 0, '--', linewidth=2, color='magenta', label='VN precip + rad + ta')
         print('No VN precip + rad + ta for {}'.format(year))
 
-    try:
-        plt.plot(dtobs_year, datobs_year, 'o', markersize=4, color='b', label='Observed')
-    except:
-        print('No obs for {}'.format(year))
+
 
     plt.gcf().autofmt_xdate()
     months = mdates.MonthLocator()  # every month
@@ -323,8 +332,17 @@ for Stname,ymax in zip(sites,maxswe):
     f2, axs2 = plt.subplots(4, 3, figsize=(12, 12))  # sets number of rows and columns of subplot as well as figure size in inches
     axs = axs2.ravel()
     for j in range(12):  # run through each subplot (here there are 9 because of 3 rows and columns)
-    #
+        plt.sca(axs[j])  # set the plot to the correct subplot
     # for i in range (0,7) :
         plot_year(j,Stname)
 
-    f2.savefig(data_folder + "/small_{}_plots_allyears.png".format(Stname))  # save the figure once it’s done.
+    f2.savefig(plot_folder + "/small_{}_plots_allyears.png".format(Stname),dpi=600)  # save the figure once it’s done.
+    plt.close()
+
+    plt.figure(figsize=[12,4])
+    for j in range(11):
+        plot_year(j, Stname)
+    plt.xlim([dt.datetime(2009,1,1),dt.datetime(2019,1,1)])
+    plt.xticks([dt.datetime(y,1,1) for y in range(2009,2020)],np.arange(2009,2020))
+    plt.title(Stname)
+    plt.savefig(plot_folder + "/small_{}_allyears_ts.png".format(Stname),dpi=600)  # save the figure once it’s done.

@@ -1,5 +1,5 @@
 """
-code to call the snow model for a simple test case using brewster glacier data
+code to call the snow model at a point for SIN sites
 """
 
 import numpy as np

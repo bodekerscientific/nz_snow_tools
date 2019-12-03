@@ -94,7 +94,7 @@ def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04 * 24, rf=0.009
     # dc=config['dc'], tc=config['tc'], a_ice=config['a_ice'], a_freshsnow=config['a_freshsnow'], a_firn=config['a_firn']
     sw_net = sw * (1 - alb)
     if config['ros'] == True:
-        #  specific heat capacity of liquid water = 4220  J / (kg * K)
+        #  specific heat capacity of liquid water = 4220  J / (kg * K); mm/s == kg/m2 per second
         qprc = 4220 * precip_per_s * (ta - 273.16)
         # use theoretical value for precipitation melt factor 0.0108  mm w.e. per hour per W m-2
         if config['ta_m_tt'] == True: # use tmelt as baseline when calculating degree days

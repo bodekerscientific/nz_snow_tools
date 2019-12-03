@@ -77,7 +77,7 @@ def load_subset_modis_annual(catchment, output_dem, year_to_take, modis_folder, 
     if mask_folder is not None:
         mask, trimmed_mask = load_mask_modis(catchment, None, mask_folder, None, modis_dem)
     else: # if no catchment specified, just mask to the valid data points.
-        mask = np.ones(ndsi.shape[1:])
+        mask = np.ones(ndsi.shape[1:],dtype=np.int)
         trimmed_mask = mask
     # trimmed_fsca = trim_data_bounds(mask, lat_array, lon_array, fsca[183].copy(), y_centres, x_centres)
     trimmed_ndsi = trim_data_to_mask(ndsi, mask)
@@ -92,6 +92,7 @@ def load_subset_modis_annual(catchment, output_dem, year_to_take, modis_folder, 
     # mask out values outside of catchment
     trimmed_fsca[:, trimmed_mask == 0] = np.nan
 
+    nc_file.close()
     return trimmed_fsca, modis_dt, trimmed_mask
 
 

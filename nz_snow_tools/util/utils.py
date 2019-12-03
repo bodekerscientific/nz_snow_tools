@@ -274,6 +274,15 @@ def nztm_to_wgs84(in_y, in_x):
     return out_y, out_x
 
 
+def wgs84_to_nztm(in_y, in_x):
+    """converts from WGS84  to NZTM Inputs and outputs can be arrays.
+    """
+    inProj = Proj(init='epsg:4326')
+    outProj = Proj(init='epsg:2193')
+    out_x, out_y = transform(inProj, outProj, in_x, in_y)
+    return out_y, out_x
+
+
 def trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres):
     # Trim down the number of latitudes requested so it all stays in memory
     valid_lat_bounds = np.nonzero(mask.sum(axis=1))[0]
