@@ -1,5 +1,6 @@
 """
 code to generate catchment masks for modelling
+updated to load for all shapefiles in a folder
 """
 from __future__ import division
 
@@ -16,12 +17,12 @@ import os
 #               'Kawarau','Greenstone','Hawea','Fraser','Clutha above Clyde Dam','Cardrona','Arrow' ,'Bannockburn Creek', 'Nevis'] # string identifying the catchment to run. must match the naming of the catchment shapefile
 
 output_dem = 'nztm250m'  # identifier for output dem
-dem_folder = ''  # 'Z:/GIS_DATA/Topography/DEM_NZSOS/'
-dem = 'modis_si_dem_250m'
+dem_folder = ''  # folder with dem (option)
+dem = 'modis_nz_dem_250m'
 
-mask_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\masks'  # location of numpy catchment mask. must be writeable if mask_created == False
-# shapefile containing polyline or polygon of catchment in WGS84
-catchment_shp_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\catchments'
+mask_folder = '/nesi/nobackup/niwa00026/Observation/Snow_RemoteSensing/catchment_masks'   # location of numpy catchment mask. must be writeable if mask_created == False
+
+catchment_shp_folder = '/nesi/nobackup/niwa00026/Observation/Snow_RemoteSensing/Catchments' # shapefile containing polyline or polygon of catchment in WGS84
 
 
 contents = os.listdir(catchment_shp_folder)

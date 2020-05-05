@@ -9,32 +9,33 @@ from __future__ import division
 
 import numpy as np
 import pickle
-#from nz_snow_tools.eval.catchment_evaluation import *
+# from nz_snow_tools.eval.catchment_evaluation import *
 from nz_snow_tools.eval.catchment_evaluation_annual import load_subset_modis_annual
 
 import os
+
 # os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
 
-if __name__ == '__main__':
-
-    origin = 'topleft'
-    catchment = 'Wilkin'  # string identifying catchment modelled
-    output_dem = 'nztm250m'  # identifier for output dem
-    years_to_take = range(2000, 2001 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-    modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
-    mask_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\masks'
-    catchment_shp_folder = ''
-    modis_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\NSDI_SI_cloudfilled'
-    dem_folder = ''
-    modis_dem = 'modis_si_dem_250m'
-    output_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS'
+def calc_modis_catchment_metrics(catchment, years_to_take, output_dem, mask_folder, modis_folder, modis_dem, output_folder):
+    """
+    reads in and computes statistics on MODIS data for specific catchments. Requires that mask has been created using
+    nz_snow_tools/util/generate_mask.py
+    saves output to a pickle file
+    :param catchment,  # string identifying catchment modelled
+    :param  years_to_take = range(2000, 2001 + 1)
+    :param output_dem = 'nztm250m'  # identifier for output dem
+    :param modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
+    :param mask_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\masks'
+    :param modis_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\NSDI_SI_cloudfilled'
+    :param modis_dem = 'modis_nz_dem_250m'
+    :param output_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS'):
+    """
 
     # set up lists
     ann_ts_av_sca_m = []
     ann_ts_av_sca_thres_m = []
     ann_dt_m = []
     ann_scd_m = []
-
 
     for year_to_take in years_to_take:
 
@@ -56,7 +57,7 @@ if __name__ == '__main__':
         ann_ts_av_sca_thres_m.append(np.asarray(ba_modis_sca_thres))
 
         # print('calc snow cover duration')
-        modis_scd = np.sum(modis_sc, axis=0) # count days with snow over threshold
+        modis_scd = np.sum(modis_sc, axis=0)  # count days with snow over threshold
         modis_scd[modis_mask == 0] = -999  # set areas outside catchment to -999
         modis_scd[np.logical_and(np.isnan(modis_fsca[0]), modis_mask == 1)] = -1  # set areas of water to -1
 
@@ -72,7 +73,19 @@ if __name__ == '__main__':
         modis_scd = None
 
     ann = [ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m]
-    pickle.dump(ann, open(
-        output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(years_to_take[0], years_to_take[-1], catchment, output_dem,
-                                                                        modis_sc_threshold),
-        'wb'), -1)
+    outfile = '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(years_to_take[0], years_to_take[-1], catchment, output_dem, modis_sc_threshold)
+    pickle.dump(ann, open(output_folder + outfile, 'wb'), -1)
+
+
+if __name__ == '__main__':
+    # origin = 'topleft'
+    catchment = 'Wilkin'  # string identifying catchment modelled
+    output_dem = 'nztm250m'  # identifier for output dem
+    years_to_take = range(2000, 2001 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+    modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
+    mask_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\masks'
+    modis_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\NSDI_SI_cloudfilled'
+    modis_dem = 'modis_nz_dem_250m'
+    output_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS'
+
+    calc_modis_catchment_metrics(catchment, years_to_take, output_dem, mask_folder, modis_folder, modis_dem, output_folder)
