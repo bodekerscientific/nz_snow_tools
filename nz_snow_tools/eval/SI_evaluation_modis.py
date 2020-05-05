@@ -50,8 +50,7 @@ if __name__ == '__main__':
     for year_to_take in years_to_take:
         print('loading modis data {}'.format(year_to_take))
         # load modis data for evaluation - trims to extent of catchment
-        modis_fsca, modis_dt, modis_mask = load_subset_modis_annual(catchment, None, year_to_take, modis_folder, None, modis_dem, None,
-                                                                    None)
+        modis_fsca, modis_dt, modis_mask = load_subset_modis_annual(catchment, year_to_take, modis_folder, modis_dem, None)
         modis_sc = modis_fsca >= modis_sc_threshold
         # modis_fsca = None # get rid of fsca out of memory
         modis_mask = nztm_dem > 0  # set mask to land area only

@@ -40,8 +40,7 @@ if __name__ == '__main__':
 
         print('loading modis data {}'.format(year_to_take))
         # load modis data for evaluation - trims to extent of catchment
-        modis_fsca, modis_dt, modis_mask = load_subset_modis_annual(catchment, output_dem, year_to_take, modis_folder,
-                                                                    dem_folder, modis_dem, mask_folder, catchment_shp_folder)
+        modis_fsca, modis_dt, modis_mask = load_subset_modis_annual(catchment, year_to_take, modis_folder, modis_dem, mask_folder)
         modis_sc = modis_fsca >= modis_sc_threshold
 
         # print('calculating basin average sca')

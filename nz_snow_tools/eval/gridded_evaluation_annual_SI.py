@@ -48,8 +48,7 @@ if __name__ == '__main__':
         print('loading modis data {}'.format(year_to_take))
 
         # load modis data for evaluation
-        modis_fsca, modis_dt, modis_mask = load_subset_modis_annual(catchment, None, year_to_take, modis_folder, None, modis_dem, mask_folder,
-                                                                    None)
+        modis_fsca, modis_dt, modis_mask = load_subset_modis_annual(catchment, year_to_take, modis_folder, modis_dem, mask_folder)
 
         # set up output array
         nt = modis_fsca.shape[0]
