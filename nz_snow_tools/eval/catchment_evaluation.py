@@ -106,7 +106,7 @@ def load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, d
     # filter out dud values
     fsca[fsca > 100] = np.nan
     # trim to only the catchment desired
-    mask, trimmed_mask = load_mask_modis(catchment, output_dem, mask_folder, dem_folder=dem_folder, modis_dem=modis_dem)
+    mask, trimmed_mask = load_mask_modis(catchment, mask_folder, modis_dem=modis_dem)
 
     # trimmed_fsca = trim_data_bounds(mask, lat_array, lon_array, fsca[183].copy(), y_centres, x_centres)
     trimmed_fsca = trim_data_to_mask(fsca, mask)
@@ -117,24 +117,25 @@ def load_subset_modis(catchment, output_dem, hydro_year_to_take, modis_folder, d
     return trimmed_fsca, modis_dt, trimmed_mask
 
 
-def load_mask_modis(catchment, output_dem, mask_folder, dem_folder, modis_dem):
+def load_mask_modis(catchment, mask_folder, modis_dem):
     '''
     load mask and trimmed mask of catchment for modis clutha domain
     '''
 
     if modis_dem == 'clutha_dem_250m':
-        # dem_file = dem_folder + modis_dem + '.tif'
-        _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None)
+        _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, extent_s=4.82e6, resolution=250,
+                                                                       origin='bottomleft')
 
     if modis_dem == 'si_dem_250m':
-        # dem_file = dem_folder + modis_dem + '.tif'
         _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
-                                                                              resolution=250)
+                                                                       resolution=250,origin='bottomleft')
 
     if modis_dem == 'modis_si_dem_250m':
-        # dem_file = dem_folder + modis_dem + '.tif'
         _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.085e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
-                                                                       resolution=250)
+                                                                       resolution=250,origin='bottomleft')
+    if modis_dem == 'modis_nz_dem_250m':
+        _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.085e6, extent_e=2.10e6, extent_n=6.20e6, extent_s=4.70e6,
+                                                                              resolution=250, origin='bottomleft')
 
     # # Get the masks for the individual regions of interest
     mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, modis_dem))

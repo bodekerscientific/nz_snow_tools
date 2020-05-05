@@ -71,12 +71,15 @@ def load_subset_modis_annual(catchment, year_to_take, modis_folder, modis_dem, m
     :return: trimmed_fsca, modis_dt, trimmed_mask. The data, datetimes and catchment mask
     """
     # load a file
-    nc_file = nc.Dataset(modis_folder + '/DSC_MOD10A1_{}_v0_nosparse_interp001.nc'.format(year_to_take))
+    if modis_dem == 'modis_nz_dem_250m':
+        nc_file = nc.Dataset(modis_folder + '/DSC_MOD10A1_{}_allnz_v0_nosparse_interp001.nc'.format(year_to_take))
+    else:
+        nc_file = nc.Dataset(modis_folder + '/DSC_MOD10A1_{}_v0_nosparse_interp001.nc'.format(year_to_take))
     ndsi = nc_file.variables['NDSI_Snow_Cover_Cloudfree'][:]  # .astype('float32')  # nsdi in %
 
     # trim to only the catchment desired
     if mask_folder is not None:
-        mask, trimmed_mask = load_mask_modis(catchment, None, mask_folder, None, modis_dem)
+        mask, trimmed_mask = load_mask_modis(catchment, mask_folder, modis_dem)
     else: # if no catchment specified, just mask to the valid data points.
         mask = np.ones(ndsi.shape[1:],dtype=np.int)
         trimmed_mask = mask
