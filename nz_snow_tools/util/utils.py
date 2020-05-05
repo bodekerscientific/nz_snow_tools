@@ -20,8 +20,9 @@ def convert_dt_to_timestamp(dt_list):
     :param dt_list:
     :return:
     """
-    timestamp= [(dt - datetime.datetime(1970, 1, 1)).total_seconds() for dt in dt_list]
+    timestamp = [(dt - datetime.datetime(1970, 1, 1)).total_seconds() for dt in dt_list]
     return timestamp
+
 
 def convert_datetime_julian_day(dt_list):
     """ returns the day number for each date object in d_list
@@ -243,6 +244,18 @@ def create_mask_from_shpfile(lat, lon, shp_path, idx=0):
     shp = shapefile.Reader(shp_path)
     shapes2 = shp.shapes()
     shppath = Path(shapes2[idx].points)
+
+    # check to find errors at start of file, and remove points
+    diffs = np.sqrt(np.diff(shppath.vertices[:], axis=0)[:, 0] ** 2 + np.diff(shppath.vertices[:], axis=0)[:, 1] ** 2)
+    where_large_diff = np.where(diffs > 5 * np.mean(diffs))[0]
+    if where_large_diff.size > 0:  # if large jumps in distance
+        trim_idx = where_large_diff[-1]  # find last point that has large jumps in distance between points
+        shppath.vertices = shppath.vertices[trim_idx + 1:, :]
+        print('trimmed {} points from start of shapefile {}'.format(trim_idx, shp_path))
+
+    # plt.scatter(shppath.vertices[:,0],shppath.vertices[:,1])
+    # plt.scatter(shppath.vertices[:200,0],shppath.vertices[:200,1],color='r')
+    # plt.scatter(shppath.vertices[200:,0],shppath.vertices[200:,1],color='g') # green points plot over red, so first red points are duplicate and can be excluded
 
     if lat.ndim == 1 and lon.ndim == 1:  # create array of lat and lon
         nx, ny = len(lon), len(lat)
@@ -556,30 +569,29 @@ def fill_timeseries_dud(inp_dt, inp_dat, tstep, max_gap=None):
     :param max_gap: maximum gap  to fill (seconds)
     :return: out_dt, out_dat (datetimes and data)
     """
-    assert len(inp_dt)==len(inp_dat)
+    assert len(inp_dt) == len(inp_dat)
 
     out_dt = []
     out_dat = []
-    if max_gap==None:
-        max_gap=tstep*1.
+    if max_gap == None:
+        max_gap = tstep * 1.
     for j in range(len(inp_dt) - 1):
         gap = (inp_dt[j + 1] - inp_dt[j]).total_seconds()
         if gap != tstep and gap <= max_gap:
-            fill_dt = make_regular_timeseries(inp_dt[j],inp_dt[j+1],tstep)
-            fill_dat = np.interp(convert_dt_to_timestamp(fill_dt),convert_dt_to_timestamp(inp_dt[j:j+2]),inp_dat[j:j+2])
+            fill_dt = make_regular_timeseries(inp_dt[j], inp_dt[j + 1], tstep)
+            fill_dat = np.interp(convert_dt_to_timestamp(fill_dt), convert_dt_to_timestamp(inp_dt[j:j + 2]), inp_dat[j:j + 2])
             out_dt.extend(fill_dt[1:-1])
             out_dat.extend(fill_dat[1:-1])
         elif gap != tstep and gap >= max_gap:
             fill_dt = make_regular_timeseries(inp_dt[j], inp_dt[j + 1], tstep)
-            fill_dat = np.ones(len(fill_dt))*np.nan
+            fill_dat = np.ones(len(fill_dt)) * np.nan
             out_dt.extend(fill_dt[1:-1])
             out_dat.extend(fill_dat[1:-1])
         else:
             out_dt.extend([inp_dt[j]])
             out_dat.extend([inp_dat[j]])
 
-    return np.asarray(out_dt), np.asarray(out_dat,dtype=inp_dat.dtype)
-
+    return np.asarray(out_dt), np.asarray(out_dat, dtype=inp_dat.dtype)
 
 
 def fill_timeseries(inp_dt, inp_dat, tstep):
@@ -591,9 +603,9 @@ def fill_timeseries(inp_dt, inp_dat, tstep):
     :param tstep: timestep of data in seconds
     :return: out_dt, out_dat (datetimes and data)
     """
-    assert len(inp_dt)==len(inp_dat)
+    assert len(inp_dt) == len(inp_dat)
 
-    out_dt = make_regular_timeseries(inp_dt[0],inp_dt[-1],tstep)
+    out_dt = make_regular_timeseries(inp_dt[0], inp_dt[-1], tstep)
     out_dat = np.interp(convert_dt_to_timestamp(out_dt), convert_dt_to_timestamp(inp_dt), inp_dat)
 
     return np.asarray(out_dt), out_dat
