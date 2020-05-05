@@ -19,7 +19,7 @@ def f(x, A):  # this is your 'straight line' y=f(x)
 
 
 seb_dat = np.genfromtxt(
-    'S:\Scratch\Jono\Final Brewster Datasets\SEB_output\cdf - code2p0_MC_meas_noQPS_single_fixed output_fixed_B\modelOUT_br1_headings.txt', skip_header=3)
+   r'S:\Scratch\Jono\Final Brewster Datasets\SEB_output\cdf - code2p0_MC_meas_noQPS_single_fixed output_fixed_B\modelOUT_br1_headings.txt', skip_header=3)
 sw_net = seb_dat[:, 14 - 1]
 lw_net = seb_dat[:, 17 - 1]
 qs = seb_dat[:, 19 - 1]

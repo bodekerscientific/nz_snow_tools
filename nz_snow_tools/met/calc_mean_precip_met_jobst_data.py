@@ -17,7 +17,7 @@ import pickle
 import matplotlib.pylab as plt
 
 import os
-os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
+# os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
 
 import mpl_toolkits.basemap as basemap
 

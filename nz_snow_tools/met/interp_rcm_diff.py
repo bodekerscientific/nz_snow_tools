@@ -6,7 +6,7 @@ Clark et al, 2009
 """
 from __future__ import division
 import os
-#os.environ['PROJ_LIB'] = '/home/jared/anaconda/envs/nz_snow_tools/share/proj'
+## os.environ['PROJ_LIB'] = '/home/jared/anaconda/envs/nz_snow_tools/share/proj'
 
 
 
@@ -19,7 +19,7 @@ import pickle
 import matplotlib.pylab as plt
 
 import os
-os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
+# os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
 
 import mpl_toolkits.basemap as basemap
 from scipy import interpolate

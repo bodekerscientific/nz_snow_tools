@@ -8,7 +8,7 @@ import matplotlib.pylab as plt
 import datetime as dt
 import pickle
 
-outfile = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Hydro\sin_snow_data\sin data June2019.pkl'
+outfile = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Hydro\sin_snow_data\sin data June2019 python36.pkl'
 infile = r"C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Hydro\Ambre\SIN calibration timeseries\SIN\SIN Data_June2019_incl density columns.csv"
 dat = np.genfromtxt(infile, delimiter=',', skip_header=4)
 

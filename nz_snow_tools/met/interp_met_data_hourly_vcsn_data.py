@@ -15,7 +15,7 @@ import pickle
 
 import os  # need to import this as basemap is a bit broken https://github.com/conda-forge/basemap-feedstock/issues/30
 
-os.environ['PROJ_LIB'] = r'C:\miniconda\envs\nz_snow27\Library\share'
+# os.environ['PROJ_LIB'] = r'C:\miniconda\envs\nz_snow27\Library\share'
 import mpl_toolkits.basemap as basemap
 from scipy import interpolate
 from nz_snow_tools.util.utils import process_precip, process_temp, create_mask_from_shpfile, make_regular_timeseries, calc_toa, trim_lat_lon_bounds, \

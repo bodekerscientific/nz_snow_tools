@@ -37,7 +37,7 @@ config['ros'] = True
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
-    'S:\Scratch\Jono\Final Brewster Datasets\updated_met_data\BrewsterGlacier_Oct10_Sep12_mod3.dat')
+   r'S:\Scratch\Jono\Final Brewster Datasets\updated_met_data\BrewsterGlacier_Oct10_Sep12_mod3.dat')
 start_t = 19296 -1# 9456 = start of doy 130 10th May 2011 9600 = end of 13th May, 18432 = start of 11th Nov 2013,19296 = 1st december 2011
 end_t = 21360  # 20783 = end of doy 365, 21264 = end of 10th January 2012
 inp_dt = make_regular_timeseries(dt.datetime(2010,10,25,00,30),dt.datetime(2012,9,2,00,00),1800)
@@ -55,7 +55,7 @@ inp_sfc -= inp_sfc[0]# reset to 0 at beginning of period
 
 # validation data
 seb_dat = np.genfromtxt(
-    'S:\Scratch\Jono\Final Brewster Datasets\SEB_output\cdf - code2p0_MC_meas_noQPS_single_fixed output_fixed_B\modelOUT_br1_headings.txt',skip_header=3)
+   r'S:\Scratch\Jono\Final Brewster Datasets\SEB_output\cdf - code2p0_MC_meas_noQPS_single_fixed output_fixed_B\modelOUT_br1_headings.txt',skip_header=3)
 seb_mb = seb_dat[start_t-1:end_t, -1]
 seb_mb -= seb_mb[0] # reset to 0
 

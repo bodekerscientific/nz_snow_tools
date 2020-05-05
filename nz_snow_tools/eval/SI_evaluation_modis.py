@@ -15,7 +15,7 @@ from nz_snow_tools.util.utils import setup_nztm_dem
 
 import os
 
-os.environ['PROJ_LIB'] = 'C:/miniconda/envs/nz_snow27/Library/share'
+# os.environ['PROJ_LIB'] = 'C:/miniconda/envs/nz_snow27/Library/share'
 
 if __name__ == '__main__':
 

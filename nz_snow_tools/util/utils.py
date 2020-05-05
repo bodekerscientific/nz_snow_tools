@@ -3,7 +3,7 @@ a collection of utilities to handle dates / grids etc to support snow model
 """
 from __future__ import division
 # import os
-# os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
+# # os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
 import datetime
 import numpy as np
 import shapefile
