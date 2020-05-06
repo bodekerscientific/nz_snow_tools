@@ -8,9 +8,13 @@ Jono Conway
 from __future__ import division
 
 import numpy as np
+import netCDF4 as nc
 import pickle
+import datetime as dt
+from time import strftime, gmtime
 # from nz_snow_tools.eval.catchment_evaluation import *
 from nz_snow_tools.eval.catchment_evaluation_annual import load_subset_modis_annual
+from nz_snow_tools.util.utils import make_regular_timeseries
 
 import os
 
@@ -75,10 +79,34 @@ def calc_modis_catchment_metrics(catchment, years_to_take, mask_folder, modis_fo
     outfile = '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(years_to_take[0], years_to_take[-1], catchment, modis_dem, modis_sc_threshold)
     pickle.dump(ann, open(output_folder + outfile, 'wb'), -1)
 
+    # repack into single timeseries
+    sca = []
+    dts_m = []
+    for ts_av_sca_m, dt_m in zip(ann_ts_av_sca_m, ann_dt_m):
+        sca.extend(ts_av_sca_m)
+        dts_m.extend(dt_m)
+
+    # dts_full = make_regular_timeseries(dt.datetime(years_to_take[0], 1, 1), dt.datetime(years_to_take[-1], 12, 31), 86400)
+    outfile_nc = '/ts_MODIS_{}_{}_{}_{}_thres{}.nc'.format(years_to_take[0], years_to_take[-1], catchment, modis_dem, modis_sc_threshold)
+    ds = nc.Dataset(output_folder + outfile_nc,'w')
+    ds.created = strftime("%Y-%m-%d %H:%M:%S", gmtime())
+    ds.comment= 'catchment averaged fractional snow covered area generated with https://github.com/bodekerscientific/nz_snow_tools/eval/catchment_evaluation_modis.py'
+
+    ds.createDimension('time', )
+    t = ds.createVariable('time', 'f8', ('time',))
+    t.long_name = "time"
+    t.units = 'days since 1900-01-01 00:00:00'
+    t[:] = nc.date2num(dts_m, units=t.units)
+
+    fsca_var = ds.createVariable('fsca', 'f8', ('time',))
+    fsca_var.setncatts({'long_name': 'fractional snow covered area'})
+    fsca_var[:] = np.asarray(sca)
+
+    ds.close()
 
 if __name__ == '__main__':
 
-    catchment = 'Tar_Patea_NZTM'  # string identifying catchment modelled
+    # catchment = 'Tar_Patea_NZTM'  # string identifying catchment modelled
     years_to_take = np.arange(2010, 2019 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     mask_folder = '/nesi/nobackup/niwa00026/Observation/Snow_RemoteSensing/catchment_masks'  # location of numpy catchment mask. must be writeable if mask_created == False
@@ -86,4 +114,29 @@ if __name__ == '__main__':
     modis_dem = 'modis_nz_dem_250m'
     output_folder = '/nesi/nobackup/niwa00026/Observation/Snow_RemoteSensing/catchment_output'
 
-    calc_modis_catchment_metrics(catchment, years_to_take, mask_folder, modis_folder, modis_dem, output_folder)
+    catchments = ['Tar_Patea_NZTM',
+         'HRZ_Rangitikei_NZTM',
+         'WRC_Waikato_NZTM',
+         'Ecan_Waitaki_NZTM',
+         'WestCoast_Grey_NZTM',
+         'Ecan_Hurunui_NZTM',
+         'Marl_Wairau_NZTM',
+         'Ecan_Clarence_NZTM',
+         'Clutha',
+         'BOP_Rangitaiki_NZTM',
+         'ES_Mataura_NZTM',
+         'HBRC_Mohaka_NZTM',
+         'Ecan_Waiau_NZTM',
+         'Ecan_Waimakariri_NZTM',
+         'HBRC_Ngaruro_NZTM',
+         'Ecan_Rakaia_NZTM',
+         'HRZ_Whanganui_NZTM',
+         'ORC_Clutha_NZTM',
+         'Tar_Waiwhakaiho_NZTM',
+         'HBRC_Wairoa_NZTM',
+         'WestCoast_Buller_NZTM',
+         'ES_Waiau_NZTM',
+         'Ecan_Rangitata_NZTM']
+
+    for catchment in catchments:
+        calc_modis_catchment_metrics(catchment, years_to_take, mask_folder, modis_folder, modis_dem, output_folder)
