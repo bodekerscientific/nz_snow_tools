@@ -18,7 +18,7 @@ from nz_snow_tools.eval.catchment_evaluation import *
 from nz_snow_tools.util.utils import convert_date_hydro_DOY, trim_lat_lon_bounds, setup_nztm_dem
 
 
-def load_dsc_snow_output_annual(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder, dsc_snow_dem_folder, run_opt,origin='bottomleft'):
+def load_dsc_snow_output_annual(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder, dsc_snow_dem_folder, run_opt, origin='bottomleft'):
     """
     load output from dsc_snow model previously run from linux VM
     :param catchment: string giving catchment area to run model on
@@ -37,7 +37,7 @@ def load_dsc_snow_output_annual(catchment, output_dem, hydro_year_to_take, dsc_s
     st_acc_total = dsc_snow_output.variables['accumulation_total'][:]
 
     if origin == 'topleft':
-        st_swe = np.flip(st_swe,axis=1)
+        st_swe = np.flip(st_swe, axis=1)
         st_melt_total = np.flip(st_melt_total, axis=1)
         st_acc_total = np.flip(st_acc_total, axis=1)
 
@@ -80,8 +80,8 @@ def load_subset_modis_annual(catchment, year_to_take, modis_folder, modis_dem, m
     # trim to only the catchment desired
     if mask_folder is not None:
         mask, trimmed_mask = load_mask_modis(catchment, mask_folder, modis_dem)
-    else: # if no catchment specified, just mask to the valid data points.
-        mask = np.ones(ndsi.shape[1:],dtype=np.int)
+    else:  # if no catchment specified, just mask to the valid data points.
+        mask = np.ones(ndsi.shape[1:], dtype=np.int)
         trimmed_mask = mask
     # trimmed_fsca = trim_data_bounds(mask, lat_array, lon_array, fsca[183].copy(), y_centres, x_centres)
     trimmed_ndsi = trim_data_to_mask(ndsi, mask)
@@ -92,7 +92,12 @@ def load_subset_modis_annual(catchment, year_to_take, modis_folder, modis_dem, m
     trimmed_fsca[trimmed_fsca < 0] = 0  # limit fsca to 0
 
     # read date and convert into hydrological year
-    modis_dt = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
+
+    if year_to_take == 2012:  # hack to get 2012 working (bad timestamp)
+        modis_dt = nc.num2date(np.arange(55927, 56293), 'days since 1858-11-17 00:00:00')
+    else:
+        modis_dt = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
+
     # mask out values outside of catchment
     trimmed_fsca[:, trimmed_mask == 0] = np.nan
 
@@ -237,7 +242,7 @@ if __name__ == '__main__':
             if dsc_snow_opt == 'fortran':
                 # load previously run simulations from netCDF
                 st_swe, st_melt, st_acc, out_dt, mask = load_dsc_snow_output_annual(catchment, output_dem, year_to_take, dsc_snow_output_folder,
-                                                                                    dsc_snow_dem_folder, run_id,origin=origin)
+                                                                                    dsc_snow_dem_folder, run_id, origin=origin)
             elif dsc_snow_opt == 'python':
                 if dsc_snow_opt2 == 'netCDF':
                     st_swe, st_melt, st_acc, out_dt = load_dsc_snow_output_python_otf(catchment, output_dem, year_to_take, dsc_snow_output_folder)
