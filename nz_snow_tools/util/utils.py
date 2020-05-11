@@ -249,9 +249,17 @@ def create_mask_from_shpfile(lat, lon, shp_path, idx=0):
     diffs = np.sqrt(np.diff(shppath.vertices[:], axis=0)[:, 0] ** 2 + np.diff(shppath.vertices[:], axis=0)[:, 1] ** 2)
     where_large_diff = np.where(diffs > 5 * np.mean(diffs))[0]
     if where_large_diff.size > 0:  # if large jumps in distance
-        trim_idx = where_large_diff[-1]  # find last point that has large jumps in distance between points
-        shppath.vertices = shppath.vertices[trim_idx + 1:, :]
-        print('trimmed {} points from start of shapefile {}'.format(trim_idx, shp_path))
+        # find indexes of parts
+        part_idx = np.concatenate([shapes2[idx].parts[:],np.array((len(shapes2[idx].points),))])
+        keep_idx = np.full(len(shapes2[idx].points),True)
+        # check to see if any parts correspond to a large jump
+        for i, start_idx in enumerate(shapes2[idx].parts[:]):
+            if start_idx - 1 in where_large_diff:
+                # remove points from this part
+                keep_idx[part_idx[i]:part_idx[i+1]] = False
+        # remove bad points
+        shppath.vertices = shppath.vertices[keep_idx, :]
+        print('trimmed {} points from shapefile {}'.format(sum(~keep_idx), shp_path))
 
     # plt.scatter(shppath.vertices[:,0],shppath.vertices[:,1])
     # plt.scatter(shppath.vertices[:200,0],shppath.vertices[:200,1],color='r')
