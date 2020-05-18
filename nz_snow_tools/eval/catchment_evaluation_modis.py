@@ -114,29 +114,29 @@ if __name__ == '__main__':
     modis_dem = 'modis_nz_dem_250m'
     output_folder = '/nesi/nobackup/niwa00026/Observation/Snow_RemoteSensing/catchment_output'
 
-    catchments = ['Tar_Patea_NZTM',
-         'HRZ_Rangitikei_NZTM',
-         'WRC_Waikato_NZTM',
-         'Ecan_Waitaki_NZTM',
-         'WestCoast_Grey_NZTM',
-         'Ecan_Hurunui_NZTM',
-         'Marl_Wairau_NZTM',
-         'Ecan_Clarence_NZTM',
-         'Clutha',
-         'BOP_Rangitaiki_NZTM',
+    catchments = ['BOP_Rangitaiki_NZTM',
          'ES_Mataura_NZTM',
-         'HBRC_Mohaka_NZTM',
+         'ES_Waiau_NZTM',
+         'Ecan_Clarence_NZTM',
+         'Ecan_Hurunui_NZTM',
+         'Ecan_Rakaia_NZTM',
+         'Ecan_Rangitata_NZTM',
          'Ecan_Waiau_NZTM',
          'Ecan_Waimakariri_NZTM',
+         'Ecan_Waitaki_NZTM',
+         'HBRC_Mohaka_NZTM',
          'HBRC_Ngaruro_NZTM',
-         'Ecan_Rakaia_NZTM',
-         'HRZ_Whanganui_NZTM',
-         'ORC_Clutha_NZTM',
-         'Tar_Waiwhakaiho_NZTM',
          'HBRC_Wairoa_NZTM',
+         'HRZ_Rangitikei_NZTM',
+         'HRZ_Whanganui_NZTM',
+         'Marl_Wairau_NZTM',
+         'ORC_Clutha_NZTM',
+         'Tar_Patea_NZTM',
+         'Tar_Waiwhakaiho_NZTM',
+         'WRC_Waikato_NZTM',
          'WestCoast_Buller_NZTM',
-         'ES_Waiau_NZTM',
-         'Ecan_Rangitata_NZTM']
+         'WestCoast_Grey_NZTM']
+
 
     for catchment in catchments:
         calc_modis_catchment_metrics(catchment, years_to_take, mask_folder, modis_folder, modis_dem, output_folder)

@@ -18,6 +18,38 @@ from nz_snow_tools.eval.catchment_evaluation import *
 from nz_snow_tools.util.utils import convert_date_hydro_DOY, trim_lat_lon_bounds, setup_nztm_dem
 
 
+def load_dsc_snow_output_annual_without_mask(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder, run_opt, origin='bottomleft'):
+    """
+    load output from dsc_snow model previously run from linux VM
+    :param catchment: string giving catchment area to run model on
+    :param output_dem: string identifying the grid to run model on
+    :param hydro_year_to_take: integer specifying the hydrological year to run model over. 2001 = 1/4/2000 to 31/3/2001
+    :return: st_swe, st_melt, st_acc, out_dt. daily grids of SWE at day's end, total melt and accumulation over the previous day, and datetimes of ouput
+    """
+    data_id = '{}_{}'.format(catchment, output_dem)
+
+    dsc_snow_output = nc.Dataset(dsc_snow_output_folder + '/{}_{}_{}.nc'.format(data_id, hydro_year_to_take, run_opt), 'r')
+
+    out_dt = nc.num2date(dsc_snow_output.variables['time'][:], dsc_snow_output.variables['time'].units)
+
+    st_swe = dsc_snow_output.variables['snow_water_equivalent'][:]
+    st_melt_total = dsc_snow_output.variables['ablation_total'][:]
+    st_acc_total = dsc_snow_output.variables['accumulation_total'][:]
+    st_water_output_total = dsc_snow_output.variables['water_output_total'][:]
+
+    if origin == 'topleft':
+        st_swe = np.flip(st_swe, axis=1)
+        st_melt_total = np.flip(st_melt_total, axis=1)
+        st_acc_total = np.flip(st_acc_total, axis=1)
+
+    # convert to daily sums
+    st_melt = np.concatenate((st_melt_total[:1, :], np.diff(st_melt_total, axis=0)))
+    st_acc = np.concatenate((st_melt_total[:1, :], np.diff(st_acc_total, axis=0)))
+    st_water_output = np.concatenate((st_water_output_total[:1, :], np.diff(st_water_output_total, axis=0)))
+
+    return st_swe * 1e3, st_melt * 1e3, st_acc * 1e3, st_water_output * 1e3, out_dt  # convert to mm w.e.
+
+
 def load_dsc_snow_output_annual(catchment, output_dem, hydro_year_to_take, dsc_snow_output_folder, dsc_snow_dem_folder, run_opt, origin='bottomleft'):
     """
     load output from dsc_snow model previously run from linux VM
