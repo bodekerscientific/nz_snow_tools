@@ -1,7 +1,6 @@
 """
 
-reads in and computes statistics on MODIS data for specific catchments. Requires that mask has been created using
-nz_snow_tools/util/generate_mask.py
+reads in and computes statistics on MODIS data for specific catchments
 
 Jono Conway
 """
@@ -9,7 +8,6 @@ from __future__ import division
 
 import numpy as np
 import pickle
-# from nz_snow_tools.eval.catchment_evaluation import *
 from nz_snow_tools.eval.catchment_evaluation_annual import load_subset_modis_annual
 from nz_snow_tools.util.utils import setup_nztm_dem
 

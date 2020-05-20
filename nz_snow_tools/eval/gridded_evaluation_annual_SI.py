@@ -125,6 +125,9 @@ if __name__ == '__main__':
         modis_mean = np.mean(modis_fsca_rs, axis=0)
         model_mean = np.mean(model_fsca_rs, axis=0)
 
+        # modis_mean = np.mean(np.sum(modis_fsca_rs > fsca_threshold, axis=0))
+        # model_mean = np.mean(np.sum(model_fsca_rs > fsca_threshold, axis=0)) # option to copmare scd rather than fsca
+
         # generate mask for comparing modis and model areal average timeseries. basically if any timesteps have a nan in either modis or model data, they are masked out.
         final_mask = ~np.logical_or(np.any(np.isnan(modis_fsca_rs), axis=0), np.any(np.isnan(model_fsca_rs), axis=0))
         # plot areal average timeseries

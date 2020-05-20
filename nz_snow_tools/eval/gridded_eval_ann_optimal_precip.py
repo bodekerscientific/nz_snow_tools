@@ -23,7 +23,7 @@ if __name__ == '__main__':
     years_to_take = range(2001, 2005 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
     output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/from Ruschle/eval'
-    plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/from Ruschle/eval/plots_jono'
+    plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/SouthIsland_results/modis_comparison/t_bias_optimisation'
 
     lists = [[] for _ in range(6)]
     a_obs, a_mod, a_ns, a_bias, a_rmse, a_mae = lists
@@ -120,7 +120,7 @@ if __name__ == '__main__':
     plot_var[np.logical_and(a_obs[0] < 10, ~(np.any(np.asarray(a_mod) > 10, axis=0)))] = np.nan
     plt.imshow(plot_var, origin=0, vmax=0.5, vmin=-2.5, cmap=cmap, interpolation='none')
     plt.colorbar(label='T bias (C)')
-    plt.yticks([]), plt.xticks([]), plt.title('T bias for lowest average absolute FSCA bias')
+    plt.yticks([]), plt.xticks([]), plt.title('T correction for optimal FSCA bias')
     plt.tight_layout()
     plt.savefig(
         plot_folder + '/t_bias_optim_t_bias_{}_swe{}_{}_rs{}_smooth{}.png'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period), dpi=300)
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     # exclude areas with very low modis fsca(< 5) and no modelled fsca(> 5) in any year
     plot_var[np.logical_and(a_obs[0] < 10, ~(np.any(np.asarray(a_mod) > 10, axis=0)))] = np.nan
     plt.imshow(plot_var, origin=0, vmax=0.5, vmin=-2.5, cmap=cmap, interpolation='none')
-    plt.yticks([]), plt.xticks([]), plt.title('T bias for highest average FSCA NS')
+    plt.yticks([]), plt.xticks([]), plt.title('T correction for optimal FSCA NS')
     cbar = plt.colorbar(label='T bias (C)')
     plt.tight_layout()
     plt.savefig(
@@ -151,14 +151,37 @@ if __name__ == '__main__':
     # exclude areas with very low modis fsca(< 5) and no modelled fsca(> 5) in any year
     plot_var[np.logical_and(a_obs[0] < 10, ~(np.any(np.asarray(a_mod) > 10, axis=0)))] = np.nan
     plt.imshow(plot_var, origin=0, cmap=cmap, interpolation='none')  # vmax=1.5, vmin=-5.5,
-    plt.yticks([]), plt.xticks([]), plt.title('lowest average absolute FSCA bias')
+    plt.yticks([]), plt.xticks([]), plt.title('absolute FSCA bias for optimal FSCA bias')
     plt.colorbar(label='absolute FSCA bias (%)')
+    plt.tight_layout()
+    plt.savefig(
+        plot_folder + '/t_bias_optim_abs_bias_{}_swe{}_{}_rs{}_smooth{}.png'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period), dpi=300)
+
+
+    # plot lowest absolute bias in FSCA
+    cmap = plt.get_cmap('RdBu', 9)
+    cmap.set_bad('0.5')
+    plt.figure(figsize=(8, 8))
+    a_bias = np.asarray(a_bias)
+    ind_var = np.argmin(np.abs(a_bias), axis=0)
+    for i in range(ind_var.shape[0]):
+        for j in range(ind_var.shape[1]):
+            plot_var[i,j] = a_bias[ind_var[i,j],i,j]
+
+    plot_var[np.isnan(np.min(np.asarray(a_bias), axis=0))] = np.nan  # set values outside domain etc to nan
+    # plot_var[a_obs[0] < 20] = np.nan
+    # exclude areas with very low modis fsca(< 5) and no modelled fsca(> 5) in any year
+    plot_var[np.logical_and(a_obs[0] < 10, ~(np.any(np.asarray(a_mod) > 10, axis=0)))] = np.nan
+    plt.imshow(plot_var, origin=0, cmap=cmap, interpolation='none',vmax=22.5, vmin=-22.5)  #
+    plt.yticks([]), plt.xticks([]), plt.title('FSCA bias when optimised to FSCA bias')
+    plt.colorbar(label='FSCA bias (%)')
     plt.tight_layout()
     plt.savefig(
         plot_folder + '/t_bias_optim_bias_{}_swe{}_{}_rs{}_smooth{}.png'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period), dpi=300)
 
+
     # plot highest NS in FSCA
-    cmap = plt.get_cmap('RdBu', 7)
+    cmap = plt.get_cmap('PiYG', 7)
     cmap.set_bad('0.5')
     # cmap.set_over('0')
     # cmap.set_under('0')
@@ -169,7 +192,7 @@ if __name__ == '__main__':
     # exclude areas with very low modis fsca(< 5) and no modelled fsca(> 5) in any year
     plot_var[np.logical_and(a_obs[0] < 10, ~(np.any(np.asarray(a_mod) > 10, axis=0)))] = np.nan
     plt.imshow(plot_var, origin=0, vmax=0.7, vmin=-0.7, cmap=cmap, interpolation='none')
-    plt.yticks([]), plt.xticks([]), plt.title('highest average FSCA NS')
+    plt.yticks([]), plt.xticks([]), plt.title('FCSA NS when optimised to FCSA NS')
     cbar = plt.colorbar(label='FSCA NS')
     plt.tight_layout()
     plt.savefig(
@@ -192,7 +215,7 @@ if __name__ == '__main__':
 
     plt.figure(figsize=(8, 8))
     plt.imshow(final_grid2, origin=0, vmax=0.5, vmin=-2.5, cmap=cmap, interpolation='none')
-    plt.yticks([]), plt.xticks([]), plt.title('T bias for highest average FSCA NS')
+    plt.yticks([]), plt.xticks([]), plt.title('T bias for optimal NS')
     cbar = plt.colorbar(label='T bias (C)')
     plt.tight_layout()
     plt.savefig(
@@ -207,7 +230,7 @@ if __name__ == '__main__':
 
     plt.figure(figsize=(8, 8))
     plt.imshow(final_grid2, origin=0, vmax=0.5, vmin=-2.5, cmap=cmap, interpolation='none')
-    plt.yticks([]), plt.xticks([]), plt.title('T bias for highest average FSCA NS')
+    plt.yticks([]), plt.xticks([]), plt.title('T bias for optimal NS')
     cbar = plt.colorbar(label='T bias (C)')
     plt.tight_layout()
     plt.savefig(
@@ -230,7 +253,7 @@ if __name__ == '__main__':
     # plot
     plt.figure(figsize=(8, 8))
     plt.imshow(final_grid2, origin=0, vmax=0.5, vmin=-2.5, cmap=cmap, interpolation='none')
-    plt.yticks([]), plt.xticks([]), plt.title('T bias for highest average FSCA NS')
+    plt.yticks([]), plt.xticks([]), plt.title('T bias for optimal FSCA NS')
     cbar = plt.colorbar(label='T bias (C)')
     plt.tight_layout()
     plt.savefig(
