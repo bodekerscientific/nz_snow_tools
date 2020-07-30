@@ -77,7 +77,7 @@ def calc_acc(ta, precip, tacc=274.16, **config):
     return acc
 
 
-def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04 * 24, rf=0.009 * 24, alb=None, precip_per_s=None,**config):
+def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04 * 24, rf=0.009 * 24, alb=None, precip_per_s=None, **config):
     """
     calculate the melt rate (mm day^-1) at current timestep according to dsc_snow model. calculates albedo if not available in the configuration
     :param ta: grid of current temperature (K)
@@ -97,12 +97,12 @@ def calc_melt_dsc_snow(ta, sw, d_snow, swe, tmelt=274.16, tf=0.04 * 24, rf=0.009
         #  specific heat capacity of liquid water = 4220  J / (kg * K); mm/s == kg/m2 per second
         qprc = 4220 * precip_per_s * (ta - 273.16)
         # use theoretical value for precipitation melt factor 0.0108  mm w.e. per hour per W m-2
-        if config['ta_m_tt'] == True: # use tmelt as baseline when calculating degree days
+        if config['ta_m_tt'] == True:  # use tmelt as baseline when calculating degree days
             melt_rate = tf * (ta - tmelt) + rf * sw_net + 0.0108 * 24 * qprc
         else:
             melt_rate = tf * (ta - 273.16) + rf * sw_net + 0.0108 * 24 * qprc
     else:
-        if config['ta_m_tt'] == True: # use tmelt as baseline when calculating degree days
+        if config['ta_m_tt'] == True:  # use tmelt as baseline when calculating degree days
             melt_rate = tf * (ta - tmelt) + rf * sw_net
         else:
             melt_rate = tf * (ta - 273.16) + rf * sw_net
@@ -127,6 +127,52 @@ def calc_albedo_snow(ts, snow, dc=11.0, tc=21.9, a_ice=0.34, a_freshsnow=0.9, a_
     return albedo
 
 
+def calc_melt_seb_basic(ta, sw, lw_in, ws, rh, pres, precip, dtstep, alb=None, d_snow=None, swe=None,  **config):
+    """
+    calculate the melt rate (mm day^-1) at current timestep according to simple surface energy balance model.
+    assumues surface is always at melting point, so valid only for periods with isothermal snowpack and constant melting
+    calculates albedo if not available in the configuration
+    :param ta: grid of current temperature (K)
+    :param precip: grid of current precipitation (mm)
+    :param sw: grid of current incoming shortwave rad (W m^-2)
+    :param d_snow: grid with current days since last snowfall (days)
+    :param swe: grid with current swe (mm w.e.)
+    :return: grid of melt rate at current timestep (mm day^-1)
+    """
+    #
+    if alb is None:
+        if d_snow is not None and swe is not None:
+            alb = calc_albedo_snow(d_snow, swe, **config)
+        else:
+            alb = 0.65
+
+    tsk = 273.15 # assume is melting
+    satvps = 6.11 * np.exp(22.74 * (1 - 273.15 / tsk))
+    Lheat = 2514000
+    p0 = 1013
+    cp = 1010
+    dens0 = 1.29
+    zm = 10
+    zh = 2
+    z0m = 0.0036
+    z0h = 0.000055
+
+    vp = ea_from_tc_rh(ta, rh,pres_hpa=pres)
+
+    # dc=config['dc'], tc=config['tc'], a_ice=config['a_ice'], a_freshsnow=config['a_freshsnow'], a_firn=config['a_firn']
+    sw_net = sw * (1 - alb)
+    lw_net = lw_in - (5.67e8 * tsk ** 4)  # assumes melting surface
+    #  specific heat capacity of liquid water = 4220  J / (kg * K); mm/s == kg/m2 per second
+    qprc = 4220 * precip / dtstep * (ta - tsk)
+    qsens = 0.4 ** 2 / np.log(zm / z0m) / np.log(zh / z0h) * cp * dens0 * pres / p0 * ws * (ta + 273.15 - tsk)
+    qlat = 0.4 ** 2 / np.log(zm / z0m) / np.log(zh / z0h) * 0.623 * Lheat * dens0 * 1 / p0 * ws * (vp - satvps)
+    qc = 0
+    qsum = sw_net + lw_net + qprc + qlat + qsens + qc
+    melt_rate = qsum * 334000 * 86400. # calculate in mm w.e. per day
+
+    return melt_rate
+
+
 def calc_dswe(swe, d_snow, ta, precip, doy, dtstep, sw=None, which_melt='clark2009', **config):
     """
     calculate the change in swe for a given timestep (mm water equivalent)
@@ -143,7 +189,9 @@ def calc_dswe(swe, d_snow, ta, precip, doy, dtstep, sw=None, which_melt='clark20
     if which_melt == 'clark2009':
         melt_rate = calc_melt_Clark2009(ta, precip, d_snow, doy, acc, **config)  # tmelt=config['tmelt'],
     elif which_melt == 'dsc_snow':
-        melt_rate = calc_melt_dsc_snow(ta, sw, d_snow, swe, precip_per_s=precip/dtstep,**config)  # tmelt=config['tmelt'], tf=config['tf'], rf=config['rf'],
+        melt_rate = calc_melt_dsc_snow(ta, sw, d_snow, swe, precip_per_s=precip / dtstep, **config)  # tmelt=config['tmelt'], tf=config['tf'], rf=config['rf'],
+    elif which_melt == 'seb_basic':
+        melt_rate = calc_melt_seb_basic(ta, sw, lw_in, ws, rh, pres, precip, dtstep, alb=None)
     melt = melt_rate * dtstep / 86400.0
     melt[(melt >= swe)] = swe[(melt >= swe)]  # limit melt to total swe
     swe = swe - melt
@@ -328,3 +376,13 @@ def read_met_input(inp_nc_file, i):
     inp_sw = inp_nc_file.get_variables_by_attributes(standard_name='surface_downwelling_shortwave_flux_in_air')[0][i, :]
 
     return inp_ta, inp_p, inp_sw
+
+
+def ea_from_tc_rh(tc, rh, pres_hpa=None):
+    # vapour pressure in hPa calculated according to Buck
+    # Rh should be with respect to water, not ice.
+    if pres_hpa == None:
+        ea = 6.1121 * np.exp(17.502 * tc / (240.97 + tc)) * rh / 100
+    else:
+        ea = (1.0007 + (3.46 * 1e-6 * pres_hpa)) * 6.1121 * np.exp(17.502 * tc / (240.97 + tc)) * rh / 100
+    return ea
