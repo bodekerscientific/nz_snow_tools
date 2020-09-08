@@ -32,7 +32,7 @@ output_folder = '/nesi/nobackup/niwa00004/jonoconway' # snow model output
 data_folder = '/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12' # input meteorology
 
 # open input met data files
-nc_file_orog = nc.Dataset(data_folder + 'tn_2020083000-utc_nzcsm_coords.nc','r')
+nc_file_orog = nc.Dataset(data_folder + '/tn_2020083000-utc_nzcsm_coords.nc','r')
 nc_file_rain = nc.Dataset(data_folder + '/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 nc_file_temp = nc.Dataset(data_folder + '/air_temperature_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 # nc_file_srad = nc.Dataset(data_folder + '/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
@@ -131,6 +131,8 @@ for year_to_take in years_to_take:
     # for each day:
     for ii, dt_t in enumerate(out_dt[:-1]):
         # load one day of precip and shortwave rad data
+        print(int(np.where(vcsn_dt==dt_t)[0]))
+        print(int(np.where(vcsn_dt==dt_t)[0])+24)
         precip_hourly = nc_file_rain[int(np.where(vcsn_dt==dt_t)[0]):int(np.where(vcsn_dt==dt_t)[0])+24]
         # sw_rad_hourly = nc_file_srad[int(np.where(vcsn_dt4==dt_t)[0]):int(np.where(vcsn_dt4==dt_t)[0])+24]
         temp_hourly = nc_file_temp[int(np.where(vcsn_dt2==dt_t)[0]):int(np.where(vcsn_dt2==dt_t)[0])+24]
