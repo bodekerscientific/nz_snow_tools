@@ -32,6 +32,7 @@ output_folder = '/nesi/nobackup/niwa00004/jonoconway' # snow model output
 data_folder = '/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12' # input meteorology
 
 # open input met data files
+nc_file_orog = nc.Dataset(data_folder + 'tn_2020083000-utc_nzcsm_coords.nc','r')
 nc_file_rain = nc.Dataset(data_folder + '/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 nc_file_temp = nc.Dataset(data_folder + '/air_temperature_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 # nc_file_srad = nc.Dataset(data_folder + '/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
@@ -60,10 +61,11 @@ config['alb_swe_thres'] = 20
 config['ros'] = True
 
 # load met grid (assume same for all input data)
-vcsn_elev = np.flipud(nc_file_rain.variables['elevation'][:])
-vcsn_elev_interp = np.ma.fix_invalid(vcsn_elev).data
-vcsn_lats = nc_file_rain.variables['latitude'][::-1]
-vcsn_lons = nc_file_rain.variables['longitude'][:]
+vcsn_elev = np.flipud(nc_file_orog.variables['orog_model'][:])
+vcsn_elev_interp = vcsn_elev.copy()
+# vcsn_elev_interp = np.ma.fix_invalid(vcsn_elev).data
+vcsn_lats = nc_file_orog.variables['latitude'][::-1]
+vcsn_lons = nc_file_orog.variables['longitude'][:]
 vcsn_dt = nc.num2date(nc_file_rain.variables['time'][:], nc_file_rain.variables['time'].units)
 vcsn_dt2 = nc.num2date(nc_file_temp.variables['time0'][:], nc_file_temp.variables['time0'].units)
 # vcsn_dt4 = nc.num2date(nc_file_srad.variables['time'][:], nc_file_srad.variables['time'].units)
@@ -92,7 +94,7 @@ if mask_dem == True:
     lats, lons, elev, northings, eastings = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
     _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
 else:
-    mask = None
+    mask = None #vcsn_elev_interp==0
     lats = lat_array
     lons = lon_array
     elev = nztm_dem
