@@ -240,20 +240,12 @@ def setup_nztm_grid_netcdf(fname, list_of_data_arrays, var_names, datetime_list,
     ds = nc.Dataset(fname, 'w')
 
     # add common attributes
-    ds.institution = "Bodeker Scientific"
-    ds.title = ''
-    ds.source = ''
-
-    ds.history = ''
-    ds.references = ''
-    ds.author = ''
-    ds.email = ''
     ds.created = strftime("%Y-%m-%d %H:%M:%S", gmtime())
     if no_time == False:
         ds.featureType = "timeSeries"
     else:
         ds.comment = 'timestamp {}'.format(datetime_list.strftime('%Y%m%d%H%M'))
-    ds.Conventions = "CF-1.6"
+
 
     if no_time == False:
         ds.createDimension('time', )

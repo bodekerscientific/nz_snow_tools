@@ -134,7 +134,7 @@ for year_to_take in years_to_take:
     # set up output netCDF:
     out_nc_file = setup_nztm_grid_netcdf(output_folder + '/snow_out_{}_{}_{}.nc'.format(catchment, output_dem, year_to_take),
                                          None, ['swe', 'acc', 'melt'],
-                                         out_dt, northings, eastings, lats, lons, elev)
+                                         out_dt, northings, eastings, lat_array, lon_array, elev)
 
     # set up initial states of prognostic variables
     init_swe = np.zeros(elev.shape)  # default to no snow
