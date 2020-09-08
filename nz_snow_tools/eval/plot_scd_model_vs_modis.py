@@ -50,15 +50,20 @@ model_scd = np.nanmean(ann_scd[1:12], axis=0)
 
 plot_scd_bias = model_scd - modis_scd
 
+# perm_snow = np.load(r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\modis_permanent_snow_2010_2016.npy')
+#
+# plot_scd_bias[perm_snow] == np.nan
+
 plt.rcParams.update({'font.size': 6})
 plt.rcParams.update({'axes.titlesize' : 6})
 fig1 = plt.figure(figsize=[4,4])
 
-bin_edges = [-60, -30, -7, 7, 14, 30, 60]  # use small negative number to include 0 in the interpolation
+bin_edges = [-60, -30, -7, 7, 30, 60]  # use small negative number to include 0 in the interpolation
 CS1 = plt.contourf(x_centres, y_centres, plot_scd_bias, levels=bin_edges, cmap=plt.cm.RdBu,extend='both')
 # CS1.cmap.set_bad('grey')
 #CS1.cmap.set_over([0.47,0.72,0.77])
 plt.gca().set_aspect('equal')
+fig1.gca().set_facecolor('grey')
 # plt.imshow(modis_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='magma_r')
 plt.xticks([])
 plt.yticks([])
