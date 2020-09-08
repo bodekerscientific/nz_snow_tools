@@ -133,16 +133,14 @@ for year_to_take in years_to_take:
     # for each day:
     for ii, dt_t in enumerate(out_dt[:-1]):
         # load one day of precip and shortwave rad data
-        print(int(np.where(vcsn_dt==dt_t)[0]))
-        print(int(np.where(vcsn_dt==dt_t)[0])+24)
         precip_hourly = nc_rain[int(np.where(vcsn_dt==dt_t)[0]):int(int(np.where(vcsn_dt==dt_t)[0])+24)]
         # sw_rad_hourly = nc_srad[int(np.where(vcsn_dt4==dt_t)[0]):int(np.where(vcsn_dt4==dt_t)[0])+24]
         temp_hourly = nc_temp[int(np.where(vcsn_dt2==dt_t)[0]):int(np.where(vcsn_dt2==dt_t)[0])+24]
 
         # interpolate data to fine grid
-        hi_res_precip = interpolate_met(precip_hourly.filled(np.nan), 'rain', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev, single_dt=True)
-        # hi_res_sw_rad = interpolate_met(sw_rad_hourly.filled(np.nan), 'srad', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev, single_dt=True)
-        hi_res_temp = interpolate_met(temp_hourly.filled(np.nan), 'tmax', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev, single_dt=True)
+        hi_res_precip = interpolate_met(precip_hourly.filled(np.nan), 'rain', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev)
+        # hi_res_sw_rad = interpolate_met(sw_rad_hourly.filled(np.nan), 'srad', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev)
+        hi_res_temp = interpolate_met(temp_hourly.filled(np.nan), 'tmax', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev)
 
         # mask out areas we don't want/need
         if mask is not None:
