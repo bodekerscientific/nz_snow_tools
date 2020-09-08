@@ -129,7 +129,7 @@ lons[lons < 0] = lons[lons < 0] + 360
 for year_to_take in years_to_take:
     # specify the days to run (output is at the end of each day)
     # out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take, 7, 1), dt.datetime(year_to_take, 7, 2), 86400))
-    out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take, 1, 1), dt.datetime(year_to_take + 1, 1, 1), 86400))
+    out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take, 4, 1), dt.datetime(year_to_take + 1, 4, 1), 86400))
 
     # set up output netCDF:
     out_nc_file = setup_nztm_grid_netcdf(output_folder + '/snow_out_{}_{}_{}.nc'.format(catchment, output_dem, year_to_take),
@@ -153,6 +153,7 @@ for year_to_take in years_to_take:
 
     # for each day:
     for ii, dt_t in enumerate(out_dt[:-1]):
+        print('processing', dt_t)
         # load one day of precip and shortwave rad data
         precip_hourly = nc_rain[int(np.where(vcsn_dt == dt_t)[0]):int(int(np.where(vcsn_dt == dt_t)[0]) + 24)]
         # sw_rad_hourly = nc_srad[int(np.where(vcsn_dt4==dt_t)[0]):int(np.where(vcsn_dt4==dt_t)[0])+24]
