@@ -36,6 +36,8 @@ nc_file_orog = nc.Dataset(data_folder + '/tn_2020083000-utc_nzcsm_coords.nc','r'
 nc_file_rain = nc.Dataset(data_folder + '/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 nc_file_temp = nc.Dataset(data_folder + '/air_temperature_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 # nc_file_srad = nc.Dataset(data_folder + '/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
+nc_rain = nc_file_rain.variables['sum_total_precip']
+nc_temp = nc_file_temp.variables['sfc_temp']
 
 # configuration dictionary containing model parameters.
 config = {}
@@ -133,9 +135,9 @@ for year_to_take in years_to_take:
         # load one day of precip and shortwave rad data
         print(int(np.where(vcsn_dt==dt_t)[0]))
         print(int(np.where(vcsn_dt==dt_t)[0])+24)
-        precip_hourly = nc_file_rain[int(np.where(vcsn_dt==dt_t)[0]):int(np.where(vcsn_dt==dt_t)[0])+24]
-        # sw_rad_hourly = nc_file_srad[int(np.where(vcsn_dt4==dt_t)[0]):int(np.where(vcsn_dt4==dt_t)[0])+24]
-        temp_hourly = nc_file_temp[int(np.where(vcsn_dt2==dt_t)[0]):int(np.where(vcsn_dt2==dt_t)[0])+24]
+        precip_hourly = nc_rain[int(np.where(vcsn_dt==dt_t)[0]):int(int(np.where(vcsn_dt==dt_t)[0])+24)]
+        # sw_rad_hourly = nc_srad[int(np.where(vcsn_dt4==dt_t)[0]):int(np.where(vcsn_dt4==dt_t)[0])+24]
+        temp_hourly = nc_temp[int(np.where(vcsn_dt2==dt_t)[0]):int(np.where(vcsn_dt2==dt_t)[0])+24]
 
         # interpolate data to fine grid
         hi_res_precip = interpolate_met(precip_hourly.filled(np.nan), 'rain', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev, single_dt=True)
