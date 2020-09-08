@@ -28,9 +28,9 @@ mask_created = True  # boolean to set whether or not the mask has already been c
 
 # folder location
 mask_folder = None
-dem_folder =   '/nesi/project/niwa00004/jonoconway' # dem used for output #'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'
+dem_folder = '/nesi/project/niwa00004/jonoconway'  # dem used for output #'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'
 output_folder = '/nesi/nobackup/niwa00004/jonoconway'  # snow model output
-data_folder =  '/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12' # input meteorology #C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/tn_file_compilation'
+data_folder = '/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12'  # input meteorology #C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/tn_file_compilation'
 
 # open input met data files
 nc_file_orog = nc.Dataset(data_folder + '/tn_2020083000-utc_nzcsm_coords.nc', 'r')
@@ -43,7 +43,6 @@ nc_file_temp = nc.Dataset(data_folder + '/air_temperature_nzcsm_2015043010_20200
 # nc_file_srad = nc.Dataset(data_folder + '/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 nc_rain = nc_file_rain.variables['sum_total_precip']
 nc_temp = nc_file_temp.variables['sfc_temp']
-
 
 # configuration dictionary containing model parameters.
 config = {}
@@ -166,8 +165,8 @@ for year_to_take in years_to_take:
 
         # mask out areas we don't want/need
         if mask is not None:
-            hi_res_precip[trimmed_mask == 0] = np.nan
-            # hi_res_sw_rad[trimmed_mask == 0] = np.nan
+            hi_res_precip[:, trimmed_mask == 0] = np.nan
+            # hi_res_sw_rad[:,trimmed_mask == 0] = np.nan
             hi_res_temp[:, trimmed_mask == 0] = np.nan
 
         hourly_dt = np.asarray(make_regular_timeseries(dt_t, dt_t + dt.timedelta(hours=23), 3600))
