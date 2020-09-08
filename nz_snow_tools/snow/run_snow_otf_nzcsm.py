@@ -6,6 +6,7 @@ from __future__ import division
 import netCDF4 as nc
 import pickle
 import numpy as np
+import cartopy.crs as ccrs
 import datetime as dt
 import matplotlib.pylab as plt
 
@@ -15,29 +16,34 @@ from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, in
     daily_to_hourly_temp_grids, setup_nztm_dem, setup_nztm_grid_netcdf, trim_lat_lon_bounds
 
 # model options
-which_model = 'clark2009'#'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
+which_model = 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
 years_to_take = np.arange(2017, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment mask file
-output_dem = 'si_dem_250m' # string identifying output DEM
+output_dem = 'si_dem_250m'  # string identifying output DEM
 
 mask_dem = False  # boolean to set whether or not to mask the output dem
 mask_created = True  # boolean to set whether or not the mask has already been created
 
 # folder location
 mask_folder = None
-dem_folder = '/nesi/project/niwa00004/jonoconway/' # dem used for output
-output_folder = '/nesi/nobackup/niwa00004/jonoconway' # snow model output
-data_folder = '/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12' # input meteorology
+dem_folder =   '/nesi/project/niwa00004/jonoconway' # dem used for output #'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'
+output_folder = '/nesi/nobackup/niwa00004/jonoconway'  # snow model output
+data_folder =  '/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12' # input meteorology #C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/tn_file_compilation'
 
 # open input met data files
-nc_file_orog = nc.Dataset(data_folder + '/tn_2020083000-utc_nzcsm_coords.nc','r')
+nc_file_orog = nc.Dataset(data_folder + '/tn_2020083000-utc_nzcsm_coords.nc', 'r')
+# nc_rain = nc_file_orog.variables['orog_model']
+#
+# nc_file_temp = nc.Dataset(data_folder + '/test_temp4.nc', 'r')
+# nc_temp = nc_file_temp.variables['sfc_temp']
 nc_file_rain = nc.Dataset(data_folder + '/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 nc_file_temp = nc.Dataset(data_folder + '/air_temperature_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 # nc_file_srad = nc.Dataset(data_folder + '/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 nc_rain = nc_file_rain.variables['sum_total_precip']
 nc_temp = nc_file_temp.variables['sfc_temp']
+
 
 # configuration dictionary containing model parameters.
 config = {}
@@ -63,14 +69,21 @@ config['alb_swe_thres'] = 20
 config['ros'] = True
 
 # load met grid (assume same for all input data)
-vcsn_elev = np.flipud(nc_file_orog.variables['orog_model'][:])
+vcsn_elev = nc_file_orog.variables['orog_model'][:]
 vcsn_elev_interp = vcsn_elev.copy()
 # vcsn_elev_interp = np.ma.fix_invalid(vcsn_elev).data
-vcsn_lats = nc_file_orog.variables['latitude'][::-1]
-vcsn_lons = nc_file_orog.variables['longitude'][:]
+vcsn_lats = nc_file_orog.variables['rlat'][:]
+vcsn_lons = nc_file_orog.variables['rlon'][:]
 vcsn_dt = nc.num2date(nc_file_rain.variables['time'][:], nc_file_rain.variables['time'].units)
 vcsn_dt2 = nc.num2date(nc_file_temp.variables['time0'][:], nc_file_temp.variables['time0'].units)
 # vcsn_dt4 = nc.num2date(nc_file_srad.variables['time'][:], nc_file_srad.variables['time'].units)
+
+# vcsn_dt = vcsn_dt2  ########hack to get working #TODO remove hack when finished debugging
+
+rot_pole = nc_file_orog.variables['rotated_pole']
+rot_pole_crs = ccrs.RotatedPole(rot_pole.grid_north_pole_longitude, rot_pole.grid_north_pole_latitude, rot_pole.north_pole_grid_longitude)
+
+# rot_pole_crs.transform_points()
 
 # check for the same timestamp
 # assert vcsn_dt[0] == vcsn_dt2[0] == vcsn_dt3 == vcsn_dt4
@@ -80,7 +93,7 @@ vcsn_dt2 = nc.num2date(nc_file_temp.variables['time0'][:], nc_file_temp.variable
 
 # calculate model grid etc:
 # output DEM
-dem_file = dem_folder + output_dem + '.tif'
+dem_file = dem_folder + '/' + output_dem + '.tif'
 if output_dem == 'clutha_dem_250m':
     nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
 
@@ -96,12 +109,22 @@ if mask_dem == True:
     lats, lons, elev, northings, eastings = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
     _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
 else:
-    mask = None #vcsn_elev_interp==0
+    mask = None  # vcsn_elev_interp==0
     lats = lat_array
     lons = lon_array
     elev = nztm_dem
     northings = y_centres
     eastings = x_centres
+
+# set mask to all land points
+mask = elev > 0
+trimmed_mask = mask
+# calculate lat/lon on rotated grid of input
+xx, yy = np.meshgrid(northings, eastings, indexing='ij')
+rotated_coords = rot_pole_crs.transform_points(ccrs.epsg(2193), xx, yy)
+lats = rotated_coords[:, :, 1]
+lons = rotated_coords[:, :, 0]
+lons[lons < 0] = lons[lons < 0] + 360
 
 # set up time to run, paths to input files etc
 for year_to_take in years_to_take:
@@ -129,13 +152,12 @@ for year_to_take in years_to_take:
     out_nc_file.variables['acc'][0, :, :] = 0
     out_nc_file.variables['melt'][0, :, :] = 0
 
-
     # for each day:
     for ii, dt_t in enumerate(out_dt[:-1]):
         # load one day of precip and shortwave rad data
-        precip_hourly = nc_rain[int(np.where(vcsn_dt==dt_t)[0]):int(int(np.where(vcsn_dt==dt_t)[0])+24)]
+        precip_hourly = nc_rain[int(np.where(vcsn_dt == dt_t)[0]):int(int(np.where(vcsn_dt == dt_t)[0]) + 24)]
         # sw_rad_hourly = nc_srad[int(np.where(vcsn_dt4==dt_t)[0]):int(np.where(vcsn_dt4==dt_t)[0])+24]
-        temp_hourly = nc_temp[int(np.where(vcsn_dt2==dt_t)[0]):int(np.where(vcsn_dt2==dt_t)[0])+24]
+        temp_hourly = nc_temp[int(np.where(vcsn_dt2 == dt_t)[0]):int(np.where(vcsn_dt2 == dt_t)[0]) + 24]
 
         # interpolate data to fine grid
         hi_res_precip = interpolate_met(precip_hourly.filled(np.nan), 'rain', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev)
@@ -159,7 +181,7 @@ for year_to_take in years_to_take:
             # d_snow += dtstep / 86400.0
 
             swe, d_snow, melt, acc = calc_dswe(swe, d_snow, hourly_temp[i], hourly_precip[i], hourly_doy[i], 3600, which_melt=which_model,
-                                               **config)#sw=hourly_swin[i]
+                                               **config)  # sw=hourly_swin[i]
 
             # print swe[0]
             bucket_melt = bucket_melt + melt

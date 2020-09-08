@@ -84,9 +84,9 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
 
     :param in_dat: 3D array with data to be interpolated. has matrix [i,j] coordinates i.e. dimensions [time, in_lats, in_lons]
     :param var: name of variable to be interpolated. if 't_max', or 't_min'  will lapse to sea level before interpolation
-    :param in_lons: 1D or 2D array containing longitudes of input data
-    :param in_lats: 1D or 2Darray containing latitudes of input data
-    :param in_elev: 2D array containing elevation of input data, dimesions [in_lats, in_lons] or same as in_lons
+    :param in_lons: 1D array containing longitudes of input data
+    :param in_lats: 1D array containing latitudes of input data
+    :param in_elev: 2D array containing elevation of input data, dimensions [in_lats, in_lons] or same as in_lons
     :param out_lons: 1D array containing longitudes of output data
     :param out_lats: 1D array containing latitudes of output data
     :param out_elev: 2D array containing elevation of output data, dimension [out_lats, out_lons]
