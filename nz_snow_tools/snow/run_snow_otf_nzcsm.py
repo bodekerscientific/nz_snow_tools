@@ -28,21 +28,21 @@ mask_created = True  # boolean to set whether or not the mask has already been c
 
 # folder location
 mask_folder = None
-dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'#'/nesi/project/niwa00004/jonoconway'  # dem used for output #
+dem_folder = '/nesi/project/niwa00004/jonoconway'  # dem used for output #'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'#
 output_folder = '/nesi/nobackup/niwa00004/jonoconway'  # snow model output
-data_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/tn_file_compilation'#'/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12'  # input meteorology #
+data_folder = '/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12'  # input meteorology #'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/tn_file_compilation'#
 
 # open input met data files
 nc_file_orog = nc.Dataset(data_folder + '/tn_2020083000-utc_nzcsm_coords.nc', 'r')
-nc_rain = nc_file_orog.variables['orog_model']
-
-nc_file_temp = nc.Dataset(data_folder + '/test_temp4.nc', 'r')
-nc_temp = nc_file_temp.variables['sfc_temp']
-# nc_file_rain = nc.Dataset(data_folder + '/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
-# nc_file_temp = nc.Dataset(data_folder + '/air_temperature_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
-# # nc_file_srad = nc.Dataset(data_folder + '/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
-# nc_rain = nc_file_rain.variables['sum_total_precip']
+# nc_rain = nc_file_orog.variables['orog_model']
+#
+# nc_file_temp = nc.Dataset(data_folder + '/test_temp4.nc', 'r')
 # nc_temp = nc_file_temp.variables['sfc_temp']
+nc_file_rain = nc.Dataset(data_folder + '/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
+nc_file_temp = nc.Dataset(data_folder + '/air_temperature_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
+# nc_file_srad = nc.Dataset(data_folder + '/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
+nc_rain = nc_file_rain.variables['sum_total_precip']
+nc_temp = nc_file_temp.variables['sfc_temp']
 
 # configuration dictionary containing model parameters.
 config = {}
@@ -73,7 +73,7 @@ vcsn_elev_interp = vcsn_elev.copy()
 # vcsn_elev_interp = np.ma.fix_invalid(vcsn_elev).data
 vcsn_lats = nc_file_orog.variables['rlat'][:]
 vcsn_lons = nc_file_orog.variables['rlon'][:]
-# vcsn_dt = nc.num2date(nc_file_rain.variables['time'][:], nc_file_rain.variables['time'].units)
+vcsn_dt = nc.num2date(nc_file_rain.variables['time'][:], nc_file_rain.variables['time'].units)
 vcsn_dt2 = nc.num2date(nc_file_temp.variables['time0'][:], nc_file_temp.variables['time0'].units)
 # vcsn_dt4 = nc.num2date(nc_file_srad.variables['time'][:], nc_file_srad.variables['time'].units)
 
