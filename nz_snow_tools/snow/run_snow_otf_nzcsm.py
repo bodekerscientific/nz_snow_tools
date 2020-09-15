@@ -20,7 +20,7 @@ from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, in
 which_model = 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-years_to_take = [2018]#np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+years_to_take = [2018]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment mask file
 output_dem = 'si_dem_250m'  # string identifying output DEM
 
@@ -124,7 +124,7 @@ else:
 mask = elev > 0
 trimmed_mask = mask
 # calculate lat/lon on rotated grid of input
-yy,xx = np.meshgrid(northings, eastings, indexing='ij')
+yy, xx = np.meshgrid(northings, eastings, indexing='ij')
 rotated_coords = rot_pole_crs.transform_points(ccrs.epsg(2193), xx, yy)
 lats = rotated_coords[:, :, 1]
 lons = rotated_coords[:, :, 0]
@@ -161,7 +161,7 @@ for year_to_take in years_to_take:
         print('processing', dt_t)
         # load one day of precip and shortwave rad data
         precip_hourly = nc_rain[int(np.where(vcsn_dt == dt_t)[0]):int(int(np.where(vcsn_dt == dt_t)[0]) + 24)]
-        sw_rad_hourly = nc_srad[int(np.where(vcsn_dt4==dt_t)[0]):int(np.where(vcsn_dt4==dt_t)[0])+24]
+        sw_rad_hourly = nc_srad[int(np.where(vcsn_dt4 == dt_t)[0]):int(np.where(vcsn_dt4 == dt_t)[0]) + 24]
         temp_hourly = nc_temp[int(np.where(vcsn_dt2 == dt_t)[0]):int(np.where(vcsn_dt2 == dt_t)[0]) + 24]
 
         # interpolate data to fine grid
@@ -172,7 +172,7 @@ for year_to_take in years_to_take:
         # mask out areas we don't want/need
         if mask is not None:
             hi_res_precip[:, trimmed_mask == 0] = np.nan
-            hi_res_sw_rad[:,trimmed_mask == 0] = np.nan
+            hi_res_sw_rad[:, trimmed_mask == 0] = np.nan
             hi_res_temp[:, trimmed_mask == 0] = np.nan
 
         hourly_dt = np.asarray(make_regular_timeseries(dt_t, dt_t + dt.timedelta(hours=23), 3600))
@@ -185,7 +185,7 @@ for year_to_take in years_to_take:
         for i in range(len(hourly_dt)):
             # d_snow += dtstep / 86400.0
 
-            swe, d_snow, melt, acc = calc_dswe(swe, d_snow, hourly_temp[i], hourly_precip[i], hourly_doy[i], 3600, which_melt=which_model,sw=hourly_swin[i]
+            swe, d_snow, melt, acc = calc_dswe(swe, d_snow, hourly_temp[i], hourly_precip[i], hourly_doy[i], 3600, which_melt=which_model, sw=hourly_swin[i],
                                                **config)  #
 
             # print swe[0]
