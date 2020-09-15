@@ -17,7 +17,7 @@ from nz_snow_tools.util.utils import create_mask_from_shpfile, make_regular_time
 from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, interpolate_met, process_precip, daily_to_hourly_swin_grids, \
     daily_to_hourly_temp_grids, setup_nztm_dem, setup_nztm_grid_netcdf, trim_lat_lon_bounds
 
-run_id = 'mueller_calib'
+run_id = 'dsc_default'
 
 # model options
 which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
@@ -74,7 +74,8 @@ config['a_ice'] = 0.42
 config['a_freshsnow'] = 0.90
 config['a_firn'] = 0.62
 config['alb_swe_thres'] = 20
-config['ros'] = True
+config['ros'] = False
+config['ta_m_tt'] = False
 
 # load met grid (assume same for all input data)
 vcsn_elev = nc_file_orog.variables['orog_model'][:]
