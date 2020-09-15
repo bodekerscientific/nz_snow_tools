@@ -40,11 +40,12 @@ for i, year_to_take in enumerate(years_to_take):
     print('loading data for year {}'.format(year_to_take))
     nc_file = nc.Dataset(model_output_folder + '/snow_out_SI_si_dem_250m_{}.nc'.format(year_to_take), 'r')
     model_scd = np.sum(nc_file.variables['swe'][:] > model_swe_sc_threshold,axis=0)
-
-    CS1 = plt.contourf(x_centres, y_centres, model_scd[:,20:], levels=bin_edges, cmap=plt.cm.magma_r, extend='both')
+    model_scd = model_scd[:, 20:]
+    model_scd[nztm_dem==0] = np.nan
+    CS1 = plt.contourf(x_centres, y_centres, model_scd, levels=bin_edges, cmap=plt.cm.magma_r, extend='both')
     # CS1.cmap.set_bad('grey')
     CS1.cmap.set_over([0.47, 0.72, 0.77])
-    CS1.cmap.set_over('none')
+    # CS1.cmap.set_under('none')
     plt.gca().set_aspect('equal')
     # plt.imshow(modis_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='magma_r')
     plt.xticks([])
