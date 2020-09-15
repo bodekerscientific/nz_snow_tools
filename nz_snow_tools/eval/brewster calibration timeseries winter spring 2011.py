@@ -13,7 +13,7 @@ import matplotlib.dates as mdates
 config = {}
 config['num_secs_output']=1800
 config['tacc'] = 274.16
-config['tmelt'] = 274.16
+config['tmelt'] = 276.16
 
 # clark2009 melt parameters
 config['mf_mean'] = 5.0
@@ -39,7 +39,7 @@ config['ta_m_tt'] = False
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
-    'C:/Users/Bonnamourar/OneDrive - NIWA/for Ambre/BrewsterGlacier_Oct10_Sep12_mod3.dat')
+    'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Hydro/BrewsterGlacier_Oct10_Sep12_mod3.dat')
 start_t = 9600 -1# 9456 = start of doy 130 10th May 2011 9600 = end of 13th May,18432 = start of 11th Nov 2013,19296 = 1st december 2011
 end_t = 21360  # 20783 = end of doy 365, 21264 = end of 10th January 2012, 21360 = end of 12th Jan
 inp_dt = make_regular_timeseries(dt.datetime(2010,10,25,00,30),dt.datetime(2012,9,2,00,00),1800)
@@ -57,13 +57,13 @@ inp_sfc -= inp_sfc[0]# reset to 0 at beginning of period
 
 # validation data
 seb_dat = np.genfromtxt(
-    'C:/Users/Bonnamourar/OneDrive - NIWA/for Ambre/modelOUT_br1_headings.txt',skip_header=3)
+    'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Hydro/modelOUT_br1_headings.txt',skip_header=3)
 seb_mb = seb_dat[start_t-1:end_t, -1]
 seb_mb -= seb_mb[0] # reset to 0
 
 # read in measured daily SEB change
 mb_dat = np.genfromtxt(
-    'C:/Users/Bonnamourar/OneDrive - NIWA/for Ambre/mchange.dat')
+    'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Hydro/mchange.dat')
 # note that the measured MB interprets surface height loss in the winter as mass loss, rather than compaction.
 mb_dt = make_regular_timeseries(dt.datetime(2010,10,26,00,00),dt.datetime(2012,9,2,00,00),86400)
 ts_mb = plt.cumsum(mb_dat[:,0])
@@ -105,6 +105,6 @@ plt.xlabel('month')
 plt.ylabel('SWE mm w.e.')
 plt.legend()
 plt.title('cumulative mass balance TF:{}, RF: {}, Tmelt:{}'.format(config['tf'],config['rf'],config['tmelt']))
-plt.savefig('C:/Users/Bonnamourar/OneDrive - NIWA/Winter Spring 2011 TF{}RF{}Tmelt{}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
+plt.savefig('C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Hydro/Winter Spring 2011 TF{}RF{}Tmelt{}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
 plt.close()
 
