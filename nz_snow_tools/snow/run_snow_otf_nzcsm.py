@@ -8,6 +8,7 @@ import pickle
 import numpy as np
 import cartopy.crs as ccrs
 import datetime as dt
+import os
 import matplotlib.pylab as plt
 
 from nz_snow_tools.snow.clark2009_snow_model import calc_dswe
@@ -19,7 +20,7 @@ from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, in
 which_model = 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-years_to_take = np.arange(2017, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+years_to_take = [2018]#np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment mask file
 output_dem = 'si_dem_250m'  # string identifying output DEM
 
@@ -29,8 +30,11 @@ mask_created = True  # boolean to set whether or not the mask has already been c
 # folder location
 mask_folder = None
 dem_folder = '/nesi/project/niwa00004/jonoconway'  # dem used for output #'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'#
-output_folder = '/nesi/nobackup/niwa00004/jonoconway'  # snow model output
-data_folder = '/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12'  # input meteorology #'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/tn_file_compilation'#
+output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/dsc_snow'  # snow model output
+data_folder = '/nesi/nobackup/niwa00004/jonoconway'  # input meteorology #'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/tn_file_compilation'#
+
+if not os.path.exists(output_folder):
+    os.makedirs(output_folder)
 
 # open input met data files
 nc_file_orog = nc.Dataset(data_folder + '/tn_2020083000-utc_nzcsm_coords.nc', 'r')
@@ -38,11 +42,12 @@ nc_file_orog = nc.Dataset(data_folder + '/tn_2020083000-utc_nzcsm_coords.nc', 'r
 #
 # nc_file_temp = nc.Dataset(data_folder + '/test_temp4.nc', 'r')
 # nc_temp = nc_file_temp.variables['sfc_temp']
-nc_file_rain = nc.Dataset(data_folder + '/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
+nc_file_rain = nc.Dataset(data_folder + '/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12_old.nc', 'r')
 nc_file_temp = nc.Dataset(data_folder + '/air_temperature_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
-# nc_file_srad = nc.Dataset(data_folder + '/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
+nc_file_srad = nc.Dataset(data_folder + '/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 nc_rain = nc_file_rain.variables['sum_total_precip']
 nc_temp = nc_file_temp.variables['sfc_temp']
+nc_srad = nc_file_srad.variables['sfc_dw_sw_flux']
 
 # configuration dictionary containing model parameters.
 config = {}
@@ -75,7 +80,7 @@ vcsn_lats = nc_file_orog.variables['rlat'][:]
 vcsn_lons = nc_file_orog.variables['rlon'][:]
 vcsn_dt = nc.num2date(nc_file_rain.variables['time'][:], nc_file_rain.variables['time'].units)
 vcsn_dt2 = nc.num2date(nc_file_temp.variables['time0'][:], nc_file_temp.variables['time0'].units)
-# vcsn_dt4 = nc.num2date(nc_file_srad.variables['time'][:], nc_file_srad.variables['time'].units)
+vcsn_dt4 = nc.num2date(nc_file_srad.variables['time1'][:], nc_file_srad.variables['time1'].units)
 
 # vcsn_dt = vcsn_dt2  ########hack to get working #TODO remove hack when finished debugging
 
@@ -156,32 +161,32 @@ for year_to_take in years_to_take:
         print('processing', dt_t)
         # load one day of precip and shortwave rad data
         precip_hourly = nc_rain[int(np.where(vcsn_dt == dt_t)[0]):int(int(np.where(vcsn_dt == dt_t)[0]) + 24)]
-        # sw_rad_hourly = nc_srad[int(np.where(vcsn_dt4==dt_t)[0]):int(np.where(vcsn_dt4==dt_t)[0])+24]
+        sw_rad_hourly = nc_srad[int(np.where(vcsn_dt4==dt_t)[0]):int(np.where(vcsn_dt4==dt_t)[0])+24]
         temp_hourly = nc_temp[int(np.where(vcsn_dt2 == dt_t)[0]):int(np.where(vcsn_dt2 == dt_t)[0]) + 24]
 
         # interpolate data to fine grid
         hi_res_precip = interpolate_met(precip_hourly.filled(np.nan), 'rain', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev)
-        # hi_res_sw_rad = interpolate_met(sw_rad_hourly.filled(np.nan), 'srad', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev)
+        hi_res_sw_rad = interpolate_met(sw_rad_hourly.filled(np.nan), 'srad', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev)
         hi_res_temp = interpolate_met(temp_hourly.filled(np.nan), 'tmax', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev)
 
         # mask out areas we don't want/need
         if mask is not None:
             hi_res_precip[:, trimmed_mask == 0] = np.nan
-            # hi_res_sw_rad[:,trimmed_mask == 0] = np.nan
+            hi_res_sw_rad[:,trimmed_mask == 0] = np.nan
             hi_res_temp[:, trimmed_mask == 0] = np.nan
 
         hourly_dt = np.asarray(make_regular_timeseries(dt_t, dt_t + dt.timedelta(hours=23), 3600))
         hourly_doy = convert_datetime_julian_day(hourly_dt)
         hourly_temp = hi_res_temp
         hourly_precip = hi_res_precip
-        # hourly_swin = hi_res_sw_rad
+        hourly_swin = hi_res_sw_rad
 
         # calculate snow and output to netcdf
         for i in range(len(hourly_dt)):
             # d_snow += dtstep / 86400.0
 
-            swe, d_snow, melt, acc = calc_dswe(swe, d_snow, hourly_temp[i], hourly_precip[i], hourly_doy[i], 3600, which_melt=which_model,
-                                               **config)  # sw=hourly_swin[i]
+            swe, d_snow, melt, acc = calc_dswe(swe, d_snow, hourly_temp[i], hourly_precip[i], hourly_doy[i], 3600, which_melt=which_model,sw=hourly_swin[i]
+                                               **config)  #
 
             # print swe[0]
             bucket_melt = bucket_melt + melt
