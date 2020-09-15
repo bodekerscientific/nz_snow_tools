@@ -3,24 +3,27 @@ code to run snow model on large grid for multiple years. calculates meteorology 
 """
 from __future__ import division
 
+import json
 import netCDF4 as nc
 import pickle
 import numpy as np
 import cartopy.crs as ccrs
 import datetime as dt
 import os
-import matplotlib.pylab as plt
+# import matplotlib.pylab as plt
 
 from nz_snow_tools.snow.clark2009_snow_model import calc_dswe
 from nz_snow_tools.util.utils import create_mask_from_shpfile, make_regular_timeseries, convert_datetime_julian_day
 from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, interpolate_met, process_precip, daily_to_hourly_swin_grids, \
     daily_to_hourly_temp_grids, setup_nztm_dem, setup_nztm_grid_netcdf, trim_lat_lon_bounds
 
+run_id = 'mueller_calib'
+
 # model options
-which_model = 'dsc_snow'#'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
+which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-years_to_take = [2018]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+years_to_take = [2016, 2018, 2019]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment mask file
 output_dem = 'si_dem_250m'  # string identifying output DEM
 
@@ -51,6 +54,7 @@ nc_srad = nc_file_srad.variables['sfc_dw_sw_flux']
 
 # configuration dictionary containing model parameters.
 config = {}
+config['which_model'] = which_model
 config['tacc'] = 274.16
 config['tmelt'] = 273.16
 # clark2009 melt parameters
@@ -137,7 +141,7 @@ for year_to_take in years_to_take:
     out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take, 4, 1), dt.datetime(year_to_take + 1, 4, 1), 86400))
 
     # set up output netCDF:
-    out_nc_file = setup_nztm_grid_netcdf(output_folder + '/snow_out_{}_{}_{}.nc'.format(catchment, output_dem, year_to_take),
+    out_nc_file = setup_nztm_grid_netcdf(output_folder + '/snow_out_{}_{}_{}_{}.nc'.format(catchment, output_dem, run_id, year_to_take),
                                          None, ['swe', 'acc', 'melt'],
                                          out_dt, northings, eastings, lat_array, lon_array, elev)
 
@@ -208,4 +212,5 @@ for year_to_take in years_to_take:
 
     out_nc_file.close()
 
-    pickle.dump(config, open(output_folder + '/config_{}_{}_{}.pkl'.format(catchment, output_dem, year_to_take), 'wb'), -1)
+    json.dump(config, open(output_folder + '/config_{}_{}_{}_{}.json'.format(catchment, output_dem, run_id, year_to_take), 'w'))
+    pickle.dump(config, open(output_folder + '/config_{}_{}_{}_{}.pkl'.format(catchment, output_dem, run_id, year_to_take), 'wb'), protocol=3)
