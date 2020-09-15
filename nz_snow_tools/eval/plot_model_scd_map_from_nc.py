@@ -10,6 +10,7 @@ import matplotlib.pylab as plt
 from nz_snow_tools.util.utils import setup_nztm_dem
 from matplotlib.colors import BoundaryNorm
 import netCDF4 as nc
+import copy
 
 run_id = 'nzcsm_clark2009'
 catchment = 'SI'
@@ -42,7 +43,7 @@ for i, year_to_take in enumerate(years_to_take):
     model_scd = np.sum(nc_file.variables['swe'][:] > model_swe_sc_threshold,axis=0)
     model_scd = model_scd[:, 20:]
     model_scd[nztm_dem==0] = np.nan
-    CS1 = plt.contourf(x_centres, y_centres, model_scd, levels=bin_edges, cmap=plt.cm.magma_r, extend='both')
+    CS1 = plt.contourf(x_centres, y_centres, model_scd, levels=bin_edges, cmap=copy.copy(plt.cm.get_cmap('magma_r')), extend='max')
     # CS1.cmap.set_bad('grey')
     CS1.cmap.set_over([0.47, 0.72, 0.77])
     # CS1.cmap.set_under('none')
