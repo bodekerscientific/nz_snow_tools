@@ -11,7 +11,7 @@ from nz_snow_tools.util.utils import setup_nztm_dem
 from matplotlib.colors import BoundaryNorm
 import netCDF4 as nc
 
-run_id = 'nzcsm_dsc_snow'
+run_id = 'nzcsm_clark2009'
 catchment = 'SI'
 output_dem = 'si_dem_250m'  # identifier for output dem
 years_to_take = [2018]  # [2013 + 1]  # range(2001, 2013 + 1)
@@ -20,7 +20,7 @@ model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/dsc_snow
 plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/dsc_snow'
 dem_folder = '/nesi/project/niwa00004/jonoconway'  # dem used for output #'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'#
 
-
+print('loading dem')
 # load si dem and trim to size. (modis has smaller extent to west (1.085e6)
 si_dem_file = dem_folder + '/si_dem_250m' + '.tif'
 nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(si_dem_file, extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
@@ -37,7 +37,8 @@ fig1 = plt.figure(figsize=[4,4])
 bin_edges = [-0.001, 30, 60, 90, 120, 180, 270, 360]  # use small negative number to include 0 in the interpolation
 
 for i, year_to_take in enumerate(years_to_take):
-    nc_file = nc.Dataset('snow_out_SI_si_dem_250m_{}.nc'.format(year_to_take), 'r')
+    print('loading data for year {}'.format(year_to_take))
+    nc_file = nc.Dataset(model_output_folder + '/snow_out_SI_si_dem_250m_{}.nc'.format(year_to_take), 'r')
     model_scd = np.sum(nc_file.variables['swe'][:] > model_swe_sc_threshold,axis=0)
 
     CS1 = plt.contourf(x_centres, y_centres, model_scd[:,20:], levels=bin_edges, cmap=plt.cm.magma_r, extend='both')
