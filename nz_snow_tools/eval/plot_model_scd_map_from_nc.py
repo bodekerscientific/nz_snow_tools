@@ -33,11 +33,12 @@ lon_array = lon_array[:, 20:]
 
 plt.rcParams.update({'font.size': 6})
 plt.rcParams.update({'axes.titlesize' : 6})
-fig1 = plt.figure(figsize=[4,4])
+
 
 bin_edges = [-0.001, 30, 60, 90, 120, 180, 270, 360]  # use small negative number to include 0 in the interpolation
 
 for i, year_to_take in enumerate(years_to_take):
+    fig1 = plt.figure(figsize=[4, 4])
     print('loading data for year {}'.format(year_to_take))
     nc_file = nc.Dataset(model_output_folder + '/snow_out_SI_si_dem_250m_{}_{}.nc'.format(run_id, year_to_take), 'r')
     model_scd = np.sum(nc_file.variables['swe'][:] > model_swe_sc_threshold,axis=0).astype(np.float)
@@ -63,4 +64,4 @@ for i, year_to_take in enumerate(years_to_take):
 
     plt.savefig(plot_folder + '/SCD model {} thres{} {}.png'.format(year_to_take, model_swe_sc_threshold, run_id), dpi=300)
     plt.show()
-    plt.clf()
+    plt.close()
