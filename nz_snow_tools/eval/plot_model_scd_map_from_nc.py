@@ -12,10 +12,10 @@ from matplotlib.colors import BoundaryNorm
 import netCDF4 as nc
 import copy
 
-run_id = 'nzcsm_clark2009'
+run_id = 'dsc_default'
 catchment = 'SI'
 output_dem = 'si_dem_250m'  # identifier for output dem
-years_to_take = [2018]  # [2013 + 1]  # range(2001, 2013 + 1)
+years_to_take = [2016,2018,2019]  # [2013 + 1]  # range(2001, 2013 + 1)
 model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
 model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/dsc_snow'
 plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/dsc_snow'
@@ -39,7 +39,7 @@ bin_edges = [-0.001, 30, 60, 90, 120, 180, 270, 360]  # use small negative numbe
 
 for i, year_to_take in enumerate(years_to_take):
     print('loading data for year {}'.format(year_to_take))
-    nc_file = nc.Dataset(model_output_folder + '/snow_out_SI_si_dem_250m_{}.nc'.format(year_to_take), 'r')
+    nc_file = nc.Dataset(model_output_folder + '/snow_out_SI_si_dem_250m_{}_{}.nc'.format(run_id, year_to_take), 'r')
     model_scd = np.sum(nc_file.variables['swe'][:] > model_swe_sc_threshold,axis=0).astype(np.float)
     model_scd = model_scd[:, 20:]
     model_scd[nztm_dem==0] = np.nan
