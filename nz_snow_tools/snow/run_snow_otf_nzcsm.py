@@ -83,7 +83,7 @@ vcsn_elev_interp = vcsn_elev.copy()
 # vcsn_elev_interp = np.ma.fix_invalid(vcsn_elev).data
 vcsn_lats = nc_file_orog.variables['rlat'][:]
 vcsn_lons = nc_file_orog.variables['rlon'][:]
-vcsn_dt = nc.num2date(nc_file_rain.variables['time'][:], nc_file_rain.variables['time'].units)
+vcsn_dt = nc.num2date(nc_file_rain.variables['time2'][:], nc_file_rain.variables['time2'].units)
 vcsn_dt2 = nc.num2date(nc_file_temp.variables['time0'][:], nc_file_temp.variables['time0'].units)
 vcsn_dt4 = nc.num2date(nc_file_srad.variables['time1'][:], nc_file_srad.variables['time1'].units)
 
