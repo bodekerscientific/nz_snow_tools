@@ -44,12 +44,12 @@ if not os.path.exists(output_folder):
 
 
 # paths to input met data
-nc_file_rain = nc.Dataset('/nesi/nobackup/niwa00026/VCSN/Rain/rain_vclim_clidb_1972010100_2020090200_south-island_p05_daily_netcdf4.nc', 'r')
+nc_file_rain = nc.Dataset('/nesi/nobackup/niwa00026/VCSN/Rain/rain_vclim_clidb_1972010100_2020080200_south-island_p05_daily_netcdf4.nc', 'r')
 #nc_file_tmax = nc.Dataset('T:/newVCSN/tmax_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc', 'r')
-nc_file_tmax = nc.Dataset('/nesi/nobackup/niwa00026/VCSN/TMax_Norton/tmax_vclim_clidb_Norton_1972010100_2020090200_south-island_p05_daily_netcdf4.nc', 'r')
+nc_file_tmax = nc.Dataset('/nesi/nobackup/niwa00026/VCSN/TMax_Norton/tmax_vclim_clidb_Norton_1972010100_2020080200_south-island_p05_daily_netcdf4.nc', 'r')
 #nc_file_tmin = nc.Dataset('T:/newVCSN/tmin_vclim_clidb_1972010100_2017102000_south-island_p05_daily.nc', 'r')
-nc_file_tmin = nc.Dataset('/nesi/nobackup/niwa00026/VCSN/TMin_Norton/tmin_vclim_clidb_Norton_1972010100_2020090200_south-island_p05_daily_netcdf4.nc', 'r')
-nc_file_srad = nc.Dataset('/nesi/nobackup/niwa00026/VCSN/SRad/srad_vclim_clidb_1972010100_2020090200_south-island_p05_daily_netcdf4.nc', 'r')
+nc_file_tmin = nc.Dataset('/nesi/nobackup/niwa00026/VCSN/TMin_Norton/tmin_vclim_clidb_Norton_1972010100_2020080200_south-island_p05_daily_netcdf4.nc', 'r')
+nc_file_srad = nc.Dataset('/nesi/nobackup/niwa00026/VCSN/SRad/srad_vclim_clidb_1972010100_2020080200_south-island_p05_daily_netcdf4.nc', 'r')
 
 
 # configuration dictionary containing model parameters.
