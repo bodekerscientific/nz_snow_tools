@@ -23,7 +23,7 @@ met_inp = 'vcsn_norton' #identifier for input meteorology
 which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-years_to_take = np.arange(2000, 2019 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+hydro_years_to_take = np.arange(2001, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment shapefile
 output_dem = 'si_dem_250m'
 mask_dem = False  # boolean to set whether or not to mask the output dem
@@ -125,7 +125,7 @@ else:
     trimmed_mask = mask
 
 # set up time to run, paths to input files etc
-for year_to_take in years_to_take:
+for year_to_take in hydro_years_to_take:
     # specify the days to run (output is at the end of each day)
     # out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take, 7, 1), dt.datetime(year_to_take, 7, 2), 86400))
     out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take-1, 4, 1), dt.datetime(year_to_take, 4, 1), 86400))
