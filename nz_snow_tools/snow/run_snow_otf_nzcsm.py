@@ -17,13 +17,13 @@ from nz_snow_tools.util.utils import create_mask_from_shpfile, make_regular_time
 from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, interpolate_met, process_precip, daily_to_hourly_swin_grids, \
     daily_to_hourly_temp_grids, setup_nztm_dem, setup_nztm_grid_netcdf, trim_lat_lon_bounds
 
-run_id = 'cl09_default'
-
+run_id = 'dsc_default'
+met_inp = 'nzcsm7-12' #identifier for input meteorology
 # model options
-which_model = 'clark2009'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
+which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-years_to_take = [2016, 2018, 2019]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+years_to_take = [2016, 2017, 2018, 2019]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment mask file
 output_dem = 'si_dem_250m'  # string identifying output DEM
 
@@ -33,7 +33,7 @@ mask_created = True  # boolean to set whether or not the mask has already been c
 # folder location
 mask_folder = None
 dem_folder = '/nesi/project/niwa00004/jonoconway'  # dem used for output #'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'#
-output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/dsc_snow'  # snow model output
+output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'  # snow model output
 data_folder = '/nesi/nobackup/niwa00004/jonoconway'  # input meteorology #'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/tn_file_compilation'#
 
 if not os.path.exists(output_folder):
@@ -45,7 +45,7 @@ nc_file_orog = nc.Dataset(data_folder + '/tn_2020083000-utc_nzcsm_coords.nc', 'r
 #
 # nc_file_temp = nc.Dataset(data_folder + '/test_temp4.nc', 'r')
 # nc_temp = nc_file_temp.variables['sfc_temp']
-nc_file_rain = nc.Dataset(data_folder + '/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12_old.nc', 'r')
+nc_file_rain = nc.Dataset(data_folder + '/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 nc_file_temp = nc.Dataset(data_folder + '/air_temperature_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 nc_file_srad = nc.Dataset(data_folder + '/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc', 'r')
 nc_rain = nc_file_rain.variables['sum_total_precip']
@@ -142,7 +142,7 @@ for year_to_take in years_to_take:
     out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take-1, 4, 1), dt.datetime(year_to_take, 4, 1), 86400))
 
     # set up output netCDF:
-    out_nc_file = setup_nztm_grid_netcdf(output_folder + '/snow_out_{}_{}_{}_{}.nc'.format(catchment, output_dem, run_id, year_to_take),
+    out_nc_file = setup_nztm_grid_netcdf(output_folder + '/snow_out_{}_{}_{}_{}_{}_{}.nc'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take),
                                          None, ['swe', 'acc', 'melt'],
                                          out_dt, northings, eastings, lat_array, lon_array, elev)
 
@@ -218,5 +218,6 @@ for year_to_take in years_to_take:
 
     out_nc_file.close()
 
-    json.dump(config, open(output_folder + '/config_{}_{}_{}_{}.json'.format(catchment, output_dem, run_id, year_to_take), 'w'))
-    pickle.dump(config, open(output_folder + '/config_{}_{}_{}_{}.pkl'.format(catchment, output_dem, run_id, year_to_take), 'wb'), protocol=3)
+
+    json.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}.json'.format(met_inp,which_model, catchment, output_dem, run_id, year_to_take), 'w'))
+    pickle.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}_{}.pkl'.format(met_inp,which_model, catchment, output_dem, run_id, year_to_take), 'wb'), protocol=3)

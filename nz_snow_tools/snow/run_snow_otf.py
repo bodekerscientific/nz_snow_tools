@@ -17,13 +17,13 @@ from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, in
     daily_to_hourly_temp_grids, setup_nztm_dem, setup_nztm_grid_netcdf, trim_lat_lon_bounds
 
 
-run_id = 'cl09_default'
+run_id = 'dsc_default'
 met_inp = 'vcsn_norton' #identifier for input meteorology
 # model options
 which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-years_to_take = range(2000, 2019 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+years_to_take = np.arange(2000, 2019 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment shapefile
 output_dem = 'si_dem_250m'
 mask_dem = False  # boolean to set whether or not to mask the output dem
@@ -131,7 +131,7 @@ for year_to_take in years_to_take:
     out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take-1, 4, 1), dt.datetime(year_to_take, 4, 1), 86400))
 
     # set up output netCDF:
-    out_nc_file = setup_nztm_grid_netcdf(output_folder + '/snow_out_{}_{}_{}_{}_{}.nc'.format(met_inp, catchment, output_dem, run_id, year_to_take),
+    out_nc_file = setup_nztm_grid_netcdf(output_folder + '/snow_out_{}_{}_{}_{}_{}_{}.nc'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take),
                                          None, ['swe', 'acc', 'melt'],
                                          out_dt, northings, eastings, lats, lons, elev)
 
@@ -220,6 +220,6 @@ for year_to_take in years_to_take:
 
     out_nc_file.close()
 
-    json.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}.json'.format(met_inp,catchment, output_dem, run_id, year_to_take), 'w'))
-    pickle.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}.pkl'.format(met_inp,catchment, output_dem, run_id, year_to_take), 'wb'), protocol=3)
-    pickle.dump(day_weightings, open(output_folder + '/met_inp_{}_{}_{}_{}_{}_daywts.pkl'.format(met_inp,catchment, output_dem, run_id, year_to_take), 'wb'), protocol=3)
+    json.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}.json'.format(met_inp,which_model, catchment, output_dem, run_id, year_to_take), 'w'))
+    pickle.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}_{}.pkl'.format(met_inp,which_model, catchment, output_dem, run_id, year_to_take), 'wb'), protocol=3)
+    pickle.dump(day_weightings, open(output_folder + '/met_inp_{}_{}_{}_{}_{}_{}_daywts.pkl'.format(met_inp,which_model, catchment, output_dem, run_id, year_to_take), 'wb'), protocol=3)
