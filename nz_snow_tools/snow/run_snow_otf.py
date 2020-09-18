@@ -120,6 +120,9 @@ else:
     elev = nztm_dem
     northings = y_centres
     eastings = x_centres
+    # set mask to all land points
+    mask = elev > 0
+    trimmed_mask = mask
 
 # set up time to run, paths to input files etc
 for year_to_take in years_to_take:

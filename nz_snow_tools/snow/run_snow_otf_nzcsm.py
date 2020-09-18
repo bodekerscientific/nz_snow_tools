@@ -27,7 +27,7 @@ years_to_take = [2016, 2018, 2019]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  #
 catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment mask file
 output_dem = 'si_dem_250m'  # string identifying output DEM
 
-mask_dem = False  # TODO: NOTE for NZCSM runs the mask is set to all land points.  boolean to set whether or not to mask the output dem
+mask_dem = False  #
 mask_created = True  # boolean to set whether or not the mask has already been created
 
 # folder location
@@ -73,7 +73,7 @@ config['tc'] = 10.0
 config['a_ice'] = 0.42
 config['a_freshsnow'] = 0.90
 config['a_firn'] = 0.62
-config['alb_swe_thres'] = 20
+config['alb_swe_thres'] = 10
 config['ros'] = False
 config['ta_m_tt'] = False
 
@@ -111,13 +111,12 @@ if output_dem == 'si_dem_250m':
                                                                           resolution=250)
 
 if mask_dem == True:
-    print('Warning - mask is reset to all land points')
-    # # Get the masks for the individual regions of interest
-    # if mask_created == True:  # load precalculated mask
-    #     mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, output_dem))
-    # # Trim down the number of latitudes requested so it all stays in memory
-    # lats, lons, elev, northings, eastings = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
-    # _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
+    # Get the masks for the individual regions of interest
+    if mask_created == True:  # load precalculated mask
+        mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, output_dem))
+    # Trim down the number of latitudes requested so it all stays in memory
+    lats, lons, elev, northings, eastings = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
+    _, _, trimmed_mask, _, _ = trim_lat_lon_bounds(mask, lat_array, lon_array, mask.copy(), y_centres, x_centres)
 else:
     mask = None  # vcsn_elev_interp==0
     lats = lat_array
@@ -126,9 +125,9 @@ else:
     northings = y_centres
     eastings = x_centres
 
-# set mask to all land points
-mask = elev > 0
-trimmed_mask = mask
+    # set mask to all land points
+    mask = elev > 0
+    trimmed_mask = mask
 # calculate lat/lon on rotated grid of input
 yy, xx = np.meshgrid(northings, eastings, indexing='ij')
 rotated_coords = rot_pole_crs.transform_points(ccrs.epsg(2193), xx, yy)
@@ -186,7 +185,8 @@ for year_to_take in years_to_take:
         if which_model == 'dsc_snow':
             sw_rad_hourly = nc_srad[int(np.where(vcsn_dt4 == dt_t)[0]):int(np.where(vcsn_dt4 == dt_t)[0]) + 24]
             hi_res_sw_rad = interpolate_met(sw_rad_hourly.filled(np.nan), 'srad', vcsn_lons, vcsn_lats, vcsn_elev_interp, lons, lats, elev)
-            hi_res_sw_rad[:, trimmed_mask == 0] = np.nan
+            if mask is not None:
+                hi_res_sw_rad[:, trimmed_mask == 0] = np.nan
             hourly_swin = hi_res_sw_rad
 
         # calculate snow and output to netcdf
