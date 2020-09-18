@@ -139,7 +139,7 @@ lons[lons < 0] = lons[lons < 0] + 360
 for year_to_take in years_to_take:
     # specify the days to run (output is at the end of each day)
     # out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take, 7, 1), dt.datetime(year_to_take, 7, 2), 86400))
-    out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take, 4, 1), dt.datetime(year_to_take + 1, 4, 1), 86400))
+    out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take-1, 4, 1), dt.datetime(year_to_take, 4, 1), 86400))
 
     # set up output netCDF:
     out_nc_file = setup_nztm_grid_netcdf(output_folder + '/snow_out_{}_{}_{}_{}.nc'.format(catchment, output_dem, run_id, year_to_take),
