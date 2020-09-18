@@ -94,7 +94,7 @@ vcsn_dt4 = nc.num2date(nc_file_srad.variables['time'][:], nc_file_srad.variables
 
 # calculate model grid etc:
 # output DEM
-dem_file = dem_folder + output_dem + '.tif'
+dem_file = dem_folder + '/' + output_dem + '.tif'
 if output_dem == 'clutha_dem_250m':
     nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file)
 
