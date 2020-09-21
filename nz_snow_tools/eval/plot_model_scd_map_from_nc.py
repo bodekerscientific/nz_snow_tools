@@ -13,13 +13,13 @@ import netCDF4 as nc
 import copy
 
 run_id = 'dsc_default'
-met_inp = 'nzcsm7-12'
+met_inp = 'vcsn_norton'
 which_model = 'dsc_snow'
 catchment = 'SI'
 output_dem = 'si_dem_250m'  # identifier for output dem
-years_to_take = [2017,2018,2019,2020]  # [2013 + 1]  # range(2001, 2013 + 1)
+years_to_take = np.arange(2001, 2020 + 1)    # [2013 + 1]  # range(2001, 2013 + 1)
 model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
-model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
+model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/vcsn'
 plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 dem_folder = '/nesi/project/niwa00004/jonoconway'  # dem used for output #'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'#
 
