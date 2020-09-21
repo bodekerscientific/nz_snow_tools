@@ -43,21 +43,8 @@ def load_oft_output_annual_without_mask(met_inp, which_model, catchment, output_
     return st_swe * 1e3, out_dt  # convert to mm w.e.
 
 
-if __name__ == '__main__':
-
-    run_id = 'dsc_default'
-    met_inp = 'nzcsm7-12'  # identifier for input meteorology
-    which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
-    # time and grid extent options
-    hydro_years_to_take = [2017, 2018, 2019, 2020]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-    catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment mask file
-    output_dem = 'si_dem_250m'  # string identifying output DEM
-
-    origin = 'topleft'
-    model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
-    mask_file = '/home/jonoconway/work/DSC_snow/modis_mask_2000_2016.npy'  # masked for any ocean/inland water cells in modis record + elevation >0
-    dsc_snow_output_folder = '/home/jonoconway/work/DSC_snow/NoCorrection'  # path to snow model output
-    output_folder = '/home/jonoconway/work/DSC_snow/'
+def SI_evaluation(run_id, met_inp, which_model, hydro_years_to_take, catchment, output_dem, origin, model_swe_sc_threshold, mask_file, dsc_snow_output_folder,
+                  output_folder):
 
     modis_mask = np.load(mask_file)
 
@@ -107,5 +94,26 @@ if __name__ == '__main__':
 
     ann = [ann_ts_av_swe_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m, ann_swe_m]
     pickle.dump(ann, open(
-        output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model, catchment, output_dem, run_id,
-                                                                        model_swe_sc_threshold), 'wb'), protocol=3)
+        output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
+                                                                                 catchment, output_dem, run_id,
+                                                                                 model_swe_sc_threshold), 'wb'), protocol=3)
+
+
+if __name__ == '__main__':
+
+    run_id = 'dsc_default'
+    met_inp = 'nzcsm7-12'  # identifier for input meteorology
+    which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
+    # time and grid extent options
+    hydro_years_to_take = [2017, 2018, 2019, 2020]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+    catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment mask file
+    output_dem = 'si_dem_250m'  # string identifying output DEM
+
+    origin = 'topleft'
+    model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
+    mask_file = '/home/jonoconway/work/DSC_snow/modis_mask_2000_2016.npy'  # masked for any ocean/inland water cells in modis record + elevation >0
+    dsc_snow_output_folder = '/home/jonoconway/work/DSC_snow/NoCorrection'  # path to snow model output
+    output_folder = '/home/jonoconway/work/DSC_snow/'
+
+    SI_evaluation(run_id, met_inp, which_model, hydro_years_to_take, catchment, output_dem, origin, model_swe_sc_threshold, mask_file, dsc_snow_output_folder,
+                  output_folder)
