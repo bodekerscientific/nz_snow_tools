@@ -28,8 +28,8 @@ for i in range(len(sites)):
     if i == 0:
         dict_sin_snow['dt_UTC+12'] = inp_dtobs
     else:
-        dict_sin_snow[sites[i]][vars[i]] = dat[:,i]
+        dict_sin_snow[sites[i]][vars[i]] = dat[:, i]
 
-pickle.dump(dict_sin_snow,open(outfile,'wb'),-1)
+pickle.dump(dict_sin_snow, open(outfile, 'wb'), protocol=3)
 
 print()

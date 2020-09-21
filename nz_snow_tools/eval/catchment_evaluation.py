@@ -247,7 +247,7 @@ if __name__ == '__main__':
                 # run model and return timeseries of daily swe, acc and melt.
                 st_swe, st_melt, st_acc, out_dt, mask = run_clark2009(catchment, output_dem, hydro_year_to_take, met_inp_folder, catchment_shp_folder)
                 pickle.dump([st_swe, st_melt, st_acc, out_dt, mask], open(clark2009_output_folder + '/{}_{}_hy{}.pkl'.format(catchment, output_dem,
-                                                                                                                             hydro_year_to_take), 'wb'), -1)
+                                                                                                                             hydro_year_to_take), 'wb'), protocol=3)
             elif clark2009run == True:
                 # load previously run simulations from pickle file
                 st_snow = pickle.load(open(clark2009_output_folder + '/{}_{}_hy{}_clark2009.pkl'.format(catchment, output_dem, hydro_year_to_take), 'rb'))

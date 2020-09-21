@@ -226,7 +226,7 @@ if __name__ == '__main__':
     final_grid2[np.isnan(final_grid2)] = 0  # _all
     pickle.dump(final_grid2, open(
         plot_folder + '/t_bias_optim_t_NS_{}_swe{}_{}_rs{}_smooth{}_trimmed_fullres.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period),
-        'wb'), -1)
+        'wb'), protocol=3)
 
     plt.figure(figsize=(8, 8))
     plt.imshow(final_grid2, origin=0, vmax=0.5, vmin=-2.5, cmap=cmap, interpolation='none')
@@ -264,7 +264,7 @@ if __name__ == '__main__':
     final_grid2[np.isnan(final_grid2)] = 0  # _all
     pickle.dump(final_grid2, open(
         plot_folder + '/t_bias_optim_t_NS_{}_swe{}_{}_rs{}_smooth{}_trimmed2_fullres.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period),
-        'wb'), -1)
+        'wb'), protocol=3)
 
     # plot
     plt.figure(figsize=(8, 8))

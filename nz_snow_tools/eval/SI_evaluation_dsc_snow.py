@@ -105,4 +105,4 @@ if __name__ == '__main__':
     ann = [ann_ts_av_swe_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m, ann_swe_m]
     pickle.dump(ann, open(
         output_folder + '/summary_MODEL_{}_{}_{}_{}_thres{}.pkl'.format(years_to_take[0], years_to_take[-1], catchment, run_id,
-                                                                        model_swe_sc_threshold), 'wb'), -1)
+                                                                        model_swe_sc_threshold), 'wb'), protocol=3)

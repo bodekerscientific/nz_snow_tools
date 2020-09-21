@@ -404,10 +404,10 @@ if __name__ == '__main__':
                 day_weightings.extend(day_weightings_1)
             out_nc_file.close()
             if hydro_years == True:
-                pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_hy{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
+                pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_hy{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), protocol=3)
             else:
                 pickle.dump(day_weightings,
-                            open(met_out_folder + '/met_inp_{}_{}_{}_{}_daywts.pkl'.format(data_id, hydro_year_to_take, ta_version, origin), 'wb'), -1)
+                            open(met_out_folder + '/met_inp_{}_{}_{}_{}_daywts.pkl'.format(data_id, hydro_year_to_take, ta_version, origin), 'wb'), protocol=3)
 
         else:  # compute all the values then write (takes too much memory for large grids)
             # Do the temporal downsampling
@@ -426,10 +426,10 @@ if __name__ == '__main__':
                                                [np.squeeze(hourly_temp[i, :, :]), np.squeeze(hourly_precip[i, :, :]), np.squeeze(hourly_swin[i, :, :])],
                                                ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
                                                dt_save, northings, eastings, lats, lons, elev, no_time=True)
-                pickle.dump(day_weightings, open(met_out_folder + '/{}/met_inp_{}_hy{}_daywts.pkl'.format(catchment, data_id, hydro_year_to_take), 'wb'), -1)
+                pickle.dump(day_weightings, open(met_out_folder + '/{}/met_inp_{}_hy{}_daywts.pkl'.format(catchment, data_id, hydro_year_to_take), 'wb'), protocol=3)
             else:
                 write_nztm_grids_to_netcdf(met_out_folder + '/met_inp_{}_hy{}.nc'.format(data_id, hydro_year_to_take),
                                            [hourly_temp, hourly_precip, hourly_swin],
                                            ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
                                            hourly_dt, northings, eastings, lats, lons, elev)
-                pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_hy{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), -1)
+                pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_hy{}_daywts.pkl'.format(data_id, hydro_year_to_take), 'wb'), protocol=3)

@@ -77,7 +77,7 @@ def calc_modis_catchment_metrics(catchment, years_to_take, mask_folder, modis_fo
 
     ann = [ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m]
     outfile = '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(years_to_take[0], years_to_take[-1], catchment, modis_dem, modis_sc_threshold)
-    pickle.dump(ann, open(output_folder + outfile, 'wb'), -1)
+    pickle.dump(ann, open(output_folder + outfile, 'wb'), protocol=3)
 
     # repack into single timeseries
     sca = []

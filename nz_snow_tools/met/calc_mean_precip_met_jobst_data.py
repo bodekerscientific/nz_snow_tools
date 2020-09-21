@@ -202,4 +202,4 @@ if __name__ == '__main__':
         #     day_weightings.extend(day_weightings_1)
         # out_nc_file.close()
         #
-        # pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_{}_{}_{}_daywts.pkl'.format(data_id, year_to_take, ta_version, origin), 'wb'), -1)
+        # pickle.dump(day_weightings, open(met_out_folder + '/met_inp_{}_{}_{}_{}_daywts.pkl'.format(data_id, year_to_take, ta_version, origin), 'wb'), protocol=3)

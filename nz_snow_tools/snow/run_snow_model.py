@@ -59,4 +59,4 @@ for which_model in ['clark2009', 'dsc_snow']:
         out_dt = np.asarray(make_regular_timeseries(inp_dt[0], inp_dt[-1], 86400))
         mask = create_mask_from_shpfile(inp_met.variables['lat'][:], inp_met.variables['lon'][:], catchment_shp_folder + '/{}.shp'.format(catchment))
         pickle.dump([st_swe.astype(dtype=np.float32), st_melt.astype(dtype=np.float32), st_acc.astype(dtype=np.float32), out_dt, mask, config], open(
-            output_folder + '/{}_{}_hy{}_{}.pkl'.format(catchment, output_dem, hydro_year_to_take, which_model), 'wb'), -1)
+            output_folder + '/{}_{}_hy{}_{}.pkl'.format(catchment, output_dem, hydro_year_to_take, which_model), 'wb'), protocol=3)

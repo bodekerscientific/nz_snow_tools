@@ -90,4 +90,4 @@ if __name__ == '__main__':
     ann = [ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m]
     pickle.dump(ann, open(
         output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(years_to_take[0], years_to_take[-1], catchment, output_dem,
-                                                                        modis_sc_threshold), 'wb'), -1)
+                                                                        modis_sc_threshold), 'wb'), protocol=3)

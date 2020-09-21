@@ -174,7 +174,7 @@ if __name__ == '__main__':
         ann = [s_obs, s_mod, s_ns, s_bias, s_rmse, s_mae, ts_modis, ts_model, final_mask]
         pickle.dump(ann, open(
             output_folder + '/resample_fit_{}_swe{}_{}_rs{}_smooth{}_{}.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period, year_to_take),
-            'wb'), -1)
+            'wb'), protocol=3)
 
         st_swe, st_sc = None, None
 
