@@ -13,12 +13,14 @@ import netCDF4 as nc
 import copy
 
 run_id = 'dsc_default'
+met_inp = 'nzcsm7-12'
+which_model = 'dsc_snow'
 catchment = 'SI'
 output_dem = 'si_dem_250m'  # identifier for output dem
-years_to_take = [2016,2018,2019]  # [2013 + 1]  # range(2001, 2013 + 1)
+years_to_take = [2016,2017,2018,2019]  # [2013 + 1]  # range(2001, 2013 + 1)
 model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
-model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/dsc_snow'
-plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/dsc_snow'
+model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
+plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 dem_folder = '/nesi/project/niwa00004/jonoconway'  # dem used for output #'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'#
 
 print('loading dem')
@@ -40,7 +42,7 @@ bin_edges = [-0.001, 30, 60, 90, 120, 180, 270, 360]  # use small negative numbe
 for i, year_to_take in enumerate(years_to_take):
     fig1 = plt.figure(figsize=[4, 4])
     print('loading data for year {}'.format(year_to_take))
-    nc_file = nc.Dataset(model_output_folder + '/snow_out_SI_si_dem_250m_{}_{}.nc'.format(run_id, year_to_take), 'r')
+    nc_file = nc.Dataset(model_output_folder + '/snow_out_{}_{}_{}_{}_{}_{}.nc'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take), 'r')
     model_scd = np.sum(nc_file.variables['swe'][:] > model_swe_sc_threshold,axis=0).astype(np.float)
     model_scd = model_scd[:, 20:]
     model_scd[nztm_dem==0] = np.nan
@@ -62,6 +64,6 @@ for i, year_to_take in enumerate(years_to_take):
     plt.title('Snow cover duration {}'.format(year_to_take))
     plt.tight_layout()
 
-    plt.savefig(plot_folder + '/SCD model {} thres{} {}.png'.format(year_to_take, model_swe_sc_threshold, run_id), dpi=300)
+    plt.savefig(plot_folder + '/SCD model {} thres{} {} {} {}.png'.format(year_to_take, model_swe_sc_threshold, run_id,met_inp, which_model), dpi=300)
     plt.show()
     plt.close()
