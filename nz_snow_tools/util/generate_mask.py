@@ -43,6 +43,11 @@ if dem == 'modis_nz_dem_250m':
     nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.085e6, extent_e=2.10e6, extent_n=6.20e6, extent_s=4.70e6,
                                                                           resolution=250, origin='bottomleft')
 
+if dem == 'nz_dem_250m':
+    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.05e6, extent_e=2.10e6, extent_n=6.275e6, extent_s=4.70e6,
+                                                                          resolution=250, origin='bottomleft')
+
+
 for catchment in shps:
     if '.shp' in catchment:
         mask_shpfile = catchment_shp_folder + '/{}'.format(catchment)

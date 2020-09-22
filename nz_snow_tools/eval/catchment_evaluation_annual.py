@@ -137,6 +137,47 @@ def load_subset_modis_annual(catchment, year_to_take, modis_folder, modis_dem, m
     return trimmed_fsca, modis_dt, trimmed_mask
 
 
+
+def load_subset_modis_hydroyear_allnz(catchment, year_to_take, modis_folder, modis_dem, mask_folder):
+    """
+    load modis data from file and cut to catchment of interest
+    :param catchment: string giving catchment area to run model on
+    :param year_to_take: integer specifying the hydrological year to run model over. 2001 = 1/4/2000 to 31/3/2001
+    :param modis_folder: folder with modis data
+    :param mask_folder: folder with pre-computed catchment masks - see utils/generate_mask.py
+    :return: trimmed_fsca, modis_dt, trimmed_mask. The data, datetimes and catchment mask
+    """
+    # load a file
+    if modis_dem == 'modis_nz_dem_250m':
+        nc_file = nc.Dataset(modis_folder + '/DSC_MOD10A1_2010-2019_allnz_v0_nosparse_interp001.nc')
+    else:
+        print('not set up grids except modis_nz_dem_250m')
+    # read date and find times for hydroloigcal year
+    modis_dt = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
+    ind_dt = np.logical_and(modis_dt<=dt.datetime(year_to_take - 1, 4, 1),modis_dt>=dt.datetime(year_to_take, 4, 1))
+    ndsi = nc_file.variables['NDSI_Snow_Cover_Cloudfree'][ind_dt]  # .astype('float32')  # nsdi in %
+
+    # trim to only the catchment desired
+    if mask_folder is not None:
+        mask, trimmed_mask = load_mask_modis(catchment, mask_folder, modis_dem)
+    else:  # if no catchment specified, just mask to the valid data points.
+        mask = np.ones(ndsi.shape[1:], dtype=np.int)
+        trimmed_mask = mask
+    # trimmed_fsca = trim_data_bounds(mask, lat_array, lon_array, fsca[183].copy(), y_centres, x_centres)
+    trimmed_ndsi = trim_data_to_mask(ndsi, mask)
+    trimmed_ndsi = trimmed_ndsi.astype(np.float32, copy=False)
+    trimmed_fsca = -1 + 1.45 * trimmed_ndsi  # convert to snow cover fraction in % (as per Modis collection 5)
+    trimmed_fsca[trimmed_ndsi > 100] = np.nan  # set all points with inland water or ocean(237 or 239) to nan
+    trimmed_fsca[trimmed_fsca > 100] = 100  # limit fsca to 100%
+    trimmed_fsca[trimmed_fsca < 0] = 0  # limit fsca to 0
+
+    # mask out values outside of catchment
+    trimmed_fsca[:, trimmed_mask == 0] = np.nan
+
+    nc_file.close()
+    return trimmed_fsca, modis_dt, trimmed_mask
+
+
 if __name__ == '__main__':
 
     origin = 'topleft'
