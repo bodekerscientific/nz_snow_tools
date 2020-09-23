@@ -17,10 +17,10 @@ from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, in
     daily_to_hourly_temp_grids, setup_nztm_dem, setup_nztm_grid_netcdf, trim_lat_lon_bounds
 
 
-run_id = 'dsc_default'
+run_id = 'cl09_default'
 met_inp = 'vcsn_norton' #identifier for input meteorology
 # model options
-which_model = 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
+which_model = 'clark2009'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
 hydro_years_to_take = np.arange(2001, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
