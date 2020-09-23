@@ -146,6 +146,7 @@ lons[lons < 0] = lons[lons < 0] + 360
 
 # set up time to run, paths to input files etc
 for year_to_take in hydro_years_to_take:
+    print(year_to_take)
     # specify the days to run (output is at the end of each day)
     # out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take, 7, 1), dt.datetime(year_to_take, 7, 2), 86400))
     out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take-1, 4, 1), dt.datetime(year_to_take, 4, 1), 86400))
