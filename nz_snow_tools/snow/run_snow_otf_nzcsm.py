@@ -16,6 +16,15 @@ from nz_snow_tools.snow.clark2009_snow_model import calc_dswe
 from nz_snow_tools.util.utils import create_mask_from_shpfile, make_regular_timeseries, convert_datetime_julian_day
 from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, interpolate_met, process_precip, daily_to_hourly_swin_grids, \
     daily_to_hourly_temp_grids, setup_nztm_dem, setup_nztm_grid_netcdf, trim_lat_lon_bounds
+import sys
+
+if len(sys.argv) == 2:
+    hydro_years_to_take = [sys.argv[1]]
+    print('taking year from user input')
+else:
+    print('taking year from script')
+    hydro_years_to_take = [2017, 2018, 2019, 2020]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+
 
 run_id = 'cl09_default'
 met_inp = 'nzcsm7-12' #identifier for input meteorology
@@ -23,7 +32,7 @@ met_inp = 'nzcsm7-12' #identifier for input meteorology
 which_model = 'clark2009'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-hydro_years_to_take = [2017, 2018, 2019, 2020]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+
 catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment mask file
 output_dem = 'si_dem_250m'  # string identifying output DEM
 
