@@ -19,7 +19,7 @@ from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, in
 import sys
 
 if len(sys.argv) == 2:
-    hydro_years_to_take = [sys.argv[1]]
+    hydro_years_to_take = [int(sys.argv[1])]
     print('taking year from user input')
 else:
     print('taking year from script')
