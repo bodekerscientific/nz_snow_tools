@@ -11,7 +11,7 @@ def plot_ens_area_ts(mod_streamq, dt_mod, ax=None, al=0.5, smooth_period=11):
     if ax == None:
         _, ax = plt.subplots(1, 1)
     for i in range(mod_streamq.shape[0]):
-        mod_streamq[i,smooth_period/2:-(smooth_period//2)] = np.convolve(mod_streamq[i,:], np.ones((smooth_period,)) / smooth_period, mode='valid')
+        mod_streamq[i,smooth_period//2:-(smooth_period//2)] = np.convolve(mod_streamq[i,:], np.ones((smooth_period,)) / smooth_period, mode='valid')
     # dt_mod = dt_mod[smooth_period/2:-(smooth_period//2)]
 
     p0 = mod_streamq_ens_percentiles_1(mod_streamq, 0)
@@ -77,8 +77,7 @@ model_output_folder = 'C:/Users/conwayjp/Documents/Temp'
                                                                           model_swe_sc_threshold), 'rb'))
 
 # np.sum(~np.isnan(ann_scd[0]))/16 = 145378
-ann_scd = np.asarray(ann_scd) / 100.  # convert to fraction from %
-ann_ts_av_sca_thres = np.asarray(ann_ts_av_sca_thres) / 100
+
 
 sca_model_2001_2012 = np.full((11, 365), np.nan)
 swe_model_2001_2012 = np.full((11, 365), np.nan)
@@ -89,6 +88,7 @@ for i in np.arange(11):
     swe_model_2001_2012[i, :] = ann_ts_av_swe[i + 1][:365] * model_analysis_area / 1e6 # convert to cubic km? need to convert from mm w.e. to km w.e. / 1e6
     sca_modis_2001_2012[i, :] = ann_ts_av_sca_thres_m[i+1][:365] * model_analysis_area
 
+sca_model_2001_2012 = sca_model_2001_2012 / 100 # convert to fraction from %
 
 plot_ens_area_ts(sca_model_2001_2012, ann_dt_m[1])
 plt.legend()

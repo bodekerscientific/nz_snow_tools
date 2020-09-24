@@ -14,7 +14,7 @@ import pickle as pkl
 config = {}
 config['num_secs_output'] = 3600
 config['tacc'] = 274.16
-config['tmelt'] = 277.16
+config['tmelt'] = 276.16
 
 # clark2009 melt parameters
 config['mf_mean'] = 5.0

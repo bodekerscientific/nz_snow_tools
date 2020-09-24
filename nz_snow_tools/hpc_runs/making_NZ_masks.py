@@ -63,7 +63,7 @@ plt.imshow(NZ_mask_modis_nz, origin=0, alpha=.2)
 np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\NZ_modis_nz_dem_250m.npy', NZ_mask_modis_nz)
 
 plt.savefig(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\modis_nz_masks.png',dpi=300)
-plt.show()
+# plt.show()
 
 plt.figure()
 plt.hist(nztm_dem2[NZ_mask_modis_nz].ravel(), np.arange(0, 3600, 100), density=True, histtype='step',cumulative=-1)
@@ -81,4 +81,33 @@ plt.xlim(-100, 52000)
 plt.ylabel('Elevation (m)')
 plt.xlabel('Area (km^2)')
 plt.savefig(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\hypsometry-100m.png',dpi=300)
+# plt.show()
+
+
+plt.figure()
+
+nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(r"C:\Users\conwayjp\OneDrive - NIWA\Data\GIS_DATA\Topography\DEM_NZSOS\si_dem_250m.tif", extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
+                                                                          resolution=250, origin='bottomleft')
+modis_si_dem_250m = nztm_dem[:, 20:]
+plt.imshow(modis_si_dem_250m, origin=0, interpolation='none')
+np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\modis_si_dem_250m.npy', modis_si_dem_250m)
+
+
+
+# 'modis_si_dem_250m':
+nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.085e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
+                                                                          resolution=250, origin='bottomleft')
+
+# assert modis_si_dem_250m == nztm_dem2[modis_si_mask_modis_nz]
+
+SI_mask_modis_si = modis_si_dem_250m > 0
+plt.imshow(SI_mask_modis_si, origin=0, alpha=.2)
+np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\SI_modis_si_dem_250m.npy', SI_mask_modis_nz)
+
+plt.figure()
+
+plt.imshow(modis_si_dem_250m - nztm_dem2[modis_si_mask_modis_nz].reshape(modis_si_dem_250m.shape),origin=0,interpolation='none')
+
+plt.figure()
+plt.imshow(SI_mask_modis_si - nztm_dem2[modis_si_mask_modis_nz].reshape(modis_si_dem_250m.shape) >0,origin=0,interpolation='none')
 plt.show()
