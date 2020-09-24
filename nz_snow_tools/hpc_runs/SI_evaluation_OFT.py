@@ -92,9 +92,9 @@ def SI_evaluation(run_id, met_inp, which_model, hydro_years_to_take, catchment, 
         ann_ts_av_sca_thres_m.append(np.asarray(ba_model_sca_thres))
 
         # print('calc snow cover duration and average and max swe')
-        model_scd = np.sum(st_sc, axis=0, dtype=np.float)  # count days with snow over threshold. mask already applied to snow cover data
-        model_av_swe = np.mean(st_swe, axis=0, dtype=np.float)  # average swe. mask already applied to snow cover data
-        model_max_swe = np.max(st_swe, axis=0, dtype=np.float)
+        model_scd = np.sum(st_sc, axis=0)  # count days with snow over threshold. mask already applied to snow cover data
+        model_av_swe = np.mean(st_swe, axis=0)  # average swe. mask already applied to snow cover data
+        model_max_swe = np.max(st_swe, axis=0)
 
         # add to annual series
         ann_av_swe_m.append(model_av_swe)
