@@ -80,7 +80,7 @@ def SI_evaluation(run_id, met_inp, which_model, hydro_years_to_take, catchment, 
         st_sc[st_swe > model_swe_sc_threshold] = 1 # set to snow cover when over threshold
         st_sc[:, modis_mask == False] = np.nan  # set non-land points to np.nan. Includes inland water/ocean points from MODIS 2000-2016 and dem ==0
 
-        num_nan_model_gridpoints = np.sum(np.isnan(st_swe[:, modis_mask]), axis=0) #TODO change so that only counts if any time for each point
+        num_nan_model_gridpoints = np.sum(np.any(np.isnan(st_swe[:, modis_mask]), axis=0))
         print('{} land grid points with nan hydro year {}'.format(num_nan_model_gridpoints,hydro_year_to_take))
         ann_metadata['num_nan_model_gridpoints'][hydro_year_to_take] = num_nan_model_gridpoints
 

@@ -90,7 +90,7 @@ if __name__ == '__main__':
 
         # print('calc snow cover duration')
         model_scd = np.sum(st_sc, axis=0, dtype=np.float)  # count days with snow over threshold. mask already applied to snow cover data
-        model_swe = np.sum(st_swe, axis=0, dtype=np.float)  # count days with snow over threshold. mask already applied to snow cover data
+        model_swe = np.mean(st_swe, axis=0, dtype=np.float)  # count days with snow over threshold. mask already applied to snow cover data
 
         # add to annual series
         ann_swe_m.append(model_swe)

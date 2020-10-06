@@ -52,26 +52,26 @@ def mod_streamq_ens_percentiles_1(mod_streamq, p):
     return percent
 
 
-hydro_years_to_take = np.arange(2001, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+hydro_years_to_take = np.arange(2017, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/vcsn'
 # model_analysis_area = 145378  # sq km.
 catchment = 'SI'  # string identifying catchment modelled
 
 # # modis options
-# modis_dem = 'nztm250m'  # identifier for output dem
-# modis_sc_threshold = 35  # value of fsca (in percent) that is counted as being snow covered
-# modis_output_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS'
-#
-# [ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m] = pickle.load(open(
-#     modis_output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, modis_dem,
-#                                                                           modis_sc_threshold), 'rb'))
+modis_dem = 'nztm250m'  # identifier for output dem
+modis_sc_threshold = 35  # value of fsca (in percent) that is counted as being snow covered
+modis_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/'
+
+[ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m] = pickle.load(open(
+    modis_output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, modis_dem,
+                                                                          modis_sc_threshold), 'rb'))
 # model options
 
 # run_id = 'cl09_default' #
 # which_model ='clark2009' #
 run_id = 'dsc_default' # 'cl09_default'
 which_model = 'dsc_snow' # 'clark2009'
-met_inp = 'vcsn_norton' # 'nzcsm7-12'  # identifier for input meteorology
+met_inp = 'nzcsm7-12'#'vcsn_norton' #   # identifier for input meteorology
 
 output_dem = 'si_dem_250m'
 model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)
@@ -87,12 +87,12 @@ plot_dt = ann_dt[0][:365]
 n_years = len(hydro_years_to_take)
 sca_model_ts = np.full((n_years, 365), np.nan)
 swe_model_ts = np.full((n_years, 365), np.nan)
-# sca_modis_ts = np.full((n_years, 365), np.nan)
+sca_modis_ts = np.full((n_years, 365), np.nan)
 
 for i in np.arange(n_years):
-    sca_model_ts[i, :] = ann_ts_av_sca_thres[i][:365] * model_analysis_area  # skip first year
+    sca_model_ts[i, :] = ann_ts_av_sca_thres[i][:365] * model_analysis_area
     swe_model_ts[i, :] = ann_ts_av_swe[i][:365] / 1e6 * model_analysis_area  # convert to km^3 from mm w.e. and km^2
-    # sca_modis_ts[i, :] = ann_ts_av_sca_thres_m[i][:365] * model_analysis_area
+    sca_modis_ts[i, :] = ann_ts_av_sca_thres_m[i][:365] * model_analysis_area
 
 plot_ens_area_ts(sca_model_ts, plot_dt)
 plt.legend()
@@ -110,10 +110,10 @@ ax.set_ylim(bottom=0)
 plt.savefig(plot_folder + '/SWE model {}_{}_{}_{}_{}_{}_{}_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model, catchment,
                                                                                output_dem, run_id, model_swe_sc_threshold), dpi=600)
 
-# plot_ens_area_ts(sca_modis_ts, plot_dt)
-# plt.legend()
-# ax = plt.gca()
-# # ax.set_ylim([0,7.5e4])
-# plt.savefig(plot_folder + '/SCA modis {}_{}_{}_{}_modis_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
-#                                                                             modis_sc_threshold), dpi=600)
+plot_ens_area_ts(sca_modis_ts, plot_dt)
+plt.legend()
+ax = plt.gca()
+# ax.set_ylim([0,7.5e4])
+plt.savefig(plot_folder + '/SCA modis {}_{}_{}_{}_modis_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
+                                                                            modis_sc_threshold), dpi=600)
 plt.show()
