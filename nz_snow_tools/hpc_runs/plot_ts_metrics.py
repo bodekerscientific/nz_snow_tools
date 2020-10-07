@@ -53,7 +53,7 @@ def mod_streamq_ens_percentiles_1(mod_streamq, p):
 
 
 hydro_years_to_take = np.arange(2017, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/vcsn'
+plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 # model_analysis_area = 145378  # sq km.
 catchment = 'SI'  # string identifying catchment modelled
 
@@ -75,7 +75,7 @@ met_inp = 'nzcsm7-12'#'vcsn_norton' #   # identifier for input meteorology
 
 output_dem = 'si_dem_250m'
 model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)
-model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/vcsn'
+model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
 
 [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
     model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
@@ -98,7 +98,8 @@ plot_ens_area_ts(sca_model_ts, plot_dt)
 plt.legend()
 ax = plt.gca()
 ax.set_ylabel('Snow Covered Area (square km)')
-ax.set_ylim(bottom=0)
+# ax.set_ylim(bottom=0)
+ax.set_ylim([0,7.5e4])
 plt.savefig(plot_folder + '/SCA model {}_{}_{}_{}_{}_{}_{}_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model, catchment,
                                                                                output_dem, run_id, model_swe_sc_threshold), dpi=600)
 plot_ens_area_ts(swe_model_ts, plot_dt)
@@ -113,7 +114,7 @@ plt.savefig(plot_folder + '/SWE model {}_{}_{}_{}_{}_{}_{}_thres{}.png'.format(h
 plot_ens_area_ts(sca_modis_ts, plot_dt)
 plt.legend()
 ax = plt.gca()
-# ax.set_ylim([0,7.5e4])
+ax.set_ylim([0,7.5e4])
 plt.savefig(plot_folder + '/SCA modis {}_{}_{}_{}_modis_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
                                                                             modis_sc_threshold), dpi=600)
 plt.show()
