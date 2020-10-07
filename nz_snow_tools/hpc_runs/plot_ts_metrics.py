@@ -95,6 +95,8 @@ for i in np.arange(n_years):
     sca_modis_ts[i, :] = ann_ts_av_sca_thres_m[i][:365] * model_analysis_area
 
 plot_ens_area_ts(sca_model_ts, plot_dt)
+for t in sca_model_ts:
+    plt.plot(plot_dt,t)
 plt.legend()
 ax = plt.gca()
 ax.set_ylabel('Snow Covered Area (square km)')
@@ -112,9 +114,12 @@ plt.savefig(plot_folder + '/SWE model {}_{}_{}_{}_{}_{}_{}_thres{}.png'.format(h
                                                                                output_dem, run_id, model_swe_sc_threshold), dpi=600)
 
 plot_ens_area_ts(sca_modis_ts, plot_dt)
+for t in sca_modis_ts:
+    plt.plot(plot_dt,t)
 plt.legend()
 ax = plt.gca()
 ax.set_ylim([0,7.5e4])
 plt.savefig(plot_folder + '/SCA modis {}_{}_{}_{}_modis_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
                                                                             modis_sc_threshold), dpi=600)
+
 plt.show()
