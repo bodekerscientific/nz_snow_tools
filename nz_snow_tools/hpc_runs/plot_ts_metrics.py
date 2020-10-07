@@ -58,12 +58,12 @@ plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 catchment = 'SI'  # string identifying catchment modelled
 
 # # modis options
-modis_dem = 'nztm250m'  # identifier for output dem
+output_dem = 'si_dem_250m'  # identifier for output dem
 modis_sc_threshold = 35  # value of fsca (in percent) that is counted as being snow covered
-modis_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/'
+modis_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 
 [ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m] = pickle.load(open(
-    modis_output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, modis_dem,
+    modis_output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
                                                                           modis_sc_threshold), 'rb'))
 # model options
 
