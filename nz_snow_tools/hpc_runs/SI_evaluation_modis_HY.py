@@ -90,9 +90,9 @@ if __name__ == '__main__':
     # options used for model simulations that modis will be compared to
     catchment = 'SI'  # string identifying catchment modelled
     output_dem = 'si_dem_250m'  # identifier for output dem used for model run
-    years_to_take = np.arange(2017, 2020 + 1)  #run
+    years_to_take = np.arange(2018, 2020 + 1)  #run
     # modis options
-    modis_sc_threshold = 35  # value of fsca (in percent) that is counted as being snow covered
+    modis_sc_threshold = 50 # value of fsca (in percent) that is counted as being snow covered
     modis_dem = 'modis_nz_dem_250m'
     modis_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
     mask_folder = '/nesi/nobackup/niwa00026/Observation/Snow_RemoteSensing/catchment_masks'  # location of numpy catchment mask. must be writeable if mask_created == False

@@ -116,18 +116,18 @@ def SI_evaluation(run_id, met_inp, which_model, hydro_years_to_take, catchment, 
 
 if __name__ == '__main__':
     run_id = 'dsc_default'
-    met_inp = 'vcsn_norton'  # identifier for input meteorology
+    met_inp = 'nzcsm7-12'  # identifier for input meteorology
     which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
     # time and grid extent options
-    hydro_years_to_take = np.arange(2001, 2020 + 1)
+    hydro_years_to_take = np.arange(2018, 2020 + 1)
     catchment = 'SI'  # string identifying the catchment to run. must match the naming of the catchment mask file
     output_dem = 'si_dem_250m'  # string identifying output DEM
 
     origin = 'bottomleft' # origin of model domain. 'bottomleft' for python otf
-    model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
+    model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)
     mask_file = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/modis_mask_2000_2016.npy'  # masked for any ocean/inland water cells in modis record + elevation >0
-    dsc_snow_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/vcsn'  # path to snow model output
-    output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/vcsn'
+    dsc_snow_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'  # path to snow model output
+    output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
 
     SI_evaluation(run_id, met_inp, which_model, hydro_years_to_take, catchment, output_dem, origin, model_swe_sc_threshold, mask_file, dsc_snow_output_folder,
                   output_folder)

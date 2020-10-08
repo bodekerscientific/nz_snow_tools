@@ -56,14 +56,14 @@ def mod_streamq_ens_percentiles_1(mod_streamq, p):
     return percent
 
 
-hydro_years_to_take = np.arange(2017, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+hydro_years_to_take = np.arange(2018, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 # model_analysis_area = 145378  # sq km.
 catchment = 'SI'  # string identifying catchment modelled
 
 # # modis options
 output_dem = 'si_dem_250m'  # identifier for output dem
-modis_sc_threshold = 35  # value of fsca (in percent) that is counted as being snow covered
+modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
 modis_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 
 [ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m] = pickle.load(open(
@@ -99,8 +99,8 @@ for i in np.arange(n_years):
     sca_modis_ts[i, :] = ann_ts_av_sca_thres_m[i][:365] * model_analysis_area
 
 plot_ens_area_ts(sca_model_ts, plot_dt)
-for t in sca_model_ts:
-    plt.plot(plot_dt, t)
+for i, t in enumerate(sca_model_ts):
+    plt.plot(plot_dt, label=hydro_years_to_take[i])
 plt.legend()
 ax = plt.gca()
 ax.set_ylabel('Snow Covered Area (square km)')
@@ -117,9 +117,9 @@ ax.set_ylim(bottom=0)
 plt.savefig(plot_folder + '/SWE model {}_{}_{}_{}_{}_{}_{}_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model, catchment,
                                                                                output_dem, run_id, model_swe_sc_threshold), dpi=600)
 
-plot_ens_area_ts(sca_modis_ts, plot_dt, smooth_period=1) # no smoothing on modis as already naturally smoothed
-for t in sca_modis_ts:
-    plt.plot(plot_dt, t)
+plot_ens_area_ts(sca_modis_ts, plot_dt)
+for i, t in enumerate(sca_modis_ts):
+    plt.plot(plot_dt, t,label=hydro_years_to_take[i])
 plt.legend()
 ax = plt.gca()
 ax.set_ylim([0, 7.5e4])
