@@ -3,6 +3,8 @@ import pickle
 import matplotlib.pylab as plt
 import matplotlib.dates as mdates
 import datetime as dt
+
+
 # from nz_snow_tools.util.utils import convert_datetime_julian_day
 
 
@@ -10,8 +12,10 @@ def plot_ens_area_ts(mod_streamq, dt_mod, ax=None, al=0.5, smooth_period=11):
     # plot shaded ensemble timeseries - assumes input dimensions are (time,ens) if ax is specified will plot in this axis
     if ax == None:
         _, ax = plt.subplots(1, 1)
-    for i in range(mod_streamq.shape[0]):
-        mod_streamq[i, smooth_period // 2:-(smooth_period // 2)] = np.convolve(mod_streamq[i, :], np.ones((smooth_period,)) / smooth_period, mode='valid')
+
+    if smooth_period > 1:
+        for i in range(mod_streamq.shape[0]):
+            mod_streamq[i, smooth_period // 2:-(smooth_period // 2)] = np.convolve(mod_streamq[i, :], np.ones((smooth_period,)) / smooth_period, mode='valid')
     # dt_mod = dt_mod[smooth_period/2:-(smooth_period//2)]
 
     p0 = mod_streamq_ens_percentiles_1(mod_streamq, 0)
@@ -69,9 +73,9 @@ modis_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 
 # run_id = 'cl09_default' #
 # which_model ='clark2009' #
-run_id = 'dsc_default' # 'cl09_default'
-which_model = 'dsc_snow' # 'clark2009'
-met_inp = 'nzcsm7-12'#'vcsn_norton' #   # identifier for input meteorology
+run_id = 'dsc_default'  # 'cl09_default'
+which_model = 'dsc_snow'  # 'clark2009'
+met_inp = 'nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology
 
 output_dem = 'si_dem_250m'
 model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)
@@ -96,12 +100,12 @@ for i in np.arange(n_years):
 
 plot_ens_area_ts(sca_model_ts, plot_dt)
 for t in sca_model_ts:
-    plt.plot(plot_dt,t)
+    plt.plot(plot_dt, t)
 plt.legend()
 ax = plt.gca()
 ax.set_ylabel('Snow Covered Area (square km)')
 # ax.set_ylim(bottom=0)
-ax.set_ylim([0,7.5e4])
+ax.set_ylim([0, 7.5e4])
 plt.savefig(plot_folder + '/SCA model {}_{}_{}_{}_{}_{}_{}_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model, catchment,
                                                                                output_dem, run_id, model_swe_sc_threshold), dpi=600)
 plot_ens_area_ts(swe_model_ts, plot_dt)
@@ -113,12 +117,12 @@ ax.set_ylim(bottom=0)
 plt.savefig(plot_folder + '/SWE model {}_{}_{}_{}_{}_{}_{}_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model, catchment,
                                                                                output_dem, run_id, model_swe_sc_threshold), dpi=600)
 
-plot_ens_area_ts(sca_modis_ts, plot_dt)
+plot_ens_area_ts(sca_modis_ts, plot_dt, smooth_period=1) # no smoothing on modis as already naturally smoothed
 for t in sca_modis_ts:
-    plt.plot(plot_dt,t)
+    plt.plot(plot_dt, t)
 plt.legend()
 ax = plt.gca()
-ax.set_ylim([0,7.5e4])
+ax.set_ylim([0, 7.5e4])
 plt.savefig(plot_folder + '/SCA modis {}_{}_{}_{}_modis_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
                                                                             modis_sc_threshold), dpi=600)
 
