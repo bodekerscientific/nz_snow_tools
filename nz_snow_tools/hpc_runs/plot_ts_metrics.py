@@ -73,8 +73,8 @@ modis_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 
 # run_id = 'cl09_default' #
 # which_model ='clark2009' #
-run_id = 'dsc_default'  # 'cl09_default'
-which_model = 'dsc_snow'  # 'clark2009'
+run_id = 'cl09_default'#'dsc_default'  #
+which_model = 'clark2009'# 'dsc_snow'  #
 met_inp = 'nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology
 
 output_dem = 'si_dem_250m'
