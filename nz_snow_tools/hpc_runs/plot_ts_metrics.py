@@ -100,7 +100,7 @@ for i in np.arange(n_years):
 
 plot_ens_area_ts(sca_model_ts, plot_dt)
 for i, t in enumerate(sca_model_ts):
-    plt.plot(plot_dt, label=hydro_years_to_take[i])
+    plt.plot(plot_dt, t, label=hydro_years_to_take[i])
 plt.legend()
 ax = plt.gca()
 ax.set_ylabel('Snow Covered Area (square km)')
@@ -109,6 +109,8 @@ ax.set_ylim([0, 7.5e4])
 plt.savefig(plot_folder + '/SCA model {}_{}_{}_{}_{}_{}_{}_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model, catchment,
                                                                                output_dem, run_id, model_swe_sc_threshold), dpi=600)
 plot_ens_area_ts(swe_model_ts, plot_dt)
+for i, t in enumerate(swe_model_ts):
+    plt.plot(plot_dt, t, label=hydro_years_to_take[i])
 plt.legend()
 ax = plt.gca()
 ax.set_ylabel('Snow water storage (cubic km)')
@@ -119,7 +121,7 @@ plt.savefig(plot_folder + '/SWE model {}_{}_{}_{}_{}_{}_{}_thres{}.png'.format(h
 
 plot_ens_area_ts(sca_modis_ts, plot_dt)
 for i, t in enumerate(sca_modis_ts):
-    plt.plot(plot_dt, t,label=hydro_years_to_take[i])
+    plt.plot(plot_dt, t, label=hydro_years_to_take[i])
 plt.legend()
 ax = plt.gca()
 ax.set_ylim([0, 7.5e4])
