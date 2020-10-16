@@ -31,8 +31,8 @@ met_inp = 'nzcsm7-12'  # identifier for input meteorology
 which_model = 'clark2009'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-catchment = 'MtCook'#'modis_NZ' # # string identifying the catchment to run. must match the naming of the catchment mask file
-output_dem = 'si_dem_250m'#'nz_dem_250m'  #  string identifying output DEM
+catchment = 'MtCook'  # 'modis_NZ' # # string identifying the catchment to run. must match the naming of the catchment mask file
+output_dem = 'si_dem_250m'  # 'nz_dem_250m'  #  string identifying output DEM
 mask_dem = True
 
 # folder location
@@ -135,7 +135,7 @@ for year_to_take in hydro_years_to_take:
     # set up output netCDF:
     out_nc_file = setup_nztm_grid_netcdf(
         output_folder + '/snow_out_{}_{}_{}_{}_{}_{}.nc'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take),
-        None, ['swe', 'acc', 'melt', 'precip', 'ros'],
+        None, ['swe', 'acc', 'melt', 'rain', 'ros', 'ros_melt'],
         out_dt, northings, eastings, wgs84_lats, wgs84_lons, elev)
 
     # set up initial states of prognostic variables
@@ -147,15 +147,17 @@ for year_to_take in hydro_years_to_take:
     bucket_melt = swe * 0
     bucket_acc = swe * 0
     swe_day_before = swe * 0
-    bucket_precip = swe * 0
+    bucket_rain = swe * 0
     bucket_ros = swe * 0
+    bucket_ros_melt = swe * 0
 
     # store initial swe value
     out_nc_file.variables['swe'][0, :, :] = init_swe
     out_nc_file.variables['acc'][0, :, :] = 0
     out_nc_file.variables['melt'][0, :, :] = 0
-    out_nc_file.variables['precip'][0, :, :] = 0
+    out_nc_file.variables['rain'][0, :, :] = 0
     out_nc_file.variables['ros'][0, :, :] = 0
+    out_nc_file.variables['ros_melt'][0, :, :] = 0
 
     # for each day:
     for ii, dt_t in enumerate(out_dt[:-1]):
@@ -198,11 +200,18 @@ for year_to_take in hydro_years_to_take:
             # print swe[0]
             bucket_melt = bucket_melt + melt
             bucket_acc = bucket_acc + acc
-            bucket_precip = bucket_precip + hourly_precip[i] - acc
-            bucket_ros = bucket_ros + (hourly_precip[i] - acc) * (swe > 0).astype(np.int)  # creates binary snow cover then multiples by rain (0 or 1)
+            rain = hourly_precip[i] - acc
+            bucket_rain = bucket_rain + rain
+            bucket_ros = bucket_ros + rain * (swe > 0).astype(np.int)  # creates binary snow cover then multiples by rain (0 or 1)
 
+            # first calculate the energy availble for melting due to rainfall (Wm^-2) over snowcovered cells only
+            qprc = (swe > 0).astype(np.int) * 4220. * rain / 3600. * (hourly_temp[i] - 273.16)
+            # then calculate potential melt per timestep . don't limit to available swe as could have contributed to intial snow melt (accounted for by degree-day model)
+            ros_melt = qprc / 334000. * 3600.
+            ros_melt[(ros_melt < 0)] = 0  # only take positive portion (could be some rain at air temperature < 0)
+            bucket_ros_melt = bucket_ros_melt + ros_melt
         # output at the end of each day,
-        for var, data in zip(['swe', 'acc', 'melt', 'precip', 'ros'], [swe, bucket_acc, bucket_melt, bucket_precip, bucket_ros]):
+        for var, data in zip(['swe', 'acc', 'melt', 'rain', 'ros','ros_melt'], [swe, bucket_acc, bucket_melt, bucket_rain, bucket_ros,bucket_ros_melt]):
             # data[(np.isnan(data))] = -9999.
             out_nc_file.variables[var][ii + 1, :, :] = data
 
@@ -214,8 +223,9 @@ for year_to_take in hydro_years_to_take:
         # reset buckets
         bucket_melt = bucket_melt * 0
         bucket_acc = bucket_acc * 0
-        bucket_precip = bucket_precip * 0
+        bucket_rain = bucket_rain * 0
         bucket_ros = bucket_ros * 0
+        bucket_ros_melt = bucket_ros_melt * 0
     out_nc_file.close()
 
     json.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}.json'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take), 'w'))

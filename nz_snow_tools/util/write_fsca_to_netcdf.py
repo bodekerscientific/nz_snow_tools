@@ -108,11 +108,11 @@ def create_ncvar_melt(ds):
     return melt_var
 
 
-def create_ncvar_precip(ds):
-    melt_var = ds.createVariable('precip', 'f4', ('time', 'northing', 'easting',), zlib=True, complevel=4)
+def create_ncvar_rain(ds):
+    melt_var = ds.createVariable('rain', 'f4', ('time', 'northing', 'easting',), zlib=True, complevel=4)
     melt_var.setncatts({
-        'long_name': 'precipitation amount (mm) ',
-        'standard_name': 'precipitation_amount',
+        'long_name': 'rainfall amount (mm) ',
+        'standard_name': 'rainfall_amount',
         'units': 'mm',
         'cell_methods': 'time: sum',
         'missing': -9999.,
@@ -125,14 +125,27 @@ def create_ncvar_precip(ds):
 def create_ncvar_ros(ds):
     melt_var = ds.createVariable('ros', 'f4', ('time', 'northing', 'easting',), zlib=True, complevel=4)
     melt_var.setncatts({
-        'long_name': 'amount of precipitation (mm) occuring over snow surface (swe > 0) ',
-        'standard_name': 'precipitation_amount',
+        'long_name': 'amount of rainfall (mm) occuring over snow surface (swe > 0) ',
+        'standard_name': 'rainfall_onto_snow_amount',
         'units': 'mm',
         'cell_methods': 'time: sum',
         'missing': -9999.,
         'valid_min': 0.,
         'valid_max': 2000.
     })
+    return melt_var
+
+def create_ncvar_ros_melt(ds):
+    melt_var = ds.createVariable('ros_melt', 'f4', ('time', 'northing', 'easting',), zlib=True, complevel=4)
+    melt_var.setncatts({
+        'long_name': 'amount of melt (mm) due to rainfall occuring over snow surface (swe > 0) ',
+        'standard_name': 'surface_snow_melt_amount_due_to_rainfall',
+        'units': 'mm',
+        'cell_methods': 'time: sum',
+        'missing': -9999.,
+        'valid_min': 0.,
+        'valid_max': 2000.
+        })
     return melt_var
 
 
@@ -338,10 +351,13 @@ def setup_nztm_grid_netcdf(fname, list_of_data_arrays, var_names, datetime_list,
     if 'melt' in var_names:
         melt_var = create_ncvar_melt(ds)
 
-    if 'precip' in var_names:
-        precip_var = create_ncvar_precip(ds)
+    if 'rain' in var_names:
+        rain_var = create_ncvar_rain(ds)
 
     if 'ros' in var_names:
         ros_var = create_ncvar_ros(ds)
+
+    if 'ros_melt' in var_names:
+        ros_melt_var = create_ncvar_ros_melt(ds)
 
     return ds
