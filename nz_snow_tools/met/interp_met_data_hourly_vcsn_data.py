@@ -108,7 +108,7 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
         YI = out_lats
 
     if single_dt == False:
-        out_dat = np.empty([in_dat.shape[0], num_out_lats, num_out_lons], dtype=np.float32) * np.nan
+        out_dat = np.full([in_dat.shape[0], num_out_lats, num_out_lons],np.nan, dtype=np.float32)
 
         for i in range(in_dat.shape[0]):
 
