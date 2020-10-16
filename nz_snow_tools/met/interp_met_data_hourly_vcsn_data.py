@@ -117,7 +117,7 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
             if type(in_dat) == np.ma.core.MaskedArray:
                 in_dat1.data[in_dat1.mask] = np.nan
 
-            if var in ['tmax', 'tmin']:  # lapse to sea level
+            if var in ['tmax', 'tmin', 'air_temp']:  # lapse to sea level
                 in_t_offset = in_elev * lapse
                 in_dat1 = in_dat1 - in_t_offset
 
@@ -144,7 +144,7 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
                 # out_dat0 = basemap.interp(in_dat1, in_lons, in_lats, XI, YI, checkbounds=False, masked=False, order=0)  # nearest neighbour grid to fill edges
                 # out_dat1[np.where(out_dat1.mask)] = out_dat0[np.where(out_dat1.mask)]  # replace the masked elements in bilinear grid with the nn grid
 
-            if var in ['tmax', 'tmin']:  # lapse back to new elevations
+            if var in ['tmax', 'tmin', 'air_temp']:  # lapse back to new elevations
                 out_t_offset = out_elev * lapse
                 out_dat1 = out_dat1 + out_t_offset
 
@@ -158,7 +158,7 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
         if type(in_dat) == np.ma.core.MaskedArray:
             in_dat.data[in_dat.mask] = np.nan
 
-        if var in ['tmax', 'tmin']:  # lapse to sea level
+        if var in ['tmax', 'tmin', 'air_temp']:  # lapse to sea level
             in_t_offset = in_elev * lapse
             in_dat = in_dat - in_t_offset
 
@@ -169,7 +169,7 @@ def interpolate_met(in_dat, var, in_lons, in_lats, in_elev, out_lons, out_lats, 
         # mask data at sea level
         # out_dat1[out_elev.data < 1.0] = np.nan # no longer send in a masked array
 
-        if var in ['tmax', 'tmin']:  # lapse back to new elevations
+        if var in ['tmax', 'tmin', 'air_temp']:  # lapse back to new elevations
             out_t_offset = out_elev * lapse
             out_dat = out_dat + out_t_offset
 
@@ -426,7 +426,8 @@ if __name__ == '__main__':
                                                [np.squeeze(hourly_temp[i, :, :]), np.squeeze(hourly_precip[i, :, :]), np.squeeze(hourly_swin[i, :, :])],
                                                ['air_temperature', 'precipitation_amount', 'surface_downwelling_shortwave_flux'],
                                                dt_save, northings, eastings, lats, lons, elev, no_time=True)
-                pickle.dump(day_weightings, open(met_out_folder + '/{}/met_inp_{}_hy{}_daywts.pkl'.format(catchment, data_id, hydro_year_to_take), 'wb'), protocol=3)
+                pickle.dump(day_weightings, open(met_out_folder + '/{}/met_inp_{}_hy{}_daywts.pkl'.format(catchment, data_id, hydro_year_to_take), 'wb'),
+                            protocol=3)
             else:
                 write_nztm_grids_to_netcdf(met_out_folder + '/met_inp_{}_hy{}.nc'.format(data_id, hydro_year_to_take),
                                            [hourly_temp, hourly_precip, hourly_swin],

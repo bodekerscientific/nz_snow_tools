@@ -1,0 +1,44 @@
+---
+#yaml file containing configuration options for interp_met_nzcsm
+variables:
+  air_temp:
+    input_file: "/nesi/project/niwa00004/jonoconway/air_temperature_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc"
+    input_var_name: "sfc_temp"
+    input_time_var: "time0"
+    output_name: "sfc_temp"
+    output_units: "K"
+  total_precip:
+    input_file: "/nesi/project/niwa00004/jonoconway/total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc"
+    input_var_name: "sum_total_precip"
+    input_time_var: "time2"
+    output_name: "total_precp"
+  solar_rad:
+    input_file: "/nesi/project/niwa00004/jonoconway/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc.nc"
+    input_var_name: "sfc_dw_sw_flux"
+    input_time_var: "time1"
+    output_name: "sfc_dw_sw_flux"
+  lw_rad:
+    input_file: "/nesi/project/niwa00004/jonoconway/solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc.nc"
+    input_var_name: "sfc_dw_lw_flux"
+    input_time_var: "time1"
+    output_name: "sfc_dw_lw_flux"
+
+input_grid:
+  dem_file: '/nesi/project/niwa00004/jonoconway/tn_2020083000-utc_nzcsm_coords.nc'
+  dem_var_name: 'orog_model'
+  coord_system: 'rotated pole'
+  y_coord_name: 'rlat'
+  x_coord_name: 'rlon'
+
+output_grid:
+  dem_name: "si_dem_250m"
+  dem_file: "/nesi/project/niwa00004/jonoconway/si_dem_250m.tif"
+  catchment_name: "SI"
+  catchment_mask: "elev"
+
+output_file:
+  output_folder: '/nesi/project/niwa00004/jonoconway'
+  file_name_template: '/output_interp{}{}.nc'
+  first_timestamp: '2020-05-02 01:00:00'
+  last_timestamp: '2020-05-05 01:00:00'
+  timestep: 3600 # timestep of output in seconds
