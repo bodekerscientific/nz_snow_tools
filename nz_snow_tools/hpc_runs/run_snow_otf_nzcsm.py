@@ -25,9 +25,8 @@ else:
     print('taking year from script')
     hydro_years_to_take = [2017, 2018, 2019, 2020]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 
-
 run_id = 'cl09_default'
-met_inp = 'nzcsm7-12' #identifier for input meteorology
+met_inp = 'nzcsm7-12'  # identifier for input meteorology
 # model options
 which_model = 'clark2009'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
@@ -149,12 +148,13 @@ for year_to_take in hydro_years_to_take:
     print(year_to_take)
     # specify the days to run (output is at the end of each day)
     # out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take, 7, 1), dt.datetime(year_to_take, 7, 2), 86400))
-    out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take-1, 4, 1), dt.datetime(year_to_take, 4, 1), 86400))
+    out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take - 1, 4, 1), dt.datetime(year_to_take, 4, 1), 86400))
 
     # set up output netCDF:
-    out_nc_file = setup_nztm_grid_netcdf(output_folder + '/snow_out_{}_{}_{}_{}_{}_{}.nc'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take),
-                                         None, ['swe', 'acc', 'melt'],
-                                         out_dt, northings, eastings, lat_array, lon_array, elev)
+    out_nc_file = setup_nztm_grid_netcdf(
+        output_folder + '/snow_out_{}_{}_{}_{}_{}_{}.nc'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take),
+        None, ['swe', 'acc', 'melt', 'precip', 'ros'],
+        out_dt, northings, eastings, lat_array, lon_array, elev)
 
     # set up initial states of prognostic variables
     init_swe = np.zeros(elev.shape)  # default to no snow
@@ -165,11 +165,15 @@ for year_to_take in hydro_years_to_take:
     bucket_melt = swe * 0
     bucket_acc = swe * 0
     swe_day_before = swe * 0
+    bucket_precip = swe * 0
+    bucket_ros = swe * 0
 
     # store initial swe value
     out_nc_file.variables['swe'][0, :, :] = init_swe
     out_nc_file.variables['acc'][0, :, :] = 0
     out_nc_file.variables['melt'][0, :, :] = 0
+    out_nc_file.variables['precip'][0, :, :] = 0
+    out_nc_file.variables['ros'][0, :, :] = 0
 
     # for each day:
     for ii, dt_t in enumerate(out_dt[:-1]):
@@ -203,17 +207,20 @@ for year_to_take in hydro_years_to_take:
         for i in range(len(hourly_dt)):
             # d_snow += dtstep / 86400.0
             if which_model == 'dsc_snow':
-                swe, d_snow, melt, acc = calc_dswe(swe, d_snow, hourly_temp[i], hourly_precip[i], hourly_doy[i], 3600, which_melt=which_model, sw=hourly_swin[i],
-                                               **config)  #
+                swe, d_snow, melt, acc = calc_dswe(swe, d_snow, hourly_temp[i], hourly_precip[i], hourly_doy[i], 3600, which_melt=which_model,
+                                                   sw=hourly_swin[i],
+                                                   **config)  #
             else:
                 swe, d_snow, melt, acc = calc_dswe(swe, d_snow, hourly_temp[i], hourly_precip[i], hourly_doy[i], 3600, which_melt=which_model,
-                                               **config)
+                                                   **config)
             # print swe[0]
             bucket_melt = bucket_melt + melt
             bucket_acc = bucket_acc + acc
+            bucket_precip = bucket_precip + hourly_precip[i] - acc
+            bucket_ros = bucket_ros + (hourly_precip[i] - acc) * (swe > 0).astype(np.int) #creates binary snow cover then multiples by rain (0 or 1)
 
         # output at the end of each day,
-        for var, data in zip(['swe', 'acc', 'melt'], [swe, bucket_acc, bucket_melt]):
+        for var, data in zip(['swe', 'acc', 'melt','precip','ros'], [swe, bucket_acc, bucket_melt,bucket_precip,bucket_ros]):
             # data[(np.isnan(data))] = -9999.
             out_nc_file.variables[var][ii + 1, :, :] = data
 
@@ -225,9 +232,10 @@ for year_to_take in hydro_years_to_take:
         # reset buckets
         bucket_melt = bucket_melt * 0
         bucket_acc = bucket_acc * 0
-
+        bucket_precip = bucket_precip * 0
+        bucket_ros = bucket_ros * 0
     out_nc_file.close()
 
-
-    json.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}.json'.format(met_inp,which_model, catchment, output_dem, run_id, year_to_take), 'w'))
-    pickle.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}_{}.pkl'.format(met_inp,which_model, catchment, output_dem, run_id, year_to_take), 'wb'), protocol=3)
+    json.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}.json'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take), 'w'))
+    pickle.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}_{}.pkl'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take), 'wb'),
+                protocol=3)

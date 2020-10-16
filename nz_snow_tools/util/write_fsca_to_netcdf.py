@@ -108,6 +108,34 @@ def create_ncvar_melt(ds):
     return melt_var
 
 
+def create_ncvar_precip(ds):
+    melt_var = ds.createVariable('precip', 'f4', ('time', 'northing', 'easting',), zlib=True, complevel=4)
+    melt_var.setncatts({
+        'long_name': 'precipitation amount (mm) ',
+        'standard_name': 'precipitation_amount',
+        'units': 'mm',
+        'cell_methods': 'time: sum',
+        'missing': -9999.,
+        'valid_min': 0.,
+        'valid_max': 2000.
+    })
+    return melt_var
+
+
+def create_ncvar_ros(ds):
+    melt_var = ds.createVariable('ros', 'f4', ('time', 'northing', 'easting',), zlib=True, complevel=4)
+    melt_var.setncatts({
+        'long_name': 'amount of precipitation (mm) occuring over snow surface (swe > 0) ',
+        'standard_name': 'precipitation_amount',
+        'units': 'mm',
+        'cell_methods': 'time: sum',
+        'missing': -9999.,
+        'valid_min': 0.,
+        'valid_max': 2000.
+    })
+    return melt_var
+
+
 
 def create_lat_lons_for_NZTMgrid(extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, extent_s=4.82e6, resolution=250):
     """create grids of latitude and longitude corresponding to grid centres of data in nztm grid
@@ -256,8 +284,8 @@ def setup_nztm_grid_netcdf(fname, list_of_data_arrays, var_names, datetime_list,
 
     ds.createDimension('northing', len(northings))
     ds.createDimension('easting', len(eastings))
-    ds.createDimension('latitude', len(northings))
-    ds.createDimension('longitude', len(eastings))
+    # ds.createDimension('latitude', len(northings))
+    # ds.createDimension('longitude', len(eastings))
     # add northing and easting dimensions as well as lat/lon variables
     t = ds.createVariable('northing', 'f8', ('northing',))
     t.axis = 'Y'
@@ -309,5 +337,11 @@ def setup_nztm_grid_netcdf(fname, list_of_data_arrays, var_names, datetime_list,
 
     if 'melt' in var_names:
         melt_var = create_ncvar_melt(ds)
+
+    if 'precip' in var_names:
+        precip_var = create_ncvar_precip(ds)
+
+    if 'ros' in var_names:
+        ros_var = create_ncvar_ros(ds)
 
     return ds
