@@ -31,8 +31,8 @@ met_inp = 'nzcsm7-12'  # identifier for input meteorology
 which_model = 'clark2009'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-catchment = 'MtCook'  # 'modis_NZ' # # string identifying the catchment to run. must match the naming of the catchment mask file
-output_dem = 'si_dem_250m'  # 'nz_dem_250m'  #  string identifying output DEM
+catchment ='modis_NZ'# 'MtCook'  #  # # string identifying the catchment to run. must match the naming of the catchment mask file
+output_dem = 'nz_dem_250m' #'si_dem_250m'  #  #  string identifying output DEM
 mask_dem = True
 
 # folder location
