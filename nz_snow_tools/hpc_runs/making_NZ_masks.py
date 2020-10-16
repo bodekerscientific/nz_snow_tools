@@ -22,6 +22,7 @@ modis_nz_ew_extent = np.logical_and(x_centres > 1.085e6, x_centres < 2.10e6)
 modis_nz_ns_extent = np.logical_and(y_centres < 6.20e6, y_centres > 4.70e6)
 modis_nz_mask = modis_nz_ns_extent[:, np.newaxis] * modis_nz_ew_extent[np.newaxis, :]
 np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\modis_nz_mask_on_nz_dem_250m.npy', modis_nz_mask)
+np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\modis_NZ_nz_dem_250m.npy', modis_nz_mask)
 
 si_ew_extent = np.logical_and(x_centres > 1.08e6, x_centres < 1.72e6)
 si_ns_extent = np.logical_and(y_centres < 5.52e6, y_centres > 4.82e6)
