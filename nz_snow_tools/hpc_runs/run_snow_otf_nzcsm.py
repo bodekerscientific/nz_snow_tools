@@ -25,13 +25,13 @@ else:
     print('taking year from script')
     hydro_years_to_take = [2018, 2019, 2020]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 
-run_id = 'cl09_default_ros'
+run_id = 'dsc_default_ros'
 met_inp = 'nzcsm7-12'  # identifier for input meteorology
 # model options
-which_model = 'clark2009'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
+which_model = 'dsc_snow'#'clark2009'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
 # time and grid extent options
-catchment ='modis_NZ'# 'MtCook'  #  # # string identifying the catchment to run. must match the naming of the catchment mask file
+catchment ='NZ'# 'MtCook'  #  # # string identifying the catchment to run. must match the naming of the catchment mask file
 output_dem = 'nz_dem_250m' #'si_dem_250m'  #  #  string identifying output DEM
 mask_dem = True
 
