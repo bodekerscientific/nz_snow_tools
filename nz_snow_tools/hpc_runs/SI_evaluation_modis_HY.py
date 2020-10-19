@@ -12,25 +12,25 @@ from nz_snow_tools.eval.catchment_evaluation_annual import load_subset_modis_hyd
 from nz_snow_tools.util.utils import setup_nztm_dem
 
 
-def evaluation_modis(catchment, output_dem, years_to_take, modis_sc_threshold, modis_dem, modis_folder, mask_folder,dem_folder, output_folder):
+def evaluation_modis(catchment, output_dem, years_to_take, modis_sc_threshold, modis_dem, modis_folder, mask_folder, dem_folder, output_folder):
 
-    dem_file = dem_folder + '/' + output_dem + '.tif'
-
-    if output_dem == 'si_dem_250m':
-        # load si dem and trim to size. (modis has smaller extent to west (1.085e6)
-        nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file, extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
-                                                                              resolution=250)
-        nztm_dem = nztm_dem[:, 20:]
-        x_centres = x_centres[20:]
-        lat_array = lat_array[:, 20:]
-        lon_array = lon_array[:, 20:]
-
-    elif output_dem == 'modis_nz_dem_250m':
-        nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file, extent_w=1.085e6, extent_e=2.10e6, extent_n=6.20e6, extent_s=4.70e6,
-                                                                              resolution=250, origin='bottomleft')
-    else:
-        print('dem option not available')
-
+    # dem_file = dem_folder + '/' + output_dem + '.tif'
+    #
+    # if output_dem == 'si_dem_250m':
+    #     # load si dem and trim to size. (modis has smaller extent to west (1.085e6)
+    #     nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file, extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
+    #                                                                           resolution=250)
+    #     nztm_dem = nztm_dem[:, 20:]
+    #     x_centres = x_centres[20:]
+    #     lat_array = lat_array[:, 20:]
+    #     lon_array = lon_array[:, 20:]
+    #
+    # elif output_dem == 'modis_nz_dem_250m':
+    #     nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(dem_file, extent_w=1.085e6, extent_e=2.10e6, extent_n=6.20e6, extent_s=4.70e6,
+    #                                                                           resolution=250, origin='bottomleft')
+    # else:
+    #     print('dem option not available')
+    #
 
     # set up lists
     ann_ts_av_sca_m = []
@@ -82,7 +82,7 @@ def evaluation_modis(catchment, output_dem, years_to_take, modis_sc_threshold, m
 
     ann = [ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m]
     pickle.dump(ann, open(
-        output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(years_to_take[0], years_to_take[-1], catchment, output_dem,
+        output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(years_to_take[0], years_to_take[-1], catchment, modis_dem,
                                                                         modis_sc_threshold), 'wb'), protocol=3)
 
 
