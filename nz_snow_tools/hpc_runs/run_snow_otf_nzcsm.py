@@ -19,7 +19,7 @@ from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import load_new_vscn, in
 import sys
 
 
-def run_snow_oft_nzcsm_main(hydro_years_to_take, run_id, met_inp, which_model, catchment, output_dem, mask_dem, mask_folder, dem_folder, output_folder, data_folder,
+def run_snow_otf_nzcsm_main(hydro_years_to_take, run_id, met_inp, which_model, catchment, output_dem, mask_dem, mask_folder, dem_folder, output_folder, data_folder,
                       orog_infile, precip_infile, air_temp_infile, solar_rad_infile, config):
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
@@ -245,5 +245,5 @@ if __name__ == '__main__':
     config['ros'] = False
     config['ta_m_tt'] = False
 
-    run_snow_oft_nzcsm_main(hydro_years_to_take, run_id, met_inp, which_model, catchment, output_dem, mask_dem, mask_folder, dem_folder, output_folder, data_folder,
+    run_snow_otf_nzcsm_main(hydro_years_to_take, run_id, met_inp, which_model, catchment, output_dem, mask_dem, mask_folder, dem_folder, output_folder, data_folder,
                       orog_infile, precip_infile, air_temp_infile, solar_rad_infile, config)
