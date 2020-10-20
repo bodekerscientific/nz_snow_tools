@@ -46,6 +46,10 @@ if config['output_grid']['dem_name'] == 'si_dem_250m':
     nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(config['output_grid']['dem_file'], extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6,
                                                                           extent_s=4.82e6, resolution=250, origin='bottomleft')
 
+elif config['output_grid']['dem_name'] == 'nz_dem_250m':
+    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(config['output_grid']['dem_file'], extent_w=1.05e6, extent_e=2.10e6, extent_n=6.275e6,
+                                                                          extent_s=4.70e6, resolution=250, origin='bottomleft')
+
 if config['output_grid']['catchment_mask'] == "elev":  # just set mask to all land points
     wgs84_lats = lat_array
     wgs84_lons = lon_array
@@ -81,7 +85,7 @@ out_nc_file = setup_nztm_grid_netcdf(config['output_file']['output_folder'] + ou
 # run through each variable
 for var in config['variables'].keys():
     print('processing {}'.format(var))
-    t = out_nc_file.createVariable(config['variables'][var]['output_name'], 'f4', ('time', 'northing', 'easting',), zlib=True)#,chunksizes=(1, 100, 100)
+    t = out_nc_file.createVariable(config['variables'][var]['output_name'], 'f4', ('time', 'northing', 'easting',), zlib=True)  # ,chunksizes=(1, 100, 100)
     t.setncatts(config['variables'][var]['output_meta'])
     inp_nc_file = nc.Dataset(config['variables'][var]['input_file'], 'r')
     inp_dt = nc.num2date(inp_nc_file.variables[config['variables'][var]['input_time_var']][:],
@@ -130,6 +134,7 @@ for var in config['variables'].keys():
                     inp_nc_var_rh = inp_nc_file_rh.variables[config['variables']['rh']['input_var_name']]
                     import pickle
                     from scipy import interpolate
+
                     dict = pickle.load(open('C:/Users/conwayjp/OneDrive - NIWA/projects/SIN_density_SIP/input_met/hydrometeor_temp_lookup.pkl', 'rb'))
                     th_interp = interpolate.interp2d(dict['rh'], dict['tc'], dict['th'], kind='linear')
 
@@ -182,7 +187,7 @@ for var in config['variables'].keys():
                         th = np.asarray([th_interp(r, t) for r, t in zip(hi_res_rh.ravel(), hi_res_tc.ravel())]).squeeze().reshape(hi_res_rh.shape)
                         b = 2.6300006
                         c = 0.09336
-                        hi_res_frs = 1 - (1. / (1 + b * c ** th)) # fraction of snowfall
+                        hi_res_frs = 1 - (1. / (1 + b * c ** th))  # fraction of snowfall
                         hi_res_frs[hi_res_frs < 0.01] = 0
                         hi_res_frs[hi_res_frs > 0.99] = 1
 
@@ -202,4 +207,3 @@ for var in config['variables'].keys():
                     # plt.show()
 
 out_nc_file.close()
-
