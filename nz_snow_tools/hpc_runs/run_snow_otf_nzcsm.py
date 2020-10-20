@@ -183,7 +183,7 @@ def run_snow_otf_nzcsm_main(hydro_years_to_take, run_id, met_inp, which_model, c
             bucket_ros_melt = bucket_ros_melt * 0
         out_nc_file.close()
 
-        json.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}.json'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take), 'w'))
+        json.dump(config, open(output_folder + '/config_{}_{}_{}_{}_{}_{}.json'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take), 'w'))
         pickle.dump(config,
                     open(output_folder + '/config_{}_{}_{}_{}_{}_{}.pkl'.format(met_inp, which_model, catchment, output_dem, run_id, year_to_take), 'wb'),
                     protocol=3)
