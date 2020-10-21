@@ -125,3 +125,38 @@ plt.imshow(modis_si_dem_250m - nztm_dem2[modis_si_mask_modis_nz].reshape(modis_s
 plt.figure()
 plt.imshow(SI_mask_modis_si - nztm_dem2[modis_si_mask_modis_nz].reshape(modis_si_dem_250m.shape) > 0, origin=0, interpolation='none')
 plt.show()
+
+
+#to get correct coordinates of trimmed modis and model grids
+
+from nz_snow_tools.util.utils import trim_data_to_mask,trim_lat_lon_bounds
+
+# # set up modis 250m nz grid
+nztm_dem2, x_centres2, y_centres2, lat_array2, lon_array2 = setup_nztm_dem(None, extent_w=1.085e6, extent_e=2.10e6, extent_n=6.20e6, extent_s=4.70e6,
+                                                                           resolution=250, origin='bottomleft')
+# read in 250m grid topography from
+nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(r"C:\Users\conwayjp\OneDrive - NIWA\Data\GIS_DATA\Topography\DEM_NZSOS\nz_dem_250m.tif",
+                                                                      extent_w=1.05e6, extent_e=2.10e6, extent_n=6.275e6,
+                                                                      extent_s=4.70e6, resolution=250, origin='bottomleft')
+
+# mask for nz modis domain on nz 250m dem domain
+modis_nz_ew_extent = np.logical_and(x_centres > 1.085e6, x_centres < 2.10e6)
+modis_nz_ns_extent = np.logical_and(y_centres < 6.20e6, y_centres > 4.70e6)
+modis_nz_mask = modis_nz_ns_extent[:, np.newaxis] * modis_nz_ew_extent[np.newaxis, :]
+nztm_dem2 = nztm_dem[modis_nz_mask].reshape(lat_array2.shape)
+
+NZ_mask_nz = nztm_dem > 0
+NZ_mask_modis_nz = nztm_dem2 > 0
+
+#to get trimmed coordinates for modis domain trimmed to elevation > 0
+trim_lat_lon_bounds(NZ_mask_modis_nz, lat_array2, lon_array2, nztm_dem2, y_centres2, x_centres2)
+
+print(NZ_mask_nz.shape)
+print(NZ_mask_modis_nz.shape)
+#trim 116 points off the top of the NZ masked domain to make the same as the modis masked domain
+assert np.all(trim_lat_lon_bounds(NZ_mask_modis_nz, lat_array2, lon_array2, nztm_dem2, y_centres2, x_centres2)[0] == trim_lat_lon_bounds(NZ_mask_nz, lat_array, lon_array,nztm_dem, y_centres, x_centres)[0][:-116])
+
+print(trim_data_to_mask(NZ_mask_modis_nz,NZ_mask_modis_nz).shape)
+
+
+
