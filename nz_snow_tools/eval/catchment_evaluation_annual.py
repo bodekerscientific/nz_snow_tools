@@ -174,7 +174,7 @@ def load_subset_modis_hydroyear_allnz(catchment, year_to_take, modis_folder, mod
     trimmed_fsca[:, trimmed_mask == 0] = np.nan
 
     nc_file.close()
-    return trimmed_fsca, modis_dt, trimmed_mask
+    return trimmed_fsca, modis_dt[ind_dt], trimmed_mask
 
 
 if __name__ == '__main__':
