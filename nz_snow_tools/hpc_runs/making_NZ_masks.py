@@ -70,9 +70,23 @@ np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\NZ
 plt.savefig(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\modis_nz_masks.png', dpi=300)
 # plt.show()
 
+# plt.figure()
+# plt.hist(nztm_dem2[NZ_mask_modis_nz].ravel(), np.arange(0, 3600, 100), density=True, histtype='step', cumulative=-1)
+# plt.hist(nztm_dem2[SI_mask_modis_nz].ravel(), np.arange(0, 3600, 100), density=True, histtype='step', cumulative=-1)
+
+n, bins, _ = plt.hist(nztm_dem2[SI_mask_modis_nz].ravel(), np.arange(0, 3600, 10))
 plt.figure()
-plt.hist(nztm_dem2[NZ_mask_modis_nz].ravel(), np.arange(0, 3600, 100), density=True, histtype='step', cumulative=-1)
-plt.hist(nztm_dem2[SI_mask_modis_nz].ravel(), np.arange(0, 3600, 100), density=True, histtype='step', cumulative=-1)
+plt.plot(np.cumsum(n[::-1])/16.,bins[1:][::-1])
+plt.grid('on')
+plt.ylim(bottom=0)
+plt.xlim(left=-1000,right = 155e3)
+plt.ylabel('Elevation (m)')
+plt.xlabel('Cumulative area (km2)')
+plt.savefig(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\hypsometry-10m cumsum.png', dpi=300)
+# plt.show()
+# np.where(bins[1:][::-1]==1100)
+# (np.cumsum(n[::-1])/16.)[249]
+
 
 plt.figure()
 # plot histogram of elevation in bins.

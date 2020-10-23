@@ -9,39 +9,57 @@ from nz_snow_tools.util.utils import convert_datetime_julian_day
 from nz_snow_tools.util.utils import setup_nztm_dem, trim_data_to_mask, trim_lat_lon_bounds
 
 hydro_years_to_take = np.arange(2018, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
+plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ'
 # plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 # model_analysis_area = 145378  # sq km.
-catchment = 'SI'  # string identifying catchment modelled
+catchment = 'NZ'  # string identifying catchment modelled
+mask_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
+dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'
+modis_dem = 'modis_nz_dem_250m'
 
-dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS/'
-si_dem_file = dem_folder + 'si_dem_250m' + '.tif'
-nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(si_dem_file, extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
+if modis_dem == 'modis_si_dem_250m':
+
+    si_dem_file = dem_folder + '/si_dem_250m' + '.tif'
+    nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(si_dem_file, extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
                                                                       resolution=250)
-nztm_dem = nztm_dem[:, 20:]
-x_centres = x_centres[20:]
-lat_array = lat_array[:, 20:]
-lon_array = lon_array[:, 20:]
+    nztm_dem = nztm_dem[:, 20:]
+    x_centres = x_centres[20:]
+    lat_array = lat_array[:, 20:]
+    lon_array = lon_array[:, 20:]
+    modis_output_dem = 'si_dem_250m'
+    mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, modis_dem))
+
+elif modis_dem == 'modis_nz_dem_250m':
+    si_dem_file = dem_folder + '/nz_dem_250m' + '.tif'
+    _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.085e6, extent_e=2.10e6, extent_n=6.20e6, extent_s=4.70e6,
+                                                                           resolution=250, origin='bottomleft')
+    nztm_dem = np.load(dem_folder + '/{}.npy'.format(modis_dem))
+    modis_output_dem = 'modis_nz_dem_250m'
+    mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, modis_dem)) # just load the mask the chooses land points from the dem. snow data has modis hy2018_2020 landpoints mask applied in NZ_evaluation_otf
+    # mask = np.load("C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/modis_mask_hy2018_2020_landpoints.npy")
+
+
+lat_array, lon_array, nztm_dem, y_centres, x_centres = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
+
 
 # # modis options
-output_dem = 'si_dem_250m'  # identifier for output dem
 modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
 modis_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 # modis_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 
 [ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m] = pickle.load(open(
-    modis_output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
+    modis_output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, modis_output_dem,
                                                                           modis_sc_threshold), 'rb'))
 # model options
 
-run_id = 'cl09_default' #
+run_id = 'cl09_default_ros' #
 which_model ='clark2009' #
 # run_id = 'dsc_default'  # #'cl09_default'  # #'cl09_default'# #  #  #
 # which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'# # # ### 'dsc_snow'  #
 met_inp = 'nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology
 
-output_dem = 'si_dem_250m'
-model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)
+output_dem = 'nz_dem_250m'
+model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered (mm w.e)
 model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 # model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
 
@@ -49,20 +67,16 @@ model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow 
     model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
                                                                                    catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
 # cut down model data to trimmed modis SI domain.
-mask_folder = r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis'
-mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, 'modis_si_dem_250m'))
-ann_scd = [trim_data_to_mask(a, mask) for a in ann_scd]
 
-# model_scd = trim_data_to_mask(model_scd, mask)
+if modis_dem == 'modis_si_dem_250m':
+    ann_scd = [trim_data_to_mask(a, mask) for a in ann_scd]
 
 modis_scd = np.nanmean(ann_scd_m, axis=0)
 model_scd = np.nanmean(ann_scd, axis=0)
 
-lat_array, lon_array, nztm_dem, y_centres, x_centres = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
-
 plot_scd_bias = model_scd - modis_scd
 
-# perm_snow = np.load(r'C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\modis_permanent_snow_2010_2016.npy')
+# perm_snow = np.load('C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/MODIS/modis_permanent_snow_2010_2016.npy')
 #
 # plot_scd_bias[perm_snow] == np.nan
 
@@ -86,6 +100,10 @@ subsets = {
     'Aoraki-Mt Cook': {
         'xlim': [1.36e6, 1.39e6],
         'ylim': [5.145e6, 5.175e6]
+    },
+    'HaastPass': {
+        'xlim': [1.295e6, 1.32e6],
+        'ylim': [5.095e6, 5.12e6]
     }
 }
 
@@ -380,13 +398,14 @@ for i, x in enumerate(np.arange(0, 3600 + 1, 200)):
     mean_swe_dsc[i] = np.nanmean(model_swe_dsc[np.logical_and(nztm_dem > x, nztm_dem <= x + 200)])
     area[i] = np.nansum(np.logical_and(nztm_dem > x, nztm_dem <= x + 200)) * .25 * .25
 
+fig, ax = plt.subplots(figsize=(4, 4))
 plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe_dsc * area / 1e6, height=200, label='dsc_snow')
 plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe * area / 1e6, height=200, label='clark')
 plt.yticks(np.arange(0, 3600 + 1, 400))
 plt.ylim(0, 3600)
 plt.ylabel('Elevation (m)')
 plt.xlabel('Average snow storage (cubic km)')
-plt.savefig(plot_folder + '/hist_snow storage.png')
+fig.savefig(plot_folder + '/hist_snow storage.png')
 
 plt.show()
 plt.close()
