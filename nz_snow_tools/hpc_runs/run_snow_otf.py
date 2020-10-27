@@ -24,10 +24,10 @@ def run_snow_otf_main(hydro_years_to_take, run_id, met_inp, which_model, catchme
     if not os.path.exists(output_folder):
         os.makedirs(output_folder)
 
-    nc_file_rain = nc.Dataset(data_folder + '/' + precip_infile, 'r')
-    nc_file_tmax = nc.Dataset(data_folder + '/' + tmax_infile, 'r')
-    nc_file_tmin = nc.Dataset(data_folder + '/' + tmin_infile, 'r')
-    nc_file_srad = nc.Dataset(data_folder + '/' + solar_rad_infile, 'r')
+    nc_file_rain = nc.Dataset(precip_infile, 'r')
+    nc_file_tmax = nc.Dataset(tmax_infile, 'r')
+    nc_file_tmin = nc.Dataset(tmin_infile, 'r')
+    nc_file_srad = nc.Dataset(solar_rad_infile, 'r')
 
     # load met grid (assume same for all input data)
     vcsn_elev = np.flipud(nc_file_rain.variables['elevation'][:])
