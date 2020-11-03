@@ -153,7 +153,8 @@ def load_subset_modis_hydroyear_allnz(catchment, year_to_take, modis_folder, mod
         print('not set up grids except modis_nz_dem_250m')
     # read date and find times for hydroloigcal year
     modis_dt = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
-    ind_dt = np.logical_and(modis_dt >= dt.datetime(year_to_take - 1, 4, 1), modis_dt < dt.datetime(year_to_take, 4, 1))
+    ind_dt = np.logical_and(modis_dt >= dt.datetime(year_to_take - 1, 4, 1), modis_dt < dt.datetime(year_to_take, 4, 1), only_use_cftime_datetimes=False,
+                         only_use_python_datetimes=True)
     ndsi = nc_file.variables['NDSI_Snow_Cover_Cloudfree'][ind_dt]  # .astype('float32')  # nsdi in %
 
     # trim to only the catchment desired
