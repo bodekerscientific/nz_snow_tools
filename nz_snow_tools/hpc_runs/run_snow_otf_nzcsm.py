@@ -29,10 +29,14 @@ def run_snow_otf_nzcsm_main(hydro_years_to_take, run_id, met_inp, which_model, c
 
     nc_file_rain = nc.Dataset(data_folder + '/' + precip_infile, 'r')
     nc_file_temp = nc.Dataset(data_folder + '/' + air_temp_infile, 'r')
-    nc_file_srad = nc.Dataset(data_folder + '/' + solar_rad_infile, 'r')
+
     nc_rain = nc_file_rain.variables['sum_total_precip']
     nc_temp = nc_file_temp.variables['sfc_temp']
-    nc_srad = nc_file_srad.variables['sfc_dw_sw_flux']
+
+    if which_model == 'dsc_snow':
+        nc_file_srad = nc.Dataset(data_folder + '/' + solar_rad_infile, 'r')
+        nc_srad = nc_file_srad.variables['sfc_dw_sw_flux']
+        vcsn_dt4 = nc.num2date(nc_file_srad.variables['time1'][:], nc_file_srad.variables['time1'].units,only_use_cftime_datetimes=False,only_use_python_datetimes=True)
 
     # load met grid (assume same for all input data)
     vcsn_elev = nc_file_orog.variables['orog_model'][:]
@@ -42,9 +46,9 @@ def run_snow_otf_nzcsm_main(hydro_years_to_take, run_id, met_inp, which_model, c
     rot_pole = nc_file_orog.variables['rotated_pole']
     rot_pole_crs = ccrs.RotatedPole(rot_pole.grid_north_pole_longitude, rot_pole.grid_north_pole_latitude, rot_pole.north_pole_grid_longitude)
 
-    vcsn_dt = nc.num2date(nc_file_rain.variables['time2'][:], nc_file_rain.variables['time2'].units)
-    vcsn_dt2 = nc.num2date(nc_file_temp.variables['time0'][:], nc_file_temp.variables['time0'].units)
-    vcsn_dt4 = nc.num2date(nc_file_srad.variables['time1'][:], nc_file_srad.variables['time1'].units)
+    vcsn_dt = nc.num2date(nc_file_rain.variables['time2'][:], nc_file_rain.variables['time2'].units,only_use_cftime_datetimes=False,only_use_python_datetimes=True)
+    vcsn_dt2 = nc.num2date(nc_file_temp.variables['time0'][:], nc_file_temp.variables['time0'].units,only_use_cftime_datetimes=False,only_use_python_datetimes=True)
+
 
     # calculate model grid etc:
     # output DEM
@@ -85,7 +89,7 @@ def run_snow_otf_nzcsm_main(hydro_years_to_take, run_id, met_inp, which_model, c
         print(year_to_take)
         # specify the days to run (output is at the end of each day)
         # out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take, 7, 1), dt.datetime(year_to_take, 7, 2), 86400))
-        out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take - 1, 4, 1), dt.datetime(year_to_take, 4, 1), 86400))
+        out_dt = np.asarray(make_regular_timeseries(dt.datetime(year_to_take - 1, 4, 1), dt.datetime(year_to_take-1, 11, 23), 86400))
 
         # set up output netCDF:
         out_nc_file = setup_nztm_grid_netcdf(
@@ -196,13 +200,13 @@ if __name__ == '__main__':
         print('taking year from user input')
     else:
         print('taking year from script')
-        hydro_years_to_take = [2018, 2019, 2020]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+        hydro_years_to_take = [2021]  # np.arange(2018, 2018 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
 
     # naming conventions
-    run_id = 'dsc_default_ros'
+    run_id = 'cl09_default_ros'
     met_inp = 'nzcsm7-12'  # identifier for input meteorology
     # model options
-    which_model = 'dsc_snow'  # 'clark2009'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
+    which_model = 'clark2009'  # 'clark2009'  # 'clark2009'  # 'dsc_snow'  # string identifying the model to be run. options include 'clark2009', 'dsc_snow' # future will include 'fsm'
 
     # time and grid extent options
     catchment = 'NZ'  # 'MtCook'  #  # # string identifying the catchment to run. must match the naming of the catchment mask file
@@ -216,8 +220,8 @@ if __name__ == '__main__':
     data_folder = '/nesi/nobackup/niwa00004/jonoconway'  # input meteorology #'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/tn_file_compilation'#
     # input filenames
     orog_infile = 'tn_2020083000-utc_nzcsm_coords.nc'
-    precip_infile = 'total_precip_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc'
-    air_temp_infile = 'air_temperature_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc'
+    precip_infile = 'total_precip_nzcsm_2015043010_2020112306_national_hourly_FR7-12.nc'
+    air_temp_infile = 'air_temperature_nzcsm_2015043010_2020112306_national_hourly_FR7-12.nc'
     solar_rad_infile = 'solar_radiation_nzcsm_2015043010_2020061706_national_hourly_FR7-12.nc'
 
     # configuration dictionary containing model parameters.
