@@ -193,7 +193,7 @@ for var in config['variables'].keys():
 
                     else:
                         hi_res_tk = out_nc_file[config['variables']['air_temp']['output_name']][ii, :, :]
-                        hi_res_frs = (hi_res_tk < config['variables'][var]['rain_snow_method']).astype('int')
+                        hi_res_frs = (hi_res_tk < config['variables'][var]['rain_snow_method']).astype('float')
                     hi_res_rain_rate = hi_res_out * (1 - hi_res_frs) / config['output_file']['timestep']
                     hi_res_snow_rate = hi_res_out * hi_res_frs / config['output_file']['timestep']
                     rfr[ii, :, :] = hi_res_rain_rate

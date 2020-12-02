@@ -3,7 +3,7 @@
 
 variables:
   air_temp:
-    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/nc4_states/nc4_states_nzcsm_2020050107_2020060106_national_hourly_FR7-12.nc"
+    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/states_nzcsm_FR7-12_kupeA.nc"
     input_var_name: "sfc_temp"
     input_time_var: "time0"
     output_name: "sfc_temp"
@@ -12,7 +12,7 @@ variables:
       standard_name: "air_temperature"
       long_name: "air temperature at 1.5m"
   rh:
-    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/nc4_states/nc4_states_nzcsm_2020050107_2020060106_national_hourly_FR7-12.nc"
+    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/states_nzcsm_FR7-12_kupeA.nc"
     input_var_name: "sfc_rh"
     input_time_var: "time0"
     output_name: "sfc_rh"
@@ -21,16 +21,16 @@ variables:
       standard_name: "relative_humidity"
       long_name: "relative humidity w.r.t. ice bulb at 1.5m"
   total_precip:
-    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/nc4/precip_nc4_rain_nzcsm_2020050107_2020060106_national_hourly_FR7-12.nc"
+    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/rain_nzcsm_FR7-12_kupeA.nc"
     input_var_name: "sum_total_precip"
-    input_time_var: "time"
+    input_time_var: "time2"
     output_name: "total_precip"
     output_meta:
       units: "kg m-2"
       standard_name: "precipitation_amount"
       long_name: "sum of rain and lwe snowfall amounts"
     calc_rain_snow_rate: True
-    rain_snow_method: 273.15 # 'harder'
+    rain_snow_method: 274.15 # 'harder'
     rain_rate_output_meta:
       units: "kg m-2 s-1"
       standard_name: "rainfall_flux"
@@ -41,7 +41,7 @@ variables:
       long_name: "snowfall rate in mm w.e. s-1"
 
   solar_rad:
-    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/nc4_radiation_nzcsm_2020050107_2020060106_national_hourly_FR7-12.nc"
+    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/radiation_nzcsm_FR7-12_kupeA.nc"
     input_var_name: "sfc_dw_sw_flux"
     input_time_var: "time1"
     output_name: "sfc_dw_sw_flux"
@@ -51,7 +51,7 @@ variables:
       standard_name: "surface_downward_shortwave_flux"
       long_name: "downward shortwave flux at the surface"
   lw_rad:
-    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/nc4_radiation_nzcsm_2020050107_2020060106_national_hourly_FR7-12.nc"
+    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/radiation_nzcsm_FR7-12_kupeA.nc"
     input_var_name: "sfc_dw_lw_flux"
     input_time_var: "time1"
     output_name: "sfc_dw_lw_flux"
@@ -61,7 +61,7 @@ variables:
       standard_name: "surface_downward_longwave_flux"
       long_name: "downward longwave flux at the surface"
   air_pres:
-    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/nc4_states/nc4_states_nzcsm_2020050107_2020060106_national_hourly_FR7-12.nc"
+    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/states_nzcsm_FR7-12_kupeA.nc"
     input_var_name: "sfc_air_press"
     input_time_var: "time0"
     output_name: "sfc_air_press"
@@ -71,7 +71,7 @@ variables:
       long_name: "surface pressure at model surface"
   wind_speed:
     convert_uv: True
-    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/nc4_states/nc4_states_nzcsm_2020050107_2020060106_national_hourly_FR7-12.nc"
+    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/states_nzcsm_FR7-12_kupeA.nc"
     input_var_name_u: "sfc_zonal_wind"
     input_var_name_v: "sfc_merid_wind"
     input_time_var: "time0"
@@ -82,7 +82,7 @@ variables:
       long_name: "wind speed at 10m derived from eastward and northward components"
 
 input_grid:
-  dem_file: '/nesi/project/niwa00004/jonoconway/tn_2020083000-utc_nzcsm_coords.nc'
+  dem_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/states_nzcsm_FR7-12_kupeA.nc"
   dem_var_name: 'orog_model'
   coord_system: 'rotated pole'
   y_coord_name: 'rlat'
@@ -95,9 +95,9 @@ output_grid:
   catchment_mask: '/nesi/project/niwa00004/jonoconway/MtCook_si_dem_250m.npy' #"elev"
 
 output_file:
-  output_folder: '/nesi/project/niwa00004/jonoconway'
-  file_name_template: '/test_met_interp_{}_{}_wgs84.nc'
-  first_timestamp: '2020-05-04 01:00:00'
-  last_timestamp: '2020-05-06 00:00:00'
+  output_folder: '/nesi/nobackup/niwa00004/jonoconway/FSM_input'
+  file_name_template: '/MtCook_{}_{}_wgs84.nc'
+  first_timestamp: '2018-04-01 01:00:00'
+  last_timestamp: '2018-12-01 00:00:00'
   timestep: 3600 # timestep of output in seconds
 
