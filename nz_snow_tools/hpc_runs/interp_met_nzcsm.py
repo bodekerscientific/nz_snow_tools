@@ -19,7 +19,7 @@ import datetime as dt
 from dateutil import parser
 import matplotlib.pylab as plt
 
-from nz_snow_tools.util.utils import make_regular_timeseries
+from nz_snow_tools.util.utils import make_regular_timeseries, u_v_from_ws_wd,ws_wd_from_u_v
 from nz_snow_tools.met.interp_met_data_hourly_vcsn_data import interpolate_met, setup_nztm_dem, setup_nztm_grid_netcdf, trim_lat_lon_bounds
 
 if len(sys.argv) == 2:
@@ -29,6 +29,7 @@ if len(sys.argv) == 2:
 else:
     print('incorrect number of commandline inputs')
     config = yaml.load(open(r'C:\Users\conwayjp\Documents\code\GitHub\nz_snow_tools\nz_snow_tools\hpc_runs\nzcsm_local.yaml'), Loader=yaml.FullLoader)
+
 # open input met grid (assume is the same for all variables)
 print('processing input orogrpahy')
 nc_file_orog = nc.Dataset(config['input_grid']['dem_file'], 'r')
@@ -103,13 +104,15 @@ for var in config['variables'].keys():
         inp_dt_t = nc.num2date(inp_nc_file_t.variables[config['variables']['air_temp']['input_time_var']][:],
                                inp_nc_file_t.variables[config['variables']['air_temp']['input_time_var']].units, only_use_cftime_datetimes=False)
         inp_nc_var_t = inp_nc_file_t.variables[config['variables']['air_temp']['input_var_name']]
-    elif var == 'wind_speed':
+    elif var == 'wind_speed' or var == 'wind_direction':
         if 'convert_uv' in config['variables'][var].keys():
             if config['variables'][var]['convert_uv']:
                 inp_nc_var_u = inp_nc_file.variables[config['variables'][var]['input_var_name_u']]
                 inp_nc_var_v = inp_nc_file.variables[config['variables'][var]['input_var_name_v']]
         else:
             inp_nc_var = inp_nc_file.variables[config['variables'][var]['input_var_name']]
+            if var == 'wind_direction':  # load wind speed to enable conversion to u/v for interpolation
+                inp_nc_var_ws = inp_nc_file.variables[config['variables']['wind_speed']['input_var_name']]
     else:
         inp_nc_var = inp_nc_file.variables[config['variables'][var]['input_var_name']]
 
@@ -166,6 +169,20 @@ for var in config['variables'].keys():
             else:
                 input_hourly = inp_nc_var[int(np.where(inp_dt == dt_t)[0]), :, :]
             hi_res_out = interpolate_met(input_hourly.filled(np.nan), var, inp_lons, inp_lats, inp_elev_interp, rlons, rlats, elev, single_dt=True)
+
+        elif var == 'wind_direction':
+            if 'convert_uv' in config['variables'][var].keys():
+                if config['variables'][var]['convert_uv']:
+                    input_hourly_u = inp_nc_var_u[int(np.where(inp_dt == dt_t)[0]), :, :]
+                    input_hourly_v = inp_nc_var_v[int(np.where(inp_dt == dt_t)[0]), :, :]
+            else:
+                input_hourly_wd = inp_nc_var[int(np.where(inp_dt == dt_t)[0]), :, :]
+                input_hourly_ws = inp_nc_var_ws[int(np.where(inp_dt == dt_t)[0]), :, :]
+                input_hourly_u, input_hourly_v = u_v_from_ws_wd(input_hourly_ws, input_hourly_wd)
+
+            hi_res_out_u = interpolate_met(input_hourly_u.filled(np.nan), var, inp_lons, inp_lats, inp_elev_interp, rlons, rlats, elev, single_dt=True)
+            hi_res_out_v = interpolate_met(input_hourly_v.filled(np.nan), var, inp_lons, inp_lats, inp_elev_interp, rlons, rlats, elev, single_dt=True)
+            hi_res_out = np.rad2deg(np.arctan2(-hi_res_out_u, -hi_res_out_v))
         else:
             input_hourly = inp_nc_var[int(np.where(inp_dt == dt_t)[0]), :, :]
             hi_res_out = interpolate_met(input_hourly.filled(np.nan), var, inp_lons, inp_lats, inp_elev_interp, rlons, rlats, elev, single_dt=True)

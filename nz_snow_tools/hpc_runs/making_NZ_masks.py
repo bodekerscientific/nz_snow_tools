@@ -108,6 +108,10 @@ plt.figure()
 nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(r"C:\Users\conwayjp\OneDrive - NIWA\Data\GIS_DATA\Topography\DEM_NZSOS\si_dem_250m.tif",
                                                                       extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
                                                                       resolution=250, origin='bottomleft')
+
+pisa_mask_si_dem = np.logical_and(y_centres > 4.995e6,y_centres < 5.055e6)[:, np.newaxis] * np.logical_and(x_centres > 1.255e6,x_centres < 1.315e6)[ np.newaxis, :]
+np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\Pisa_si_dem_250m.npy', pisa_mask_si_dem)
+
 modis_si_dem_250m = nztm_dem[:, 20:]
 plt.imshow(modis_si_dem_250m, origin=0, interpolation='none')
 np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\modis_si_dem_250m.npy', modis_si_dem_250m)
@@ -121,6 +125,9 @@ mask = nztm_dem * 0
 mask[1300:1400, 1100:1200] = 1
 plt.imshow(mask, origin='lower', alpha=.2, interpolation='none')
 np.save(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\MtCook_si_dem_250m.npy', mask)
+
+
+
 
 # 'modis_si_dem_250m':
 nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.085e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
