@@ -617,3 +617,19 @@ def fill_timeseries(inp_dt, inp_dat, tstep):
     out_dat = np.interp(convert_dt_to_timestamp(out_dt), convert_dt_to_timestamp(inp_dt), inp_dat)
 
     return np.asarray(out_dt), out_dat
+
+
+def ws_wd_from_u_v(u,v):
+    """ function to calculate geographic wind speed and direction with respect to north from u and v components
+    """
+    wd = np.rad2deg(np.arctan2(-u, -v))
+    ws = np.sqrt((u ** 2) + (v ** 2))
+    return ws, wd
+
+
+def u_v_from_ws_wd(ws,wd):
+    """ function to calculate geographic wind speed and direction with respect to north from u and v components
+    """
+    u = -ws * np.sin(np.deg2rad(wd))
+    v = -ws * np.cos(np.deg2rad(wd))
+    return u, v
