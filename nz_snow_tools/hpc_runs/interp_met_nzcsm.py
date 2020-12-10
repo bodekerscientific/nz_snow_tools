@@ -193,6 +193,14 @@ for var in config['variables'].keys():
         # plt.imshow(hi_res_out, origin='lower')
         # plt.colorbar()
         # plt.show()
+        # add climate chnage offsets (temperature change will also affect the longwave radiation and rain/snow partioning, but not RH, or SW rad)
+        if 'climate_change_offsets' in config.keys():
+            if var in config['climate_change_offsets'].keys():
+                if 'percentage_change' in config['climate_change_offsets'][var].keys():
+                    hi_res_out = hi_res_out * (100. + config['climate_change_offsets'][var]['percentage_change']) / 100.
+                elif 'absolute_change' in config['climate_change_offsets'][var].keys():
+                    hi_res_out = hi_res_out + config['climate_change_offsets'][var]['absolute_change']
+
         t[ii, :, :] = hi_res_out
         if var == 'total_precip':  # load temp (and optionally rh) to calculate rain/snow rate if needed
             if 'calc_rain_snow_rate' in config['variables'][var].keys():

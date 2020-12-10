@@ -110,6 +110,12 @@ variables:
 #      standard_name: "northward_wind"
 #      long_name: "true northward (meridional) wind at 10m"
 
+climate_change_offsets:
+  air_temp:
+    absolute_change: 1.5
+  total_precip:
+    percentage_change: 10
+
 input_grid:
   dem_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/states_nzcsm_FR7-12_kupeA.nc"
   dem_var_name: 'orog_model'
@@ -127,6 +133,6 @@ output_file:
   output_folder: '/nesi/nobackup/niwa00004/jonoconway/FSM_input'
   file_name_template: '/Pisa_{}_{}_wgs84.nc'
   first_timestamp: '2018-04-01 01:00:00'
-  last_timestamp: '2018-12-01 00:00:00'
+  last_timestamp: '2018-04-02 00:00:00'
   timestep: 3600 # timestep of output in seconds
 
