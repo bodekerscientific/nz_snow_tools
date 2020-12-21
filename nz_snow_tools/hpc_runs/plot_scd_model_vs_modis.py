@@ -9,13 +9,13 @@ from nz_snow_tools.util.utils import convert_datetime_julian_day
 from nz_snow_tools.util.utils import setup_nztm_dem, trim_data_to_mask, trim_lat_lon_bounds
 
 hydro_years_to_take = np.arange(2018, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ'
+plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/SI'
 # plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 # model_analysis_area = 145378  # sq km.
-catchment = 'NZ'  # string identifying catchment modelled
+catchment = 'SI'  # string identifying catchment modelled
 mask_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'
-modis_dem = 'modis_nz_dem_250m'
+modis_dem = 'modis_si_dem_250m'
 
 if modis_dem == 'modis_si_dem_250m':
 
@@ -52,16 +52,17 @@ modis_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow 
                                                                           modis_sc_threshold), 'rb'))
 # model options
 
-run_id = 'cl09_default_ros' #
+run_id = 'cl09_default' #'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' #
 which_model ='clark2009' #
-# run_id = 'dsc_default'  # #'cl09_default'  # #'cl09_default'# #  #  #
-# which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'# # # ### 'dsc_snow'  #
-met_inp = 'nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology
+# run_id = 'dsc_default'  #'dsc_mueller_TF2p4_tmelt278_ros'  #
+# which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'#
+met_inp = 'nzcsm7-12'#'vcsn_norton'#'nzcsm7-12'#vcsn_norton' #nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology
 
-output_dem = 'nz_dem_250m'
-model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered (mm w.e)
+output_dem = 'si_dem_250m'
+model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)
 model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 # model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
+
 
 [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
     model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
@@ -70,7 +71,8 @@ model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow 
 
 if modis_dem == 'modis_si_dem_250m':
     ann_scd = [trim_data_to_mask(a, mask) for a in ann_scd]
-
+    ann_max_swe = [trim_data_to_mask(a, mask) for a in ann_max_swe]
+    ann_av_swe = [trim_data_to_mask(a, mask) for a in ann_av_swe]
 modis_scd = np.nanmean(ann_scd_m, axis=0)
 model_scd = np.nanmean(ann_scd, axis=0)
 
@@ -104,11 +106,75 @@ subsets = {
     'HaastPass': {
         'xlim': [1.295e6, 1.32e6],
         'ylim': [5.095e6, 5.12e6]
+    },
+    'Cardrona': {
+        'xlim': [1.27e6, 1.3e6],
+        'ylim': [5.015e6, 5.045e6]
+    },
+    'Central-Nth-Island': {
+        'xlim': [1.66e6, 1.91e6],
+        'ylim': [5.40e6, 5.69e6]
+    },
+    'South-Island': {
+        'xlim': [1.2e6, 1.7e6],
+        'ylim': [5.0e6, 5.5e6]
     }
+
 }
 
 plt.rcParams.update({'font.size': 6})
 plt.rcParams.update({'axes.titlesize': 6})
+
+
+# plt.figure()
+# ind = np.logical_and(modis_scd>1,model_scd>1)
+# plt.hexbin(modis_scd[ind].ravel(), model_scd[ind].ravel(),gridsize=30,bins='log')
+# plt.plot([0,365],[0,365],'k--',alpha=.5)
+# plt.colorbar()
+# plt.xlabel('MODIS SCD')
+# plt.ylabel('Model SCD')
+# plt.yticks(range(0,361,90))
+# plt.xticks(range(0,361,90))
+# plt.savefig(plot_folder + '/SCD hexbin HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1],
+#                                                                                                                 met_inp, which_model,
+#                                                                                                                 catchment, output_dem, run_id,
+#                                                                                                                 model_swe_sc_threshold,
+#                                                                                                                 modis_sc_threshold), dpi=600)
+
+
+
+# model_swe = np.nanmean(ann_av_swe, axis=0)
+# mean_swe = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
+# area = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
+# for i, x in enumerate(np.arange(0, 3600 + 1, 200)):
+#     mean_swe[i] = np.nanmean(model_swe[np.logical_and(nztm_dem > x, nztm_dem <= x + 200)])
+#     area[i] = np.nansum(np.logical_and(nztm_dem > x, nztm_dem <= x + 200)) * .25 * .25
+# fig, ax = plt.subplots(figsize=(4, 4))
+# # plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe_dsc * area / 1e6, height=200, label='dsc_snow')
+# plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe * area / 1e6, height=200, label='clark')
+# plt.yticks(np.arange(0, 3600 + 1, 400))
+# plt.ylim(0, 3600)
+# plt.ylabel('Elevation (m)')
+# plt.xlabel('Average snow storage (cubic km)')
+# plt.tight_layout()
+# fig.savefig(plot_folder + '/hist av snow storage clark.png')
+#
+# model_max_swe = np.nanmean(ann_max_swe, axis=0)
+# max_swe = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
+# area = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
+# for i, x in enumerate(np.arange(0, 3600 + 1, 200)):
+#     max_swe[i] = np.nanmean(model_max_swe[np.logical_and(nztm_dem > x, nztm_dem <= x + 200)])
+#     area[i] = np.nansum(np.logical_and(nztm_dem > x, nztm_dem <= x + 200)) * .25 * .25
+# fig, ax = plt.subplots(figsize=(4, 4))
+# # plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe_dsc * area / 1e6, height=200, label='dsc_snow')
+# plt.barh(np.arange(0, 3600 + 1, 200) + 100, max_swe * area / 1e6, height=200, label='clark')
+# plt.yticks(np.arange(0, 3600 + 1, 400))
+# plt.ylim(0, 3600)
+# plt.ylabel('Elevation (m)')
+# plt.xlabel('Max snow storage (cubic km)')
+# plt.tight_layout()
+# fig.savefig(plot_folder + '/hist max snow storage clark.png')
+
 
 fig1 = plt.figure(figsize=[4, 4])
 bin_edges = [-60, -30, -7, 7, 30, 60]  # use small negative number to include 0 in the interpolation
@@ -128,14 +194,46 @@ plt.xlabel('NZTM easting')
 plt.title('SCD Bias: Model-MODIS {} to {}'.format(hydro_years_to_take[0], hydro_years_to_take[-1]))
 plt.xlim((np.min(x_centres),np.max(x_centres)))
 plt.ylim((np.min(y_centres),np.max(y_centres)))
-plt.xticks(np.arange(12e5, 17e5, 2e5))
-plt.yticks(np.arange(50e5, 55e5, 2e5))
+if catchment == 'SI':
+    plt.xticks(np.arange(12e5, 17e5, 2e5))
+    plt.yticks(np.arange(50e5, 55e5, 2e5))
+else:
+    plt.xticks(np.arange(12e5, 21e5, 2e5))
+    plt.yticks(np.arange(48e5, 63e5, 2e5))
+
 plt.tight_layout()
 plt.savefig(plot_folder + '/SCD bias model-modis HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1],
                                                                                                                 met_inp, which_model,
                                                                                                                 catchment, output_dem, run_id,
                                                                                                                 model_swe_sc_threshold,
                                                                                                                 modis_sc_threshold), dpi=600)
+name = 'Central-Nth-Island'
+plt.xlim(subsets[name]['xlim'])
+plt.ylim(subsets[name]['ylim'])
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 100e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 100e3))
+plt.tight_layout()
+plt.savefig(
+    plot_folder + '/SCD bias model-modis {} HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}_no_contour.png'.format(name, hydro_years_to_take[0],
+                                                                                                           hydro_years_to_take[-1],
+                                                                                                           met_inp, which_model,
+                                                                                                           catchment, output_dem, run_id,
+                                                                                                           model_swe_sc_threshold,
+                                                                                                           modis_sc_threshold), dpi=600)
+name = 'South-Island'
+plt.xlim(subsets[name]['xlim'])
+plt.ylim(subsets[name]['ylim'])
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 200e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 200e3))
+plt.tight_layout()
+plt.savefig(
+    plot_folder + '/SCD bias model-modis {} HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}_no_contour.png'.format(name, hydro_years_to_take[0],
+                                                                                                           hydro_years_to_take[-1],
+                                                                                                           met_inp, which_model,
+                                                                                                           catchment, output_dem, run_id,
+                                                                                                           model_swe_sc_threshold,
+                                                                                                           modis_sc_threshold), dpi=600)
+
 plt.contour(x_centres, y_centres,nztm_dem,np.arange(0,4000,200),colors='k', linewidths=0.5)
 for name in subsets.keys():
     plt.xlim(subsets[name]['xlim'])
@@ -172,11 +270,34 @@ plt.xlabel('NZTM easting')
 plt.title('Mean snow cover duration {} to {}'.format(hydro_years_to_take[0], hydro_years_to_take[-1]))
 plt.xlim((np.min(x_centres), np.max(x_centres)))
 plt.ylim((np.min(y_centres), np.max(y_centres)))
-plt.xticks(np.arange(12e5, 17e5, 2e5))
-plt.yticks(np.arange(50e5, 55e5, 2e5))
+if catchment == 'SI':
+    plt.xticks(np.arange(12e5, 17e5, 2e5))
+    plt.yticks(np.arange(50e5, 55e5, 2e5))
+else:
+    plt.xticks(np.arange(12e5, 21e5, 2e5))
+    plt.yticks(np.arange(48e5, 63e5, 2e5))
+
 plt.tight_layout()
 plt.savefig(
     plot_folder + '/SCD modis mean HY {} to {} thres{} {}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, catchment), dpi=300)
+name = 'Central-Nth-Island'
+plt.xlim(subsets[name]['xlim'])
+plt.ylim(subsets[name]['ylim'])
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 100e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 100e3))
+plt.tight_layout()
+plt.savefig(
+    plot_folder + '/SCD modis mean {} HY {} to {} thres{} {} no contour.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, catchment),
+    dpi=300)
+name = 'South-Island'
+plt.xlim(subsets[name]['xlim'])
+plt.ylim(subsets[name]['ylim'])
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 200e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 200e3))
+plt.tight_layout()
+plt.savefig(
+    plot_folder + '/SCD modis mean {} HY {} to {} thres{} {} no contour.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, catchment),
+    dpi=300)
 plt.contour(x_centres, y_centres,nztm_dem,np.arange(0,4000,200),colors='k', linewidths=0.5)
 for name in subsets.keys():
     plt.xlim(subsets[name]['xlim'])
@@ -205,12 +326,39 @@ plt.xlabel('NZTM easting')
 plt.title('Mean snow cover duration HY {} to {}'.format(hydro_years_to_take[0], hydro_years_to_take[-1]))
 plt.xlim((np.min(x_centres),np.max(x_centres)))
 plt.ylim((np.min(y_centres),np.max(y_centres)))
-plt.xticks(np.arange(12e5, 17e5, 2e5))
-plt.yticks(np.arange(50e5, 55e5, 2e5))
+if catchment == 'SI':
+    plt.xticks(np.arange(12e5, 17e5, 2e5))
+    plt.yticks(np.arange(50e5, 55e5, 2e5))
+else:
+    plt.xticks(np.arange(12e5, 21e5, 2e5))
+    plt.yticks(np.arange(48e5, 63e5, 2e5))
 plt.tight_layout()
 plt.savefig(
     plot_folder + '/SCD model mean HY {} to {} thres{} {} {} {} {}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], model_swe_sc_threshold, run_id,
                                                                                met_inp, which_model, catchment), dpi=300)
+
+name = 'Central-Nth-Island'
+plt.xlim(subsets[name]['xlim'])
+plt.ylim(subsets[name]['ylim'])
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 100e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 100e3))
+plt.tight_layout()
+plt.savefig(
+    plot_folder + '/SCD model mean {} HY {} to {} thres{} {} {} {} {} no contour.png'.format(name,hydro_years_to_take[0], hydro_years_to_take[-1], model_swe_sc_threshold,
+                                                                               run_id,
+                                                                               met_inp, which_model, catchment), dpi=300)
+
+name = 'South-Island'
+plt.xlim(subsets[name]['xlim'])
+plt.ylim(subsets[name]['ylim'])
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 100e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 100e3))
+plt.tight_layout()
+plt.savefig(
+    plot_folder + '/SCD model mean {} HY {} to {} thres{} {} {} {} {} no contour.png'.format(name,hydro_years_to_take[0], hydro_years_to_take[-1], model_swe_sc_threshold,
+                                                                               run_id,
+                                                                               met_inp, which_model, catchment), dpi=300)
+
 plt.contour(x_centres, y_centres,nztm_dem,np.arange(0,4000,200),colors='k', linewidths=0.5)
 for name in subsets.keys():
     plt.xlim(subsets[name]['xlim'])
@@ -226,8 +374,8 @@ for name in subsets.keys():
 for i, year_to_take in enumerate(hydro_years_to_take):
     fig1 = plt.figure(figsize=[4, 4])
     print('loading data for year {}'.format(year_to_take))
-    model_scd = ann_scd[i]
-    CS1 = plt.contourf(x_centres, y_centres, model_scd, levels=bin_edges, cmap=copy.copy(plt.cm.get_cmap('magma_r')), extend='max')
+    model_scd_1year = ann_scd[i]
+    CS1 = plt.contourf(x_centres, y_centres, model_scd_1year, levels=bin_edges, cmap=copy.copy(plt.cm.get_cmap('magma_r')), extend='max')
     # CS1.cmap.set_bad('grey')
     CS1.cmap.set_over([0.47, 0.72, 0.77])
     # CS1.cmap.set_under('none')
@@ -237,8 +385,8 @@ for i, year_to_take in enumerate(hydro_years_to_take):
     plt.yticks([])
     cbar = plt.colorbar()
     cbar.set_label('Snow cover duration (days)', rotation=90)
-    plt.xticks(np.arange(12e5, 17e5, 2e5))
-    plt.yticks(np.arange(50e5, 55e5, 2e5))
+    plt.xticks(np.arange(12e5, 21e5, 2e5))
+    plt.yticks(np.arange(48e5, 63e5, 2e5))
     plt.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
     plt.ylabel('NZTM northing')
     plt.xlabel('NZTM easting')
@@ -250,8 +398,8 @@ for i, year_to_take in enumerate(hydro_years_to_take):
 for i, year_to_take in enumerate(hydro_years_to_take):
     fig1 = plt.figure(figsize=[4, 4])
     print('loading data for year {}'.format(year_to_take))
-    modis_scd = ann_scd_m[i]
-    CS1 = plt.contourf(x_centres, y_centres, modis_scd, levels=bin_edges, cmap=copy.copy(plt.cm.get_cmap('magma_r')), extend='max')
+    modis_scd_1year = ann_scd_m[i]
+    CS1 = plt.contourf(x_centres, y_centres, modis_scd_1year, levels=bin_edges, cmap=copy.copy(plt.cm.get_cmap('magma_r')), extend='max')
     # CS1.cmap.set_bad('grey')
     CS1.cmap.set_over([0.47, 0.72, 0.77])
     # CS1.cmap.set_under('none')
@@ -261,8 +409,8 @@ for i, year_to_take in enumerate(hydro_years_to_take):
     plt.yticks([])
     cbar = plt.colorbar()
     cbar.set_label('Snow cover duration (days)', rotation=90)
-    plt.xticks(np.arange(12e5, 17e5, 2e5))
-    plt.yticks(np.arange(50e5, 55e5, 2e5))
+    plt.xticks(np.arange(12e5, 21e5, 2e5))
+    plt.yticks(np.arange(48e5, 63e5, 2e5))
     plt.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
     plt.ylabel('NZTM northing')
     plt.xlabel('NZTM easting')
@@ -334,78 +482,100 @@ fig1.savefig(plot_folder + '/hist modis SCD model SCD bias HY {} to {} {}_{}_{}_
                                                                                                                           catchment, output_dem, run_id,
                                                                                                                           model_swe_sc_threshold,
                                                                                                                           modis_sc_threshold), dpi=600)
-
-h2d = plt.hist2d(modis_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
+h2d_modis_av = plt.hist2d(modis_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
                  bins=(np.arange(0, 365 + 1, 10), np.arange(0, 3600 + 1, 500)), norm=LogNorm())
-
-h2d_mod = plt.hist2d(model_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
-                     bins=(np.arange(0, 365 + 1, 10), np.arange(0, 3600 + 1, 500)), norm=LogNorm())
-
-run_id = 'cl09_default'  # 'dsc_default'#'cl09_default'  # #'cl09_default'# #  #  #
-which_model = 'clark2009'  # 'dsc_snow'# # # ### 'dsc_snow'  #
-
-[ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
-    model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
-                                                                                   catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
-ann_scd = [trim_data_to_mask(a, mask) for a in ann_scd]
-model_scd = np.nanmean(ann_scd, axis=0)
 h2d_mod2 = plt.hist2d(model_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
                       bins=(np.arange(0, 365 + 1, 10), np.arange(0, 3600 + 1, 500)), norm=LogNorm())
-
 colors = plt.cm.tab10
 fig, ax = plt.subplots(figsize=(4, 4))
 for i in np.arange(0, 5):
     ax.semilogy(h2d_mod2[1][1:] - 5, h2d_mod2[0][:, i] / 16, '-.',
                 color=colors(i / 10))  # , label='model cl {}-{} m'.format(h2d_mod2[2][i], h2d_mod2[2][i + 1]))
-    ax.semilogy(h2d_mod[1][1:] - 5, h2d_mod[0][:, i] / 16, '--', color=colors(i / 10))  # , label='model dsc {}-{} m'.format(h2d_mod[2][i],h2d_mod[2][i+1]))
-    ax.semilogy(h2d[1][1:] - 5, h2d[0][:, i] / 16, '-', color=colors(i / 10), label='{}-{} m'.format(h2d_mod[2][i], h2d_mod[2][i + 1]))
+    ax.semilogy(h2d_modis_av[1][1:] - 5, h2d_modis_av[0][:, i] / 16, '-', color=colors(i / 10), label='{}-{} m'.format(h2d_modis_av[2][i], h2d_modis_av[2][i + 1]))
 plt.legend()
 plt.ylim(bottom=10)
 plt.xticks(np.arange(0, 365, 30))
 plt.ylabel('Area  (km^2)')
 plt.xlabel('SCD')
-fig.savefig(plot_folder + '/hist modis vs models SCD HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}.png'.format(hydro_years_to_take[0],
+fig.savefig(plot_folder + '/hist modis vs model SCD HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}.png'.format(hydro_years_to_take[0],
                                                                                                                     hydro_years_to_take[-1],
                                                                                                                     met_inp, which_model,
                                                                                                                     catchment, output_dem, run_id,
                                                                                                                     model_swe_sc_threshold,
                                                                                                                     modis_sc_threshold), dpi=600)
-run_id = 'cl09_default'
-which_model = 'clark2009'  #
-
-[ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
-    model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
-                                                                                   catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
-ann_av_swe = [trim_data_to_mask(a, mask) for a in ann_av_swe]
-model_swe = np.nanmean(ann_av_swe, axis=0)
-mean_swe = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
-area = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
-for i, x in enumerate(np.arange(0, 3600 + 1, 200)):
-    mean_swe[i] = np.nanmean(model_swe[np.logical_and(nztm_dem > x, nztm_dem <= x + 200)])
-    area[i] = np.nansum(np.logical_and(nztm_dem > x, nztm_dem <= x + 200)) * .25 * .25
-
-run_id = 'dsc_default'  # #'cl09_default'  # #'cl09_default'# #  #  #
-which_model = 'dsc_snow'  #
-
-[ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
-    model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
-                                                                                   catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
-
-ann_av_swe = [trim_data_to_mask(a, mask) for a in ann_av_swe]
-model_swe_dsc = np.nanmean(ann_av_swe, axis=0)
-mean_swe_dsc = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
-for i, x in enumerate(np.arange(0, 3600 + 1, 200)):
-    mean_swe_dsc[i] = np.nanmean(model_swe_dsc[np.logical_and(nztm_dem > x, nztm_dem <= x + 200)])
-    area[i] = np.nansum(np.logical_and(nztm_dem > x, nztm_dem <= x + 200)) * .25 * .25
-
-fig, ax = plt.subplots(figsize=(4, 4))
-plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe_dsc * area / 1e6, height=200, label='dsc_snow')
-plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe * area / 1e6, height=200, label='clark')
-plt.yticks(np.arange(0, 3600 + 1, 400))
-plt.ylim(0, 3600)
-plt.ylabel('Elevation (m)')
-plt.xlabel('Average snow storage (cubic km)')
-fig.savefig(plot_folder + '/hist_snow storage.png')
-
-plt.show()
-plt.close()
+#
+# h2d = plt.hist2d(modis_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
+#                  bins=(np.arange(0, 365 + 1, 10), np.arange(0, 3600 + 1, 500)), norm=LogNorm())
+#
+# h2d_mod = plt.hist2d(model_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
+#                      bins=(np.arange(0, 365 + 1, 10), np.arange(0, 3600 + 1, 500)), norm=LogNorm())
+#
+# run_id = 'cl09_default'  # 'dsc_default'#'cl09_default'  # #'cl09_default'# #  #  #
+# which_model = 'clark2009'  # 'dsc_snow'# # # ### 'dsc_snow'  #
+#
+# [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
+#     model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
+#                                                                                    catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
+# ann_scd = [trim_data_to_mask(a, mask) for a in ann_scd]
+# model_scd = np.nanmean(ann_scd, axis=0)
+# h2d_mod2 = plt.hist2d(model_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
+#                       bins=(np.arange(0, 365 + 1, 10), np.arange(0, 3600 + 1, 500)), norm=LogNorm())
+#
+# colors = plt.cm.tab10
+# fig, ax = plt.subplots(figsize=(4, 4))
+# for i in np.arange(0, 5):
+#     ax.semilogy(h2d_mod2[1][1:] - 5, h2d_mod2[0][:, i] / 16, '-.',
+#                 color=colors(i / 10))  # , label='model cl {}-{} m'.format(h2d_mod2[2][i], h2d_mod2[2][i + 1]))
+#     ax.semilogy(h2d_mod[1][1:] - 5, h2d_mod[0][:, i] / 16, '--', color=colors(i / 10))  # , label='model dsc {}-{} m'.format(h2d_mod[2][i],h2d_mod[2][i+1]))
+#     ax.semilogy(h2d[1][1:] - 5, h2d[0][:, i] / 16, '-', color=colors(i / 10), label='{}-{} m'.format(h2d_mod[2][i], h2d_mod[2][i + 1]))
+# plt.legend()
+# plt.ylim(bottom=10)
+# plt.xticks(np.arange(0, 365, 30))
+# plt.ylabel('Area  (km^2)')
+# plt.xlabel('SCD')
+# fig.savefig(plot_folder + '/hist modis vs models SCD HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}.png'.format(hydro_years_to_take[0],
+#                                                                                                                     hydro_years_to_take[-1],
+#                                                                                                                     met_inp, which_model,
+#                                                                                                                     catchment, output_dem, run_id,
+#                                                                                                                     model_swe_sc_threshold,
+#                                                                                                                     modis_sc_threshold), dpi=600)
+#
+# run_id = 'cl09_default'
+# which_model = 'clark2009'  #
+#
+# [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
+#     model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
+#                                                                                    catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
+# ann_av_swe = [trim_data_to_mask(a, mask) for a in ann_av_swe]
+# model_swe = np.nanmean(ann_av_swe, axis=0)
+# mean_swe = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
+# area = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
+# for i, x in enumerate(np.arange(0, 3600 + 1, 200)):
+#     mean_swe[i] = np.nanmean(model_swe[np.logical_and(nztm_dem > x, nztm_dem <= x + 200)])
+#     area[i] = np.nansum(np.logical_and(nztm_dem > x, nztm_dem <= x + 200)) * .25 * .25
+#
+# run_id = 'dsc_default'  # #'cl09_default'  # #'cl09_default'# #  #  #
+# which_model = 'dsc_snow'  #
+#
+# [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
+#     model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
+#                                                                                    catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
+#
+# ann_av_swe = [trim_data_to_mask(a, mask) for a in ann_av_swe]
+# model_swe_dsc = np.nanmean(ann_av_swe, axis=0)
+# mean_swe_dsc = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
+# for i, x in enumerate(np.arange(0, 3600 + 1, 200)):
+#     mean_swe_dsc[i] = np.nanmean(model_swe_dsc[np.logical_and(nztm_dem > x, nztm_dem <= x + 200)])
+#     area[i] = np.nansum(np.logical_and(nztm_dem > x, nztm_dem <= x + 200)) * .25 * .25
+#
+# fig, ax = plt.subplots(figsize=(4, 4))
+# plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe_dsc * area / 1e6, height=200, label='dsc_snow')
+# plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe * area / 1e6, height=200, label='clark')
+# plt.yticks(np.arange(0, 3600 + 1, 400))
+# plt.ylim(0, 3600)
+# plt.ylabel('Elevation (m)')
+# plt.xlabel('Average snow storage (cubic km)')
+# fig.savefig(plot_folder + '/hist_snow storage.png')
+#
+# plt.show()
+# plt.close()
