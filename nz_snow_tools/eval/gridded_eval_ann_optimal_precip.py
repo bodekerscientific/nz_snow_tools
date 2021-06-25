@@ -23,7 +23,7 @@ if __name__ == '__main__':
     years_to_take = range(2001, 2005 + 1)  # range(2016, 2016 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
     model_swe_sc_threshold = 20  # threshold for treating a grid cell as snow covered (mm w.e)
     output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/from Ruschle/eval'
-    plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/SouthIsland_results/modis_comparison/t_bias_optimisation'
+    plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/for_Christian_June2021'
 
     lists = [[] for _ in range(6)]
     a_obs, a_mod, a_ns, a_bias, a_rmse, a_mae = lists
@@ -43,7 +43,7 @@ if __name__ == '__main__':
             for year_to_take in years_to_take:
                 ann = pickle.load(open(
                     output_folder + '/resample_fit_{}_swe{}_{}_rs{}_smooth{}_{}.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period,
-                                                                                            year_to_take), 'rb'))  # ,encoding='latin1'
+                                                                                            year_to_take), 'rb'),encoding='latin1')  # ,encoding='latin1'
 
                 #
                 s_obs.append(ann[0][0])
@@ -247,8 +247,13 @@ if __name__ == '__main__':
     for i in range(plot_var.shape[0]):
         for j in range(plot_var.shape[1]):
             final_grid[i * 4:(i + 1) * 4, j * 4:(j + 1) * 4] = plot_var[i, j]
-    final_grid2 = np.zeros((2800, 2560))
+    final_grid2 = np.full((2800, 2560),np.nan)
     final_grid2[:, 20:] = final_grid
+
+    #dump file with nans
+    pickle.dump(final_grid2, open(
+        plot_folder + '/t_bias_optim_t_NS_{}_swe{}_{}_rs{}_smooth{}_trimmed2_fullres_withnan.pkl'.format(catchment, model_swe_sc_threshold, run_id, rl, smooth_period),
+        'wb'), protocol=3)
 
     # plot
     plt.figure(figsize=(8, 8))
