@@ -9,13 +9,13 @@ from nz_snow_tools.util.utils import convert_datetime_julian_day
 from nz_snow_tools.util.utils import setup_nztm_dem, trim_data_to_mask, trim_lat_lon_bounds
 
 hydro_years_to_take = np.arange(2018, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/SI'
+plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ'
 # plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 # model_analysis_area = 145378  # sq km.
-catchment = 'SI'  # string identifying catchment modelled
+catchment = 'NZ'  # string identifying catchment modelled
 mask_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'
-modis_dem = 'modis_si_dem_250m'
+modis_dem = 'modis_nz_dem_250m'
 
 if modis_dem == 'modis_si_dem_250m':
 
@@ -52,13 +52,13 @@ modis_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow 
                                                                           modis_sc_threshold), 'rb'))
 # model options
 
-run_id = 'cl09_default' #'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' #
+run_id = 'cl09_default_ros' #'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' #
 which_model ='clark2009' #
 # run_id = 'dsc_default'  #'dsc_mueller_TF2p4_tmelt278_ros'  #
 # which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'#
 met_inp = 'nzcsm7-12'#'vcsn_norton'#'nzcsm7-12'#vcsn_norton' #nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology
 
-output_dem = 'si_dem_250m'
+output_dem = 'nz_dem_250m'
 model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)
 model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 # model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
@@ -141,22 +141,47 @@ plt.rcParams.update({'axes.titlesize': 6})
 #                                                                                                                 model_swe_sc_threshold,
 #                                                                                                                 modis_sc_threshold), dpi=600)
 
+# plot change in elevation of snowline (120 days SCD)
 
+# model_scd = np.nanmean(ann_scd, axis=0)
+# mask = np.load("C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/modis_mask_hy2018_2020_landpoints.npy")
+# model_scd[~mask] = np.nan
+# model_snowline = []
+# modis_snowline = []
+# for bin_s in np.arange(4.7e6, 6.2e6, 5.e4):
+#     # select points within northing range\
+#     ind_y = np.logical_and(y_centres > bin_s, y_centres <= bin_s + 5e4)
+#     model_scd_y = model_scd[ind_y, :]
+#     modis_scd_y = modis_scd[ind_y, :]
+#     dem_y = nztm_dem[ind_y, :]
+#     model_snowline.append(np.nanmean(dem_y[np.logical_and(model_scd_y > 110, model_scd_y < 130)]))
+#     modis_snowline.append(np.nanmean(dem_y[np.logical_and(modis_scd_y > 110, modis_scd_y < 130)]))
 
-# model_swe = np.nanmean(ann_av_swe, axis=0)
-# mean_swe = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
-# area = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
-# for i, x in enumerate(np.arange(0, 3600 + 1, 200)):
-#     mean_swe[i] = np.nanmean(model_swe[np.logical_and(nztm_dem > x, nztm_dem <= x + 200)])
-#     area[i] = np.nansum(np.logical_and(nztm_dem > x, nztm_dem <= x + 200)) * .25 * .25
-# fig, ax = plt.subplots(figsize=(4, 4))
-# # plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe_dsc * area / 1e6, height=200, label='dsc_snow')
-# plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe * area / 1e6, height=200, label='clark')
-# plt.yticks(np.arange(0, 3600 + 1, 400))
-# plt.ylim(0, 3600)
-# plt.ylabel('Elevation (m)')
-# plt.xlabel('Average snow storage (cubic km)')
+# plt.plot(modis_snowline, np.arange(4.7e6, 6.2e6, 5.e4) + 2.5e4)
+# plt.plot(model_snowline, np.arange(4.7e6, 6.2e6, 5.e4) + 2.5e4)
+# plt.grid()
+
+# plt.legend()
+# plt.ylabel('NZTM northing (m)')
+# plt.xlabel('Elevation (m)')
 # plt.tight_layout()
+# plt.savefig(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\snowline elevation with northing.png',dpi=300)
+
+
+model_swe = np.nanmean(ann_av_swe, axis=0)
+mean_swe = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
+area = np.full(np.arange(0, 3600 + 1, 200).shape, np.nan)
+for i, x in enumerate(np.arange(0, 3600 + 1, 200)):
+    mean_swe[i] = np.nanmean(model_swe[np.logical_and(nztm_dem > x, nztm_dem <= x + 200)])
+    area[i] = np.nansum(np.logical_and(nztm_dem > x, nztm_dem <= x + 200)) * .25 * .25
+fig, ax = plt.subplots(figsize=(4, 4))
+# plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe_dsc * area / 1e6, height=200, label='dsc_snow')
+plt.barh(np.arange(0, 3600 + 1, 200) + 100, mean_swe * area / 1e6, height=200, label='clark')
+plt.yticks(np.arange(0, 3600 + 1, 400))
+plt.ylim(0, 3600)
+plt.ylabel('Elevation (m)')
+plt.xlabel('Average snow storage (cubic km)')
+plt.tight_layout()
 # fig.savefig(plot_folder + '/hist av snow storage clark.png')
 #
 # model_max_swe = np.nanmean(ann_max_swe, axis=0)
