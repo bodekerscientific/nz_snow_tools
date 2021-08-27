@@ -9,7 +9,7 @@ from nz_snow_tools.util.utils import convert_datetime_julian_day
 from nz_snow_tools.util.utils import setup_nztm_dem, trim_data_to_mask, trim_lat_lon_bounds
 
 hydro_years_to_take = np.arange(2018, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ'
+plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ/august2021'
 # plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 # model_analysis_area = 145378  # sq km.
 catchment = 'NZ'  # string identifying catchment modelled
@@ -118,6 +118,11 @@ subsets = {
     'South-Island': {
         'xlim': [1.2e6, 1.7e6],
         'ylim': [5.0e6, 5.5e6]
+    },
+
+    'Ruapehu': {
+        'xlim': [1.81e6, 1.84e6],
+        'ylim': [5.64e6, 5.67e6]
     }
 
 }
@@ -235,8 +240,8 @@ plt.savefig(plot_folder + '/SCD bias model-modis HY {} to {} {}_{}_{}_{}_{}_swe_
 name = 'Central-Nth-Island'
 plt.xlim(subsets[name]['xlim'])
 plt.ylim(subsets[name]['ylim'])
-plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 100e3))
-plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 100e3))
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 100e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 100e3))
 plt.tight_layout()
 plt.savefig(
     plot_folder + '/SCD bias model-modis {} HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}_no_contour.png'.format(name, hydro_years_to_take[0],
@@ -248,8 +253,8 @@ plt.savefig(
 name = 'South-Island'
 plt.xlim(subsets[name]['xlim'])
 plt.ylim(subsets[name]['ylim'])
-plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 200e3))
-plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 200e3))
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 200e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 200e3))
 plt.tight_layout()
 plt.savefig(
     plot_folder + '/SCD bias model-modis {} HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}_no_contour.png'.format(name, hydro_years_to_take[0],
@@ -263,8 +268,8 @@ plt.contour(x_centres, y_centres,nztm_dem,np.arange(0,4000,200),colors='k', line
 for name in subsets.keys():
     plt.xlim(subsets[name]['xlim'])
     plt.ylim(subsets[name]['ylim'])
-    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 5e3))
-    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 5e3))
+    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 5e3))
+    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 5e3))
     plt.tight_layout()
     plt.savefig(
         plot_folder + '/SCD bias model-modis {} HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}.png'.format(name, hydro_years_to_take[0],
@@ -308,8 +313,8 @@ plt.savefig(
 name = 'Central-Nth-Island'
 plt.xlim(subsets[name]['xlim'])
 plt.ylim(subsets[name]['ylim'])
-plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 100e3))
-plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 100e3))
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 100e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 100e3))
 plt.tight_layout()
 plt.savefig(
     plot_folder + '/SCD modis mean {} HY {} to {} thres{} {} no contour.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, catchment),
@@ -317,8 +322,8 @@ plt.savefig(
 name = 'South-Island'
 plt.xlim(subsets[name]['xlim'])
 plt.ylim(subsets[name]['ylim'])
-plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 200e3))
-plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 200e3))
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 200e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 200e3))
 plt.tight_layout()
 plt.savefig(
     plot_folder + '/SCD modis mean {} HY {} to {} thres{} {} no contour.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, catchment),
@@ -327,8 +332,8 @@ plt.contour(x_centres, y_centres,nztm_dem,np.arange(0,4000,200),colors='k', line
 for name in subsets.keys():
     plt.xlim(subsets[name]['xlim'])
     plt.ylim(subsets[name]['ylim'])
-    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 5e3))
-    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 5e3))
+    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 5e3))
+    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 5e3))
     plt.tight_layout()
     plt.savefig(
         plot_folder + '/SCD modis mean {} HY {} to {} thres{} {}.png'.format(name,hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, catchment),
@@ -388,8 +393,8 @@ plt.contour(x_centres, y_centres,nztm_dem,np.arange(0,4000,200),colors='k', line
 for name in subsets.keys():
     plt.xlim(subsets[name]['xlim'])
     plt.ylim(subsets[name]['ylim'])
-    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 5e3))
-    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 5e3))
+    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 5e3))
+    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 5e3))
     plt.tight_layout()
     plt.savefig(
         plot_folder + '/SCD model mean {} HY {} to {} thres{} {} {} {} {}.png'.format(name,hydro_years_to_take[0], hydro_years_to_take[-1], model_swe_sc_threshold,
