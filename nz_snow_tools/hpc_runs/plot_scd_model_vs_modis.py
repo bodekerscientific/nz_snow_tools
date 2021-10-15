@@ -8,20 +8,21 @@ import datetime as dt
 from nz_snow_tools.util.utils import convert_datetime_julian_day
 from nz_snow_tools.util.utils import setup_nztm_dem, trim_data_to_mask, trim_lat_lon_bounds
 
+#TODO # todos indicate which parameters need to change to switch between VCSN and NZCSM
 hydro_years_to_take = np.arange(2018, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ/august2021'
+plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ/august2021' #TODO
 # plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 # model_analysis_area = 145378  # sq km.
-catchment = 'NZ'  # string identifying catchment modelled
+catchment = 'NZ'  # string identifying catchment modelled #TODO
 mask_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'
-modis_dem = 'modis_nz_dem_250m'
+modis_dem = 'modis_nz_dem_250m' #TODO
 
 if modis_dem == 'modis_si_dem_250m':
 
     si_dem_file = dem_folder + '/si_dem_250m' + '.tif'
     nztm_dem, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(si_dem_file, extent_w=1.08e6, extent_e=1.72e6, extent_n=5.52e6, extent_s=4.82e6,
-                                                                      resolution=250)
+                                                                          resolution=250)
     nztm_dem = nztm_dem[:, 20:]
     x_centres = x_centres[20:]
     lat_array = lat_array[:, 20:]
@@ -32,15 +33,14 @@ if modis_dem == 'modis_si_dem_250m':
 elif modis_dem == 'modis_nz_dem_250m':
     si_dem_file = dem_folder + '/nz_dem_250m' + '.tif'
     _, x_centres, y_centres, lat_array, lon_array = setup_nztm_dem(None, extent_w=1.085e6, extent_e=2.10e6, extent_n=6.20e6, extent_s=4.70e6,
-                                                                           resolution=250, origin='bottomleft')
+                                                                   resolution=250, origin='bottomleft')
     nztm_dem = np.load(dem_folder + '/{}.npy'.format(modis_dem))
     modis_output_dem = 'modis_nz_dem_250m'
-    mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment, modis_dem)) # just load the mask the chooses land points from the dem. snow data has modis hy2018_2020 landpoints mask applied in NZ_evaluation_otf
+    mask = np.load(mask_folder + '/{}_{}.npy'.format(catchment,
+                                                     modis_dem))  # just load the mask the chooses land points from the dem. snow data has modis hy2018_2020 landpoints mask applied in NZ_evaluation_otf
     # mask = np.load("C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/modis_mask_hy2018_2020_landpoints.npy")
 
-
 lat_array, lon_array, nztm_dem, y_centres, x_centres = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
-
 
 # # modis options
 modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
@@ -52,14 +52,14 @@ modis_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow 
                                                                           modis_sc_threshold), 'rb'))
 # model options
 
-run_id = 'cl09_default_ros' #'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' #
-which_model ='clark2009' #
+run_id = 'cl09_default_ros'  ## 'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' ##TODO
+which_model = 'clark2009'  #TODO
 # run_id = 'dsc_default'  #'dsc_mueller_TF2p4_tmelt278_ros'  #
 # which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'#
-met_inp = 'nzcsm7-12'#'vcsn_norton'#'nzcsm7-12'#vcsn_norton' #nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology
+met_inp = 'nzcsm7-12'  # 'vcsn_norton'#'nzcsm7-12'#vcsn_norton' #nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology #TODO
 
-output_dem = 'nz_dem_250m'
-model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)
+output_dem = 'nz_dem_250m' #TODO
+model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)#TODO
 model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 # model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
 
@@ -113,11 +113,11 @@ subsets = {
     },
     'Central-Nth-Island': {
         'xlim': [1.66e6, 1.91e6],
-        'ylim': [5.40e6, 5.69e6]
+        'ylim': [5.41e6, 5.69e6]
     },
     'South-Island': {
-        'xlim': [1.2e6, 1.7e6],
-        'ylim': [5.0e6, 5.5e6]
+        'xlim': [1.08e6, 1.72e6],
+        'ylim': [4.82e6, 5.52e6]
     },
 
     'Ruapehu': {
@@ -129,7 +129,6 @@ subsets = {
 
 plt.rcParams.update({'font.size': 6})
 plt.rcParams.update({'axes.titlesize': 6})
-
 
 # plt.figure()
 # ind = np.logical_and(modis_scd>1,model_scd>1)
@@ -222,8 +221,8 @@ plt.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
 plt.ylabel('NZTM northing')
 plt.xlabel('NZTM easting')
 plt.title('SCD Bias: Model-MODIS {} to {}'.format(hydro_years_to_take[0], hydro_years_to_take[-1]))
-plt.xlim((np.min(x_centres),np.max(x_centres)))
-plt.ylim((np.min(y_centres),np.max(y_centres)))
+plt.xlim((np.min(x_centres), np.max(x_centres)))
+plt.ylim((np.min(y_centres), np.max(y_centres)))
 if catchment == 'SI':
     plt.xticks(np.arange(12e5, 17e5, 2e5))
     plt.yticks(np.arange(50e5, 55e5, 2e5))
@@ -238,38 +237,43 @@ plt.savefig(plot_folder + '/SCD bias model-modis HY {} to {} {}_{}_{}_{}_{}_swe_
                                                                                                                 model_swe_sc_threshold,
                                                                                                                 modis_sc_threshold), dpi=600)
 name = 'Central-Nth-Island'
+plt.title('(f) SCD Bias:Model-MODIS',fontweight='bold',fontsize=10)
 plt.xlim(subsets[name]['xlim'])
 plt.ylim(subsets[name]['ylim'])
-plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 100e3))
-plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 100e3))
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1] + 1, 100e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1] + 1, 100e3))
 plt.tight_layout()
 plt.savefig(
     plot_folder + '/SCD bias model-modis {} HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}_no_contour.png'.format(name, hydro_years_to_take[0],
-                                                                                                           hydro_years_to_take[-1],
-                                                                                                           met_inp, which_model,
-                                                                                                           catchment, output_dem, run_id,
-                                                                                                           model_swe_sc_threshold,
-                                                                                                           modis_sc_threshold), dpi=600)
+                                                                                                                      hydro_years_to_take[-1],
+                                                                                                                      met_inp, which_model,
+                                                                                                                      catchment, output_dem, run_id,
+                                                                                                                      model_swe_sc_threshold,
+                                                                                                                      modis_sc_threshold), dpi=600)
 name = 'South-Island'
+plt.title('(e) SCD Bias:Model-MODIS',fontweight='bold',fontsize=10)
 plt.xlim(subsets[name]['xlim'])
 plt.ylim(subsets[name]['ylim'])
-plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 200e3))
-plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 200e3))
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1] + 1, 200e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1] + 1, 200e3))
 plt.tight_layout()
 plt.savefig(
     plot_folder + '/SCD bias model-modis {} HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}_no_contour.png'.format(name, hydro_years_to_take[0],
-                                                                                                           hydro_years_to_take[-1],
-                                                                                                           met_inp, which_model,
-                                                                                                           catchment, output_dem, run_id,
-                                                                                                           model_swe_sc_threshold,
-                                                                                                           modis_sc_threshold), dpi=600)
+                                                                                                                      hydro_years_to_take[-1],
+                                                                                                                      met_inp, which_model,
+                                                                                                                      catchment, output_dem, run_id,
+                                                                                                                      model_swe_sc_threshold,
+                                                                                                                      modis_sc_threshold), dpi=600)
 
-plt.contour(x_centres, y_centres,nztm_dem,np.arange(0,4000,200),colors='k', linewidths=0.5)
+plt.contour(x_centres, y_centres, nztm_dem, np.arange(0, 4000, 200), colors='k', linewidths=0.5)
+plt.contour(x_centres, y_centres, nztm_dem, np.arange(0, 4000, 1000), colors='k', linewidths=1)
+plt.title('(c) SCD Bias: Model-MODIS',fontweight='bold',fontsize=10)
+
 for name in subsets.keys():
     plt.xlim(subsets[name]['xlim'])
     plt.ylim(subsets[name]['ylim'])
-    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 5e3))
-    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 5e3))
+    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1] + 1, 5e3))
+    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1] + 1, 5e3))
     plt.tight_layout()
     plt.savefig(
         plot_folder + '/SCD bias model-modis {} HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}.png'.format(name, hydro_years_to_take[0],
@@ -277,7 +281,7 @@ for name in subsets.keys():
                                                                                                                met_inp, which_model,
                                                                                                                catchment, output_dem, run_id,
                                                                                                                model_swe_sc_threshold,
-                                                                                                             modis_sc_threshold), dpi=600)
+                                                                                                               modis_sc_threshold), dpi=600)
 # plt.clf()
 
 
@@ -297,7 +301,7 @@ cbar.set_label('Snow cover duration (days)', rotation=90)
 plt.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
 plt.ylabel('NZTM northing')
 plt.xlabel('NZTM easting')
-plt.title('Mean snow cover duration {} to {}'.format(hydro_years_to_take[0], hydro_years_to_take[-1]))
+plt.title('MODIS mean SCD {} to {}'.format(hydro_years_to_take[0], hydro_years_to_take[-1]))
 plt.xlim((np.min(x_centres), np.max(x_centres)))
 plt.ylim((np.min(y_centres), np.max(y_centres)))
 if catchment == 'SI':
@@ -310,33 +314,44 @@ else:
 plt.tight_layout()
 plt.savefig(
     plot_folder + '/SCD modis mean HY {} to {} thres{} {}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, catchment), dpi=300)
+
 name = 'Central-Nth-Island'
+plt.title('(d) MODIS mean SCD',fontweight='bold',fontsize=10)
 plt.xlim(subsets[name]['xlim'])
 plt.ylim(subsets[name]['ylim'])
-plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 100e3))
-plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 100e3))
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1] + 1, 100e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1] + 1, 100e3))
 plt.tight_layout()
 plt.savefig(
-    plot_folder + '/SCD modis mean {} HY {} to {} thres{} {} no contour.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, catchment),
+    plot_folder + '/SCD modis mean {} HY {} to {} thres{} {} no contour.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold,
+                                                                                    catchment),
     dpi=300)
+
 name = 'South-Island'
+plt.title('(c) MODIS mean SCD',fontweight='bold',fontsize=10)
 plt.xlim(subsets[name]['xlim'])
 plt.ylim(subsets[name]['ylim'])
-plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 200e3))
-plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 200e3))
+plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1] + 1, 200e3))
+plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1] + 1, 200e3))
 plt.tight_layout()
 plt.savefig(
-    plot_folder + '/SCD modis mean {} HY {} to {} thres{} {} no contour.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, catchment),
+    plot_folder + '/SCD modis mean {} HY {} to {} thres{} {} no contour.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold,
+                                                                                    catchment),
     dpi=300)
-plt.contour(x_centres, y_centres,nztm_dem,np.arange(0,4000,200),colors='k', linewidths=0.5)
+
+plt.contour(x_centres, y_centres, nztm_dem, np.arange(0, 4000, 200), colors='k', linewidths=0.5)
+plt.contour(x_centres, y_centres, nztm_dem, np.arange(0, 4000, 1000), colors='k', linewidths=1)
+plt.title('(b) MODIS mean SCD',fontweight='bold',fontsize=10)
+
 for name in subsets.keys():
     plt.xlim(subsets[name]['xlim'])
     plt.ylim(subsets[name]['ylim'])
-    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 5e3))
-    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 5e3))
+    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1] + 1, 5e3))
+    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1] + 1, 5e3))
     plt.tight_layout()
     plt.savefig(
-        plot_folder + '/SCD modis mean {} HY {} to {} thres{} {}.png'.format(name,hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, catchment),
+        plot_folder + '/SCD modis mean {} HY {} to {} thres{} {}.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold,
+                                                                             catchment),
         dpi=300)
 
 fig1 = plt.figure(figsize=[4, 4])
@@ -353,9 +368,9 @@ cbar.set_label('Snow cover duration (days)', rotation=90)
 plt.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
 plt.ylabel('NZTM northing')
 plt.xlabel('NZTM easting')
-plt.title('Mean snow cover duration HY {} to {}'.format(hydro_years_to_take[0], hydro_years_to_take[-1]))
-plt.xlim((np.min(x_centres),np.max(x_centres)))
-plt.ylim((np.min(y_centres),np.max(y_centres)))
+plt.title('Model mean SCD HY {} to {}'.format(hydro_years_to_take[0], hydro_years_to_take[-1]))
+plt.xlim((np.min(x_centres), np.max(x_centres)))
+plt.ylim((np.min(y_centres), np.max(y_centres)))
 if catchment == 'SI':
     plt.xticks(np.arange(12e5, 17e5, 2e5))
     plt.yticks(np.arange(50e5, 55e5, 2e5))
@@ -368,39 +383,49 @@ plt.savefig(
                                                                                met_inp, which_model, catchment), dpi=300)
 
 name = 'Central-Nth-Island'
+plt.title('(b) Model mean SCD',fontweight='bold',fontsize=10)
+
 plt.xlim(subsets[name]['xlim'])
 plt.ylim(subsets[name]['ylim'])
 plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 100e3))
 plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 100e3))
 plt.tight_layout()
 plt.savefig(
-    plot_folder + '/SCD model mean {} HY {} to {} thres{} {} {} {} {} no contour.png'.format(name,hydro_years_to_take[0], hydro_years_to_take[-1], model_swe_sc_threshold,
-                                                                               run_id,
-                                                                               met_inp, which_model, catchment), dpi=300)
+    plot_folder + '/SCD model mean {} HY {} to {} thres{} {} {} {} {} no contour.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1],
+                                                                                             model_swe_sc_threshold,
+                                                                                             run_id,
+                                                                                             met_inp, which_model, catchment), dpi=300)
 
 name = 'South-Island'
+plt.title('(a) Model mean SCD',fontweight='bold',fontsize=10)
 plt.xlim(subsets[name]['xlim'])
 plt.ylim(subsets[name]['ylim'])
 plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1], 100e3))
 plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1], 100e3))
 plt.tight_layout()
 plt.savefig(
-    plot_folder + '/SCD model mean {} HY {} to {} thres{} {} {} {} {} no contour.png'.format(name,hydro_years_to_take[0], hydro_years_to_take[-1], model_swe_sc_threshold,
-                                                                               run_id,
-                                                                               met_inp, which_model, catchment), dpi=300)
+    plot_folder + '/SCD model mean {} HY {} to {} thres{} {} {} {} {} no contour.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1],
+                                                                                             model_swe_sc_threshold,
+                                                                                             run_id,
+                                                                                             met_inp, which_model, catchment), dpi=300)
 
-plt.contour(x_centres, y_centres,nztm_dem,np.arange(0,4000,200),colors='k', linewidths=0.5)
+plt.contour(x_centres, y_centres, nztm_dem, np.arange(0, 4000, 200), colors='k', linewidths=0.5)
+plt.contour(x_centres, y_centres, nztm_dem, np.arange(0, 4000, 1000), colors='k', linewidths=1)
+plt.title('(a) Model mean SCD',fontweight='bold',fontsize=10)
+
 for name in subsets.keys():
     plt.xlim(subsets[name]['xlim'])
     plt.ylim(subsets[name]['ylim'])
-    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1]+1, 5e3))
-    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1]+1, 5e3))
+    plt.xticks(np.arange(subsets[name]['xlim'][0], subsets[name]['xlim'][1] + 1, 5e3))
+    plt.yticks(np.arange(subsets[name]['ylim'][0], subsets[name]['ylim'][1] + 1, 5e3))
     plt.tight_layout()
     plt.savefig(
-        plot_folder + '/SCD model mean {} HY {} to {} thres{} {} {} {} {}.png'.format(name,hydro_years_to_take[0], hydro_years_to_take[-1], model_swe_sc_threshold,
-                                                                                   run_id,
-                                                                                   met_inp, which_model, catchment), dpi=300)
+        plot_folder + '/SCD model mean {} HY {} to {} thres{} {} {} {} {}.png'.format(name, hydro_years_to_take[0], hydro_years_to_take[-1],
+                                                                                      model_swe_sc_threshold,
+                                                                                      run_id,
+                                                                                      met_inp, which_model, catchment), dpi=300)
 
+# plot years separately
 for i, year_to_take in enumerate(hydro_years_to_take):
     fig1 = plt.figure(figsize=[4, 4])
     print('loading data for year {}'.format(year_to_take))
@@ -457,10 +482,18 @@ plt.xticks(h2d[1][:-1])
 plt.yticks(h2d[2][:-1])
 plt.ylabel('Elevation (m)')
 plt.xlabel('SCD (days)')
-plt.title('MODIS SCD by elevation')
+plt.title('(b) MODIS SCD by elevation',fontweight='bold',fontsize=10)
+mode_modis = np.argmax(h2d[0], axis=0)
+scd_x = h2d[1][:-1]
+mode_modis_scd = np.asarray([scd_x[m] for m in mode_modis])
+mode_modis_scd += 15
+# plt.scatter(mode_modis_scd,h2d[2][:-1]+100,18,'k')
+plt.scatter(mode_modis_scd, h2d[2][:-1] + 100, 18, 'k', label='mode (MODIS)')
+plt.legend(loc='upper left')
 plt.tight_layout()
 fig1.savefig(
-    plot_folder + '/hist elevation modis SCD HY{}to{} thres{} {}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold, run_id),
+    plot_folder + '/hist elevation modis SCD with mode HY{}to{} thres{} {}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold,
+                                                                                       run_id),
     dpi=300)
 
 # plot model scd vs elevation
@@ -472,12 +505,22 @@ plt.xticks(h2d[1][:-1])
 plt.yticks(h2d[2][:-1])
 plt.ylabel('Elevation (m)')
 plt.xlabel('SCD (days)')
-plt.title('Model SCD by elevation')
+plt.title('(a) Model SCD by elevation',fontweight='bold',fontsize=10)
+mode = np.argmax(h2d[0], axis=0)
+scd_x = h2d[1][:-1]
+mode_scd = np.asarray([scd_x[m] for m in mode])
+mode_scd += 15
+# plt.scatter(mode_modis_scd,h2d[2][:-1]+100,18,'k')
+# plt.scatter(mode_scd,h2d[2][:-1]+100,6,'r')
+plt.scatter(mode_scd, h2d[2][:-1] + 100, 18, 'b', label='mode (Model)')
+plt.scatter(mode_modis_scd, h2d[2][:-1] + 100,18, label='mode (MODIS)',facecolor='none',edgecolor='k')
+plt.legend(loc='upper left')
 plt.tight_layout()
-fig1.savefig(plot_folder + '/hist elevation model SCD HY {} to {} {}_{}_{}_{}_{}_swe_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1],
-                                                                                                         met_inp, which_model,
-                                                                                                         catchment, output_dem, run_id,
-                                                                                                         model_swe_sc_threshold), dpi=600)
+fig1.savefig(
+    plot_folder + '/hist elevation model SCD with mode HY {} to {} {}_{}_{}_{}_{}_swe_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1],
+                                                                                                          met_inp, which_model,
+                                                                                                          catchment, output_dem, run_id,
+                                                                                                          model_swe_sc_threshold), dpi=600)
 
 # plot histogram of bias vs elevation
 fig1 = plt.figure(figsize=[4, 4])
@@ -512,8 +555,9 @@ fig1.savefig(plot_folder + '/hist modis SCD model SCD bias HY {} to {} {}_{}_{}_
                                                                                                                           catchment, output_dem, run_id,
                                                                                                                           model_swe_sc_threshold,
                                                                                                                           modis_sc_threshold), dpi=600)
+
 h2d_modis_av = plt.hist2d(modis_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
-                 bins=(np.arange(0, 365 + 1, 10), np.arange(0, 3600 + 1, 500)), norm=LogNorm())
+                          bins=(np.arange(0, 365 + 1, 10), np.arange(0, 3600 + 1, 500)), norm=LogNorm())
 h2d_mod2 = plt.hist2d(model_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
                       bins=(np.arange(0, 365 + 1, 10), np.arange(0, 3600 + 1, 500)), norm=LogNorm())
 colors = plt.cm.tab10
@@ -521,18 +565,45 @@ fig, ax = plt.subplots(figsize=(4, 4))
 for i in np.arange(0, 5):
     ax.semilogy(h2d_mod2[1][1:] - 5, h2d_mod2[0][:, i] / 16, '-.',
                 color=colors(i / 10))  # , label='model cl {}-{} m'.format(h2d_mod2[2][i], h2d_mod2[2][i + 1]))
-    ax.semilogy(h2d_modis_av[1][1:] - 5, h2d_modis_av[0][:, i] / 16, '-', color=colors(i / 10), label='{}-{} m'.format(h2d_modis_av[2][i], h2d_modis_av[2][i + 1]))
+    ax.semilogy(h2d_modis_av[1][1:] - 5, h2d_modis_av[0][:, i] / 16, '-', color=colors(i / 10),
+                label='{}-{} m'.format(h2d_modis_av[2][i], h2d_modis_av[2][i + 1]))
 plt.legend()
 plt.ylim(bottom=10)
 plt.xticks(np.arange(0, 365, 30))
 plt.ylabel('Area  (km^2)')
 plt.xlabel('SCD')
 fig.savefig(plot_folder + '/hist modis vs model SCD HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}.png'.format(hydro_years_to_take[0],
-                                                                                                                    hydro_years_to_take[-1],
-                                                                                                                    met_inp, which_model,
-                                                                                                                    catchment, output_dem, run_id,
-                                                                                                                    model_swe_sc_threshold,
-                                                                                                                    modis_sc_threshold), dpi=600)
+                                                                                                                   hydro_years_to_take[-1],
+                                                                                                                   met_inp, which_model,
+                                                                                                                   catchment, output_dem, run_id,
+                                                                                                                   model_swe_sc_threshold,
+                                                                                                                   modis_sc_threshold), dpi=600)
+plt.figure()
+h2d_modis_av = plt.hist2d(modis_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
+                          bins=(np.arange(0, 365 + 1, 10), np.arange(1000, 3600 + 1, 500)), norm=LogNorm())
+h2d_mod2 = plt.hist2d(model_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
+                      bins=(np.arange(0, 365 + 1, 10), np.arange(1000, 3600 + 1, 500)), norm=LogNorm())
+colors = plt.cm.tab10
+fig, ax = plt.subplots(figsize=(4, 4))
+for i in np.arange(0, 3):
+    ax.plot(h2d_mod2[1][1:] - 5, h2d_mod2[0][:, i] / np.sum(h2d_mod2[0][:, i]), '--', color=colors(i / 10),
+            label='MODEL {}-{} m'.format(h2d_mod2[2][i], h2d_mod2[2][i + 1]))  # , label='model cl {}-{} m'.format(h2d_mod2[2][i], h2d_mod2[2][i + 1]))
+    ax.plot(h2d_modis_av[1][1:] - 5, h2d_modis_av[0][:, i] / np.sum(h2d_modis_av[0][:, i]), '-', color=colors(i / 10),
+            label='MODIS {}-{} m'.format(h2d_modis_av[2][i], h2d_modis_av[2][i + 1]))
+# plt.text(0,0.19,'(c)',fontsize=10,fontweight='bold')
+plt.legend()
+plt.xticks(np.arange(0, 365, 30))
+plt.ylabel('Fraction of points')
+plt.xlabel('SCD (days)')
+plt.title('(c) SCD in elevation bands',fontsize=10,fontweight='bold')
+plt.tight_layout()
+fig.savefig(plot_folder + '/hist modis vs model linear SCD HY {} to {} {}_{}_{}_{}_{}_swe_thres{}_sca_thres{}.png'.format(hydro_years_to_take[0],
+                                                                                                                   hydro_years_to_take[-1],
+                                                                                                                   met_inp, which_model,
+                                                                                                                   catchment, output_dem, run_id,
+                                                                                                                   model_swe_sc_threshold,
+                                                                                                                   modis_sc_threshold), dpi=600)
+
 #
 # h2d = plt.hist2d(modis_scd.ravel()[~np.isnan(plot_scd_bias.ravel())], nztm_dem.ravel()[~np.isnan(plot_scd_bias.ravel())],
 #                  bins=(np.arange(0, 365 + 1, 10), np.arange(0, 3600 + 1, 500)), norm=LogNorm())
