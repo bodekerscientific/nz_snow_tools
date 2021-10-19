@@ -10,13 +10,13 @@ from nz_snow_tools.util.utils import setup_nztm_dem, trim_data_to_mask, trim_lat
 
 #TODO # todos indicate which parameters need to change to switch between VCSN and NZCSM
 hydro_years_to_take = np.arange(2018, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ/august2021' #TODO
+plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/SI/oct2021_vcsn' #TODO
 # plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 # model_analysis_area = 145378  # sq km.
-catchment = 'NZ'  # string identifying catchment modelled #TODO
+catchment = 'SI'  # string identifying catchment modelled #TODO
 mask_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'
-modis_dem = 'modis_nz_dem_250m' #TODO
+modis_dem = 'modis_si_dem_250m' #TODO
 
 if modis_dem == 'modis_si_dem_250m':
 
@@ -52,13 +52,13 @@ modis_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow 
                                                                           modis_sc_threshold), 'rb'))
 # model options
 
-run_id = 'cl09_default_ros'  ## 'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' ##TODO
+run_id = 'cl09_default'  ## 'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' ##TODO
 which_model = 'clark2009'  #TODO
 # run_id = 'dsc_default'  #'dsc_mueller_TF2p4_tmelt278_ros'  #
 # which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'#
-met_inp = 'nzcsm7-12'  # 'vcsn_norton'#'nzcsm7-12'#vcsn_norton' #nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology #TODO
+met_inp = 'vcsn_norton'  # 'vcsn_norton'#'nzcsm7-12'#vcsn_norton' #nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology #TODO
 
-output_dem = 'nz_dem_250m' #TODO
+output_dem = 'si_dem_250m' #TODO
 model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)#TODO
 model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 # model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
