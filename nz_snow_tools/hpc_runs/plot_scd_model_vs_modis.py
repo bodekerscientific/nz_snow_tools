@@ -10,13 +10,13 @@ from nz_snow_tools.util.utils import setup_nztm_dem, trim_data_to_mask, trim_lat
 
 #TODO # todos indicate which parameters need to change to switch between VCSN and NZCSM
 hydro_years_to_take = np.arange(2018, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/SI/oct2021_vcsn' #TODO
+plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ/august2021' #TODO
 # plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 # model_analysis_area = 145378  # sq km.
-catchment = 'SI'  # string identifying catchment modelled #TODO
+catchment = 'NZ'  # string identifying catchment modelled #TODO
 mask_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'
-modis_dem = 'modis_si_dem_250m' #TODO
+modis_dem = 'modis_nz_dem_250m' #TODO
 
 if modis_dem == 'modis_si_dem_250m':
 
@@ -52,13 +52,13 @@ modis_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow 
                                                                           modis_sc_threshold), 'rb'))
 # model options
 
-run_id = 'cl09_default'  ## 'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' ##TODO
+run_id = 'cl09_default_ros'  ## 'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' ##TODO
 which_model = 'clark2009'  #TODO
 # run_id = 'dsc_default'  #'dsc_mueller_TF2p4_tmelt278_ros'  #
 # which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'#
-met_inp = 'vcsn_norton'  # 'vcsn_norton'#'nzcsm7-12'#vcsn_norton' #nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology #TODO
+met_inp = 'nzcsm7-12'  # 'vcsn_norton'#'nzcsm7-12'#vcsn_norton' #nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology #TODO
 
-output_dem = 'si_dem_250m' #TODO
+output_dem = 'nz_dem_250m' #TODO
 model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)#TODO
 model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 # model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
@@ -77,6 +77,14 @@ modis_scd = np.nanmean(ann_scd_m, axis=0)
 model_scd = np.nanmean(ann_scd, axis=0)
 
 plot_scd_bias = model_scd - modis_scd
+
+print('mean MODIS {:0.2f}'.format(np.nanmean(modis_scd)))
+print('mean model {:0.2f}'.format(np.nanmean(model_scd)))
+print('mean bias {:0.2f}'.format(np.nanmean(plot_scd_bias)))
+print('mean absolute error {:0.2f}'.format(np.nanmean(np.abs(plot_scd_bias))))
+
+
+
 
 # perm_snow = np.load('C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow/MODIS/modis_permanent_snow_2010_2016.npy')
 #
@@ -170,6 +178,56 @@ plt.rcParams.update({'axes.titlesize': 6})
 # plt.xlabel('Elevation (m)')
 # plt.tight_layout()
 # plt.savefig(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2101\snow reanalysis\snowline elevation with northing.png',dpi=300)
+
+
+fig1 = plt.figure(figsize=[4, 4])
+h2d = plt.hist2d(modis_scd.ravel()[~np.isnan(modis_scd.ravel())], nztm_dem.ravel()[~np.isnan(modis_scd.ravel())],
+                 bins=(np.arange(0, 420, 30), np.arange(0, 4000, 200)), norm=LogNorm())
+plt.colorbar()
+plt.xticks(h2d[1][:-1])
+plt.yticks(h2d[2][:-1])
+plt.ylabel('Elevation (m)')
+plt.xlabel('SCD (days)')
+plt.title('(b) MODIS SCD by elevation',fontweight='bold',fontsize=10)
+mode_modis = np.argmax(h2d[0], axis=0)
+scd_x = h2d[1][:-1]
+mode_modis_scd = np.asarray([scd_x[m] for m in mode_modis])
+mode_modis_scd += 15
+# plt.scatter(mode_modis_scd,h2d[2][:-1]+100,18,'k')
+plt.scatter(mode_modis_scd, h2d[2][:-1] + 100, 18, 'k', label='mode (MODIS)')
+plt.legend(loc='upper left')
+plt.tight_layout()
+fig1.savefig(
+    plot_folder + '/hist elevation modis SCD with mode HY{}to{} thres{} {}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], modis_sc_threshold,
+                                                                                       run_id),
+    dpi=300)
+
+# plot model scd vs elevation
+fig1 = plt.figure(figsize=[4, 4])
+h2d = plt.hist2d(model_scd.ravel()[~np.isnan(model_scd.ravel())], nztm_dem.ravel()[~np.isnan(model_scd.ravel())],
+                 bins=(np.arange(0, 420, 30), np.arange(0, 4000, 200)), norm=LogNorm())
+plt.colorbar()
+plt.xticks(h2d[1][:-1])
+plt.yticks(h2d[2][:-1])
+plt.ylabel('Elevation (m)')
+plt.xlabel('SCD (days)')
+plt.title('(a) Model SCD by elevation',fontweight='bold',fontsize=10)
+mode = np.argmax(h2d[0], axis=0)
+scd_x = h2d[1][:-1]
+mode_scd = np.asarray([scd_x[m] for m in mode])
+mode_scd += 15
+# plt.scatter(mode_modis_scd,h2d[2][:-1]+100,18,'k')
+# plt.scatter(mode_scd,h2d[2][:-1]+100,6,'r')
+plt.scatter(mode_scd, h2d[2][:-1] + 100, 18, 'b', label='mode (Model)')
+plt.scatter(mode_modis_scd, h2d[2][:-1] + 100,18, label='mode (MODIS)',facecolor='none',edgecolor='k')
+plt.legend(loc='upper left')
+plt.tight_layout()
+fig1.savefig(
+    plot_folder + '/hist elevation model SCD with mode HY {} to {} {}_{}_{}_{}_{}_swe_thres{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1],
+                                                                                                          met_inp, which_model,
+                                                                                                          catchment, output_dem, run_id,
+                                                                                                          model_swe_sc_threshold), dpi=600)
+
 
 
 model_swe = np.nanmean(ann_av_swe, axis=0)
