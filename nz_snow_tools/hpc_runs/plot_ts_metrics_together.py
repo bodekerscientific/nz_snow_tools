@@ -73,12 +73,12 @@ def mod_streamq_ens_percentiles_1(mod_streamq, p):
 if __name__ == '__main__':
 
     hydro_years_to_take = np.arange(2018,2020+1)  # [2013 + 1]  # range(2001, 2013 + 1)
-    plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/SI/ts_plots'
+    plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ/ts_plots'
     # model_analysis_area = 145378  # sq km.
-    catchment = 'SI'  # string identifying catchment modelled
+    catchment = 'NZ'  # string identifying catchment modelled
     smooth_period = 11
     # # modis options
-    output_dem = 'si_dem_250m'  # identifier for output dem
+    output_dem = 'modis_nz_dem_250m'  # identifier for output dem
     modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
     modis_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 
@@ -89,12 +89,12 @@ if __name__ == '__main__':
 
     # run_id = 'cl09_default' #
     # which_model ='clark2009' #
-    run_id = 'cl09_default'#'dsc_default'  #
+    run_id = 'cl09_default_ros'#'dsc_default'  #
     which_model = 'clark2009'# 'dsc_snow'  #
     met_inp = 'nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology
 
-    output_dem = 'si_dem_250m'
-    model_swe_sc_threshold = 5#30  # threshold for treating a grid cell as snow covered (mm w.e)
+    output_dem = 'nz_dem_250m'
+    model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered (mm w.e)
     model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 
     [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
@@ -133,44 +133,44 @@ if __name__ == '__main__':
         sca_model_ts_30nzcsm[i, :] = ann_ts_av_sca_thres[i][:365] * model_analysis_area
         swe_model_ts_30nzcsm[i, :] = ann_ts_av_swe[i][:365] / 1e6 * model_analysis_area  # convert to km^3 from mm w.e. and km^2
 
-    #load run 3
-    met_inp = 'vcsn_norton' #   # identifier for input meteorology
-    model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered (mm w.e)
-    [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
-        model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
-                                                                                       catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
-    model_analysis_area = ann_metadata['area_domain']
-    # np.sum(~np.isnan(ann_scd[0]))/16 = 145378
-    n_years = len(hydro_years_to_take)
-    sca_model_ts_5vcsn = np.full((n_years, 365), np.nan)
-    swe_model_ts_5vcsn = np.full((n_years, 365), np.nan)
-    for i in np.arange(n_years):
-        sca_model_ts_5vcsn[i, :] = ann_ts_av_sca_thres[i][:365] * model_analysis_area
-        swe_model_ts_5vcsn[i, :] = ann_ts_av_swe[i][:365] / 1e6 * model_analysis_area  # convert to km^3 from mm w.e. and km^2
-
-    #load run 4
-    met_inp = 'vcsn_norton' #   # identifier for input meteorology
-    model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)
-    [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
-        model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
-                                                                                       catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
-    model_analysis_area = ann_metadata['area_domain']
-    # np.sum(~np.isnan(ann_scd[0]))/16 = 145378
-    n_years = len(hydro_years_to_take)
-    sca_model_ts_30vcsn = np.full((n_years, 365), np.nan)
-    swe_model_ts_30vcsn = np.full((n_years, 365), np.nan)
-    for i in np.arange(n_years):
-        sca_model_ts_30vcsn[i, :] = ann_ts_av_sca_thres[i][:365] * model_analysis_area
-        swe_model_ts_30vcsn[i, :] = ann_ts_av_swe[i][:365] / 1e6 * model_analysis_area  # convert to km^3 from mm w.e. and km^2
-
+    # #load run 3
+    # met_inp = 'vcsn_norton' #   # identifier for input meteorology
+    # model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered (mm w.e)
+    # [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
+    #     model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
+    #                                                                                    catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
+    # model_analysis_area = ann_metadata['area_domain']
+    # # np.sum(~np.isnan(ann_scd[0]))/16 = 145378
+    # n_years = len(hydro_years_to_take)
+    # sca_model_ts_5vcsn = np.full((n_years, 365), np.nan)
+    # swe_model_ts_5vcsn = np.full((n_years, 365), np.nan)
+    # for i in np.arange(n_years):
+    #     sca_model_ts_5vcsn[i, :] = ann_ts_av_sca_thres[i][:365] * model_analysis_area
+    #     swe_model_ts_5vcsn[i, :] = ann_ts_av_swe[i][:365] / 1e6 * model_analysis_area  # convert to km^3 from mm w.e. and km^2
+    #
+    # #load run 4
+    # met_inp = 'vcsn_norton' #   # identifier for input meteorology
+    # model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)
+    # [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
+    #     model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
+    #                                                                                    catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
+    # model_analysis_area = ann_metadata['area_domain']
+    # # np.sum(~np.isnan(ann_scd[0]))/16 = 145378
+    # n_years = len(hydro_years_to_take)
+    # sca_model_ts_30vcsn = np.full((n_years, 365), np.nan)
+    # swe_model_ts_30vcsn = np.full((n_years, 365), np.nan)
+    # for i in np.arange(n_years):
+    #     sca_model_ts_30vcsn[i, :] = ann_ts_av_sca_thres[i][:365] * model_analysis_area
+    #     swe_model_ts_30vcsn[i, :] = ann_ts_av_swe[i][:365] / 1e6 * model_analysis_area  # convert to km^3 from mm w.e. and km^2
+    #
 
 
 ####### smooth####
     sca_modis_ts = smooth(sca_modis_ts,smooth_period=smooth_period)
     sca_model_ts_5nzcsm = smooth(sca_model_ts_5nzcsm,smooth_period=smooth_period)
     sca_model_ts_30nzcsm = smooth(sca_model_ts_30nzcsm,smooth_period=smooth_period)
-    sca_model_ts_5vcsn = smooth(sca_model_ts_5vcsn,smooth_period=smooth_period)
-    sca_model_ts_30vcsn = smooth(sca_model_ts_30vcsn,smooth_period=smooth_period)
+    # sca_model_ts_5vcsn = smooth(sca_model_ts_5vcsn,smooth_period=smooth_period)
+    # sca_model_ts_30vcsn = smooth(sca_model_ts_30vcsn,smooth_period=smooth_period)
 ############## start plotting ############
 
     plt.rcParams.update({'font.size': 8})
@@ -215,51 +215,51 @@ if __name__ == '__main__':
     ax.fmt_xdata = mdates.DateFormatter('%d-%b')  # to set pointer display
     ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4,5,6,7,8,9,10,11,12,1,2,3,4])) # tick every 2 months
     plt.tight_layout()
-    plt.savefig(plot_folder + '/SCA nzcsm both 5 and 30 {}_{}_{}_{}_smoothed{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
+    plt.savefig(plot_folder + '/SCA nzcsm both 5 and 30 {}_{}_{}_{}_{}_smoothed{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,run_id,
                                                                                 smooth_period), dpi=600)
-
-    #VCSN plot
-    fig,[ax1,ax2] = plt.subplots(nrows=1,ncols=2,figsize = [10,4])
-    plt.sca(ax1)
-    for i, t in enumerate(sca_modis_ts):
-        plt.plot(plot_dt, t, style[i], color='k',
-             label='MODIS {}-{}'.format(hydro_years_to_take[i] - 1, hydro_years_to_take[i] - 2000))
-    for i, t in enumerate(sca_model_ts_30vcsn):
-        plt.plot(plot_dt, t, style[i], color='b',
-             label='MODEL {}-{}'.format(hydro_years_to_take[i] - 1, hydro_years_to_take[i] - 2000))
-    plt.legend()
-    ax = plt.gca()
-    ax.set_ylabel('Snow Covered Area (square km)')
-    ax.set_ylim([0, 6.4e4])
-    # plt.grid(True)
-    ax.set_xlabel('Month')
-    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4, 6, 8, 10, 12, 2, 4]))  # tick every 2 months
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))  # to set tick format
-    ax.fmt_xdata = mdates.DateFormatter('%d-%b')  # to set pointer display
-    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4,5,6,7,8,9,10,11,12,1,2,3,4])) # tick every 2 months
-    plt.title('(a) Model threshold 30 mm w.e.',fontweight='bold',fontsize=10)
-    plt.sca(ax2)
-    for i, t in enumerate(sca_modis_ts):
-        plt.plot(plot_dt, t, style[i], color='k',
-             label='MODIS {}-{}'.format(hydro_years_to_take[i] - 1, hydro_years_to_take[i] - 2000))
-    for i, t in enumerate(sca_model_ts_5vcsn):
-        plt.plot(plot_dt, t, style[i], color='b',
-             label='MODEL {}-{}'.format(hydro_years_to_take[i] - 1, hydro_years_to_take[i] - 2000))
-    plt.title('(b) Model threshold 5 mm w.e', fontweight='bold',fontsize=10)
-    plt.legend()
-    ax = plt.gca()
-    ax.set_ylabel('Snow Covered Area (square km)')
-    ax.set_ylim([0, 6.4e4])
-    # plt.grid(True)
-    ax.set_xlabel('Month')
-    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4, 6, 8, 10, 12, 2, 4]))  # tick every 2 months
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))  # to set tick format
-    ax.fmt_xdata = mdates.DateFormatter('%d-%b')  # to set pointer display
-    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4,5,6,7,8,9,10,11,12,1,2,3,4])) # tick every 2 months
-    plt.tight_layout()
-    plt.savefig(plot_folder + '/SCA vcsn both 5 and 30 {}_{}_{}_{}_smoothed{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
-                                                                                smooth_period), dpi=600)
-
+    #
+    # #VCSN plot
+    # fig,[ax1,ax2] = plt.subplots(nrows=1,ncols=2,figsize = [10,4])
+    # plt.sca(ax1)
+    # for i, t in enumerate(sca_modis_ts):
+    #     plt.plot(plot_dt, t, style[i], color='k',
+    #          label='MODIS {}-{}'.format(hydro_years_to_take[i] - 1, hydro_years_to_take[i] - 2000))
+    # for i, t in enumerate(sca_model_ts_30vcsn):
+    #     plt.plot(plot_dt, t, style[i], color='b',
+    #          label='MODEL {}-{}'.format(hydro_years_to_take[i] - 1, hydro_years_to_take[i] - 2000))
+    # plt.legend()
+    # ax = plt.gca()
+    # ax.set_ylabel('Snow Covered Area (square km)')
+    # ax.set_ylim([0, 6.4e4])
+    # # plt.grid(True)
+    # ax.set_xlabel('Month')
+    # ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4, 6, 8, 10, 12, 2, 4]))  # tick every 2 months
+    # ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))  # to set tick format
+    # ax.fmt_xdata = mdates.DateFormatter('%d-%b')  # to set pointer display
+    # ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4,5,6,7,8,9,10,11,12,1,2,3,4])) # tick every 2 months
+    # plt.title('(a) Model threshold 30 mm w.e.',fontweight='bold',fontsize=10)
+    # plt.sca(ax2)
+    # for i, t in enumerate(sca_modis_ts):
+    #     plt.plot(plot_dt, t, style[i], color='k',
+    #          label='MODIS {}-{}'.format(hydro_years_to_take[i] - 1, hydro_years_to_take[i] - 2000))
+    # for i, t in enumerate(sca_model_ts_5vcsn):
+    #     plt.plot(plot_dt, t, style[i], color='b',
+    #          label='MODEL {}-{}'.format(hydro_years_to_take[i] - 1, hydro_years_to_take[i] - 2000))
+    # plt.title('(b) Model threshold 5 mm w.e', fontweight='bold',fontsize=10)
+    # plt.legend()
+    # ax = plt.gca()
+    # ax.set_ylabel('Snow Covered Area (square km)')
+    # ax.set_ylim([0, 6.4e4])
+    # # plt.grid(True)
+    # ax.set_xlabel('Month')
+    # ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4, 6, 8, 10, 12, 2, 4]))  # tick every 2 months
+    # ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))  # to set tick format
+    # ax.fmt_xdata = mdates.DateFormatter('%d-%b')  # to set pointer display
+    # ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4,5,6,7,8,9,10,11,12,1,2,3,4])) # tick every 2 months
+    # plt.tight_layout()
+    # plt.savefig(plot_folder + '/SCA vcsn both 5 and 30 {}_{}_{}_{}_smoothed{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
+    #                                                                             smooth_period), dpi=600)
+    #
 
     plt.figure(figsize = [5,4])
     for i, t in enumerate(swe_model_ts_30nzcsm):
@@ -268,7 +268,7 @@ if __name__ == '__main__':
     plt.legend()
     ax = plt.gca()
     ax.set_ylabel('Snow water storage (cubic km)')
-    ax.set_ylim(bottom=0)
+    ax.set_ylim(bottom=0,top=15.5)
     # plt.grid(True)
     ax.set_xlabel('Month')
     ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4, 6, 8, 10, 12, 2, 4]))  # tick every 2 months
@@ -277,26 +277,26 @@ if __name__ == '__main__':
     ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4,5,6,7,8,9,10,11,12,1,2,3,4])) # tick every 2 months
     plt.tight_layout()
     plt.grid()
-    plt.savefig(plot_folder + '/SWE nzcsm {}_{}_{}_{}_smoothed{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
+    plt.savefig(plot_folder + '/SWE nzcsm {}_{}_{}_{}_{}_smoothed{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,run_id,
                                                                                 smooth_period), dpi=600)
 
 
-
-    plt.figure(figsize = [5,4])
-    for i, t in enumerate(swe_model_ts_30vcsn):
-        plt.plot(plot_dt, t, style[i], color='b',
-             label='{}-{}'.format(hydro_years_to_take[i] - 1, hydro_years_to_take[i] - 2000))
-    plt.legend()
-    ax = plt.gca()
-    ax.set_ylabel('Snow water storage (cubic km)')
-    ax.set_ylim(bottom=0)
-    # plt.grid(True)
-    ax.set_xlabel('Month')
-    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4, 6, 8, 10, 12, 2, 4]))  # tick every 2 months
-    ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))  # to set tick format
-    ax.fmt_xdata = mdates.DateFormatter('%d-%b')  # to set pointer display
-    ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4,5,6,7,8,9,10,11,12,1,2,3,4])) # tick every 2 months
-    plt.tight_layout()
-    plt.grid()
-    plt.savefig(plot_folder + '/SWE vcsn {}_{}_{}_{}_smoothed{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
-                                                                                smooth_period), dpi=600)
+    #
+    # plt.figure(figsize = [5,4])
+    # for i, t in enumerate(swe_model_ts_30vcsn):
+    #     plt.plot(plot_dt, t, style[i], color='b',
+    #          label='{}-{}'.format(hydro_years_to_take[i] - 1, hydro_years_to_take[i] - 2000))
+    # plt.legend()
+    # ax = plt.gca()
+    # ax.set_ylabel('Snow water storage (cubic km)')
+    # ax.set_ylim(bottom=0)
+    # # plt.grid(True)
+    # ax.set_xlabel('Month')
+    # ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4, 6, 8, 10, 12, 2, 4]))  # tick every 2 months
+    # ax.xaxis.set_major_formatter(mdates.DateFormatter('%b'))  # to set tick format
+    # ax.fmt_xdata = mdates.DateFormatter('%d-%b')  # to set pointer display
+    # ax.xaxis.set_major_locator(mdates.MonthLocator(bymonth=[4,5,6,7,8,9,10,11,12,1,2,3,4])) # tick every 2 months
+    # plt.tight_layout()
+    # plt.grid()
+    # plt.savefig(plot_folder + '/SWE vcsn {}_{}_{}_{}_smoothed{}.png'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, output_dem,
+    #                                                                             smooth_period), dpi=600)
