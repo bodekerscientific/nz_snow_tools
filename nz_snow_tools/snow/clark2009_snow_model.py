@@ -24,10 +24,49 @@ def calc_melt_Clark2009(ta, precip, d_snow, doy, acc, tmelt=274.16, **config):
 
     # determine melt factor
     mf = calc_melt_factor_Clark2009(doy, d_snow, precip, acc,
-                                    **config)  # mf_mean=config['mf_mean'], mf_amp=config['mf_amp'], mf_alb=config['mf_alb'],                                    mf_alb_decay=config['mf_alb_decay'], mf_ros=config['mf_ros']
+                                    **config)  # mf_mean=config['mf_mean'], mf_amp=config['mf_amp'], mf_alb=config['mf_alb'], mf_alb_decay=config['mf_alb_decay'], mf_ros=config['mf_ros']
     melt_rate = mf * (ta - tmelt)
     melt_rate[(ta < tmelt)] = 0
     return melt_rate
+
+
+def topnet_seas_amp(doy, mf_amp, mf_doy_max_ddf, mf_doy_min_ddf):
+    """
+    compute seasonal varying melt factor as per topnet implementation - add minimum melt date
+    :param doy:
+    :param mf_amp:
+    :param mf_doy_max_ddf:
+    :param mf_doy_min_ddf:
+    :return:
+    """
+    # maximum days per year (used for seasonal snow melt contribution)
+    m_dpy = 366.0
+    # julian days (1 to 366) of minimum/maximum seasonal snow melt
+    dmax = max([mf_doy_max_ddf, mf_doy_min_ddf])
+    dmin = min([mf_doy_max_ddf, mf_doy_min_ddf])
+    # set the sgn variable used for seasonal melt
+    if mf_doy_min_ddf <= mf_doy_max_ddf:
+        sgn = +1.
+    else:
+        sgn = -1.
+
+    # compute the seasonally varying melt factor for the current time of the year (m/K/s)
+    ajday = doy
+    if ajday < dmin:
+        phi = m_dpy * 3.0 / 2.0 - dmax * 3.0 / 2.0 + dmin / 2.0
+        k = m_dpy / 2.0 / (m_dpy - dmax + dmin)
+    elif ajday > dmax:
+        phi = m_dpy / 2.0 - dmax * 3.0 / 2.0 + dmin / 2.0
+        k = m_dpy / 2.0 / (m_dpy - dmax + dmin)
+    else:
+        phi = -dmax * 3.0 / 2.0 + dmin / 2.0
+        k = -m_dpy / 2.0 / (dmax - dmin)
+
+    psday = ajday + phi  # phase shift julian day
+    sin_wave = sgn * np.sin(k * psday / m_dpy * 2.0 * np.pi)
+    ampmelt = sin_wave * mf_amp
+
+    return ampmelt
 
 
 def calc_melt_factor_Clark2009(doy, d_snow, precip, acc, mf_mean=5.0, mf_amp=5.0, mf_alb=2.5, mf_alb_decay=5.0,
@@ -48,7 +87,11 @@ def calc_melt_factor_Clark2009(doy, d_snow, precip, acc, mf_mean=5.0, mf_amp=5.0
     """
 
     # compute change in melt factor due to season
-    dmf_seas = mf_amp * np.sin(2 * np.pi * (doy - mf_doy_max_ddf + 91.5) / 366)
+    if np.nonzero(config['mf_doy_min_ddf']):
+        mf_doy_min_ddf = config['mf_doy_min_ddf'] # config['mf_doy_min_ddf']
+        dmf_seas = topnet_seas_amp(doy, mf_amp, mf_doy_max_ddf, mf_doy_min_ddf)
+    else:
+        dmf_seas = mf_amp * np.sin(2 * np.pi * (doy - mf_doy_max_ddf + 91.5) / 366)
 
     # compute change in melt factor due to increased albedo after snowfall
     dmf_alb = - mf_alb * np.exp(- d_snow / mf_alb_decay)
@@ -147,7 +190,6 @@ def calc_dswe(swe, d_snow, ta, precip, doy, dtstep, sw=None, which_melt='clark20
     melt = melt_rate * dtstep / 86400.0
     melt[(melt >= swe)] = swe[(melt >= swe)]  # limit melt to total swe
     swe = swe - melt
-
 
     return swe, d_snow, melt, acc
 
