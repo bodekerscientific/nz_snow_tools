@@ -15,7 +15,6 @@ import matplotlib.dates as mdates
 outfolder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/clark_output'
 # ros = True
 # ta_m_tt = False
-
 # load input data for mueller hut
 infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/SIN_density_SIP/input_met/mueller_hut_met_20170501_20200401_with_hs_swe_rain_withcloud_precip_harder.pkl'
 aws_df = pkl.load(open(infile, 'rb'))
@@ -31,9 +30,6 @@ grid_id = np.arange(grid_size)
 inp_ta = aws_df.tc[start_t:end_t][:, np.newaxis] * np.ones(grid_size) + 273.16  # 2 metre air temp in C
 inp_precip = aws_df.precip[start_t:end_t][:, np.newaxis] * np.ones(grid_size)  # precip in mm
 inp_sw = aws_df.srad[start_t:end_t][:, np.newaxis] * np.ones(grid_size)
-
-# validation data
-obs_swe = aws_df.swe[start_t:end_t] * 1000  # measured swe - convert to mm w.e.
 
 # set up
 init_swe = np.ones(inp_ta.shape[1:]) * 0  # give initial value of swe
@@ -60,8 +56,8 @@ config['tacc'] = 274.16
 
 # use measured albedo
 # tacc_list = np.linspace(-1,3,5) + 273.16
-tmelt_list = np.linspace(-5, 6, 23) + 273.16
-tf_list = np.linspace(1, 10, 19)
+tmelt_list = np.linspace(-5, 6, 4) + 273.16 #23
+tf_list = np.linspace(1, 10, 5)
 
 # clark2009 melt parameters
 config['mf_mean'] = 5.0
@@ -75,97 +71,29 @@ config['mf_doy_min_ddf'] = 210
 
 # rf_list = np.linspace(0,100e-4,11)
 
-ns_array = np.zeros((len(tf_list), len(tmelt_list)))
-mbd_array = np.zeros((len(tf_list), len(tmelt_list)))
-rmsd_array = np.zeros((len(tf_list), len(tmelt_list)))
-h_ns_array = np.zeros((len(tf_list), len(tmelt_list)))
-h_mbd_array = np.zeros((len(tf_list), len(tmelt_list)))
-h_rmsd_array = np.zeros((len(tf_list), len(tmelt_list)))
-
 # for tmelt in tmelt_list:
 #     config['tmelt'] = tmelt
 # loop to call range of parameters
+stor_dict = {}
+ii = 0
 for i, tf in enumerate(tf_list):
     for j, tt in enumerate(tmelt_list):
+        stor_dict[ii] = {}
         config['mf_mean'] = tf
         config['tmelt'] = tt
         # call main function once hourly/sub-hourly temp and precip data available.
         st_swe, st_melt, st_acc, st_alb = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=3600, init_swe=init_swe,
                                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='clark2009', **config)
-        #TODO save output and config to dictionary similar to FSM2 collated output
-        # stor_dict[outname]['states_output'] = hourly timeseries
-        # stor_dict[outname]['namelist'] = nml
+        stor_dict[ii]['st_swe'] = st_swe
+        stor_dict[ii]['st_melt'] = st_melt
+        stor_dict[ii]['st_acc'] = st_acc
+        stor_dict[ii]['st_alb'] = st_alb
+        stor_dict[ii]['config'] = config
 
-        # compute daily melt
-        daily_swe3 = []
-        obs_swe_daily = []
-        for k in range(47, len(st_swe[:, 0]), 48):
-            daily_swe3.append(st_swe[k, 0])
-            obs_swe_daily.append(obs_swe[k])
+        ii += 1
+        print(ii)
+print()
 
-        # compute validation metrics
-        mb_sim = -1 * np.diff(np.asarray(daily_swe3))
-        dSWE_daily_obs = -1 * np.diff(np.asarray(obs_swe_daily))
-        ns_array[i, j] = nash_sut(mb_sim, dSWE_daily_obs)
-        mbd_array[i, j] = mean_bias(mb_sim, dSWE_daily_obs)
-        rmsd_array[i, j] = rmsd(mb_sim, dSWE_daily_obs)
+pkl.dump(stor_dict, open(outfolder + '/clark_test_output.pkl','wb'),-1)
 
-        h_ns_array[i, j] = nash_sut(st_swe[1:, 0], obs_swe)
-        h_mbd_array[i, j] = mean_bias(st_swe[1:, 0], obs_swe)
-        h_rmsd_array[i, j] = rmsd(st_swe[1:, 0], obs_swe)
 
-np.savetxt(outfolder + '/daily_sfc_ns_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'], config['ta_m_tt']), ns_array)
-np.savetxt(outfolder + '/daily_sfc_mbd_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'], config['ta_m_tt']), mbd_array)
-np.savetxt(outfolder + '/daily_sfc_rmsd_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'], config['ta_m_tt']), rmsd_array)
-np.savetxt(outfolder + '/hourly_sfc_ns_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'], config['ta_m_tt']), h_ns_array)
-np.savetxt(outfolder + '/hourly_sfc_mbd_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'], config['ta_m_tt']), h_mbd_array)
-np.savetxt(outfolder + '/hourly_sfc_rmsd_2010_TF_TT_ROS{}_ta_m_tt{}.txt'.format(config['ros'], config['ta_m_tt']), h_rmsd_array)
-
-plt.figure(figsize=[8, 12])
-
-plt.subplot(4, 3, 1)
-CS = plt.contour(tmelt_list, tf_list, ns_array, levels=np.linspace(-1, 1, 21), cmap=plt.cm.winter, vmax=1, vmin=-1)
-plt.clabel(CS, inline=1, fontsize=10)
-plt.ylabel('TF (mm w.e. per hour)'), plt.xlabel('T melt threshold (C)')
-plt.title('NS daily 2010')
-
-plt.subplot(4, 3, 2)
-CS = plt.contour(tmelt_list, tf_list, mbd_array, levels=np.linspace(-20, 20, 21), cmap=plt.cm.copper, vmax=20, vmin=-20)
-plt.clabel(CS, inline=1, fontsize=10)
-plt.ylabel('TF (mm w.e. per hour)'), plt.xlabel('T melt threshold (C)')
-plt.title('MBD daily 2010')
-
-plt.subplot(4, 3, 3)
-CS = plt.contour(tmelt_list, tf_list, rmsd_array, levels=np.linspace(10, 30, 21), cmap=plt.cm.winter_r, vmax=30, vmin=10)
-plt.clabel(CS, inline=1, fontsize=10)
-plt.ylabel('TF (mm w.e. per hour)'), plt.xlabel('T melt threshold (C)')
-plt.title('RMSD daily 2010')
-
-plt.tight_layout()
-# plt.savefig(outfolder + '/daily_sfc_fit_metrics2010_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
-
-# plt.close()
-# plt.figure(figsize=[8,3])
-
-plt.subplot(4, 3, 7)
-CS = plt.contour(tmelt_list, tf_list, h_ns_array, levels=np.linspace(-1, 1, 21), cmap=plt.cm.winter, vmax=1, vmin=-1)
-plt.clabel(CS, inline=1, fontsize=10)
-plt.title('NS hourly 2010')
-plt.ylabel('TF (mm w.e. per hour)'), plt.xlabel('T melt threshold (C)')
-plt.tight_layout()
-
-plt.subplot(4, 3, 8)
-CS = plt.contour(tmelt_list, tf_list, h_mbd_array, levels=np.linspace(-0.4, 0.4, 17), cmap=plt.cm.copper, vmax=0.4, vmin=-0.4)
-plt.clabel(CS, inline=1, fontsize=10)
-plt.ylabel('TF (mm w.e. per hour)'), plt.xlabel('T melt threshold (C)')
-plt.title('MBD hourly 2010')
-
-plt.subplot(4, 3, 9)
-CS = plt.contour(tmelt_list, tf_list, h_rmsd_array, levels=np.linspace(0.2, 1, 17), cmap=plt.cm.winter_r, vmax=1, vmin=0.2)
-plt.clabel(CS, inline=1, fontsize=10)
-plt.ylabel('TF (mm w.e. per hour)'), plt.xlabel('T melt threshold (C)')
-plt.title('RMSD hourly 2010')
-plt.tight_layout()
-# plt.tight_layout()
-# plt.savefig(outfolder + '/hourly_SEB_fit_metrics2010_TF_TT_ROS{}_ta_m_tt{}.png'.format(config['ros'],config['ta_m_tt']))
-# plt.close()
