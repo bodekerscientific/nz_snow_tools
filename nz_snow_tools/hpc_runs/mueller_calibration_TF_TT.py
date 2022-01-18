@@ -6,6 +6,7 @@ modified to
 
 import numpy as np
 import pickle as pkl
+import pandas as pd
 from nz_snow_tools.snow.clark2009_snow_model import snow_main_simple
 from nz_snow_tools.util.utils import make_regular_timeseries, nash_sut, mean_bias, rmsd
 import matplotlib.pylab as plt
@@ -18,9 +19,9 @@ outfolder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ense
 # load input data for mueller hut
 infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/SIN_density_SIP/input_met/mueller_hut_met_20170501_20200401_with_hs_swe_rain_withcloud_precip_harder.pkl'
 aws_df = pkl.load(open(infile, 'rb'))
-start_t = 1
-end_t = -1
-inp_dt = [i.to_pydatetime() for i in aws_df.index[start_t:end_t]]
+start_t = 1 # drop first timestamp as model uses initial value
+end_t = None # take the end point.
+inp_dt = [i.to_pydatetime() for i in aws_df.index[start_t-1:end_t]]
 inp_doy = [i.dayofyear for i in aws_df.index[start_t:end_t]]
 inp_hourdec = [i.hour for i in aws_df.index[start_t:end_t]]
 
@@ -56,8 +57,8 @@ config['tacc'] = 274.16
 
 # use measured albedo
 # tacc_list = np.linspace(-1,3,5) + 273.16
-tmelt_list = np.linspace(-5, 6, 4) + 273.16 #23
-tf_list = np.linspace(1, 10, 5)
+tmelt_list = np.linspace(-3, 6, 10) + 273.16 #23
+tf_list = np.linspace(1, 10, 10)
 
 # clark2009 melt parameters
 config['mf_mean'] = 5.0
@@ -74,7 +75,9 @@ config['mf_doy_min_ddf'] = 210
 # for tmelt in tmelt_list:
 #     config['tmelt'] = tmelt
 # loop to call range of parameters
+
 stor_dict = {}
+
 ii = 0
 for i, tf in enumerate(tf_list):
     for j, tt in enumerate(tmelt_list):
@@ -84,16 +87,28 @@ for i, tf in enumerate(tf_list):
         # call main function once hourly/sub-hourly temp and precip data available.
         st_swe, st_melt, st_acc, st_alb = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=3600, init_swe=init_swe,
                                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='clark2009', **config)
-        stor_dict[ii]['st_swe'] = st_swe
-        stor_dict[ii]['st_melt'] = st_melt
-        stor_dict[ii]['st_acc'] = st_acc
-        stor_dict[ii]['st_alb'] = st_alb
-        stor_dict[ii]['config'] = config
+
+        run_dict = {
+            'timestamp': inp_dt,
+            'swe': np.squeeze(st_swe),
+            'melt': np.squeeze(st_melt),
+            'acc': np.squeeze(st_acc),
+            'alb': np.squeeze(st_alb)
+        }
+        run_df = pd.DataFrame.from_dict(run_dict)
+        run_df.set_index('timestamp',inplace=True)
+        stor_dict[ii]['states_output'] = run_df
+        # stor_dict[ii]['inp_dt'] = inp_dt
+        # stor_dict[ii]['st_swe'] = st_swe
+        # stor_dict[ii]['st_melt'] = st_melt
+        # stor_dict[ii]['st_acc'] = st_acc
+        # stor_dict[ii]['st_alb'] = st_alb
+        stor_dict[ii]['config'] = config.copy() # need to copy to avoid being changed with config dictionary is updated
 
         ii += 1
         print(ii)
 print()
 
-pkl.dump(stor_dict, open(outfolder + '/clark_test_output.pkl','wb'),-1)
+pkl.dump(stor_dict, open(outfolder + '/collated_output_testA.pkl','wb'),-1)
 
 
