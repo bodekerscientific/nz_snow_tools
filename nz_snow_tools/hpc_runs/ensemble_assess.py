@@ -33,37 +33,42 @@ def arrays_to_datetimes(years, months, days, hours):
     return np.asarray(timestamp)
 
 
-ensemble_id = 'test3'
-model = 'fsm2'#'clark'  # 'eti' 'fsm2'
+ensemble_id = 'test_randomA'
+model = 'eti'#'clark'  # 'eti' 'fsm2'
 hy = '2017-18'
 # hy = '2019-20'
 
 if model == 'clark':
     outfolder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/clark_output'
     dict_in = pkl.load(
-        open(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2201\snow_model_ensembles\clark_output\collated_output_{}.pkl'.format(ensemble_id), 'rb'))
+        open('C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/clark_output/collated_output_{}.pkl'.format(ensemble_id), 'rb'))
+
+if model == 'eti':
+    outfolder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/ETI_output'
+    dict_in = pkl.load(
+        open('C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/ETI_output/collated_output_{}.pkl'.format(ensemble_id), 'rb'))
 
 elif model == 'fsm2':
     outfolder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/FSM2_output'
 
     dict_in = pkl.load(
-        open(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2201\snow_model_ensembles\FSM2_output\collated_output_{}.pkl'.format(ensemble_id), 'rb'))
+        open('C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/FSM2_output/collated_output_{}.pkl'.format(ensemble_id), 'rb'))
 
-# dict_in = pkl.load(open(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2201\snow_model_ensembles\clark_output\clark_test_output.pkl', 'rb'))
+# dict_in = pkl.load(open('C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/clark_output/clark_test_output.pkl', 'rb'))
 
 obs_file = 'C:/Users/conwayjp/OneDrive - NIWA/projects/SIN_density_SIP/input_met/mueller_hut_met_20170501_20200401_with_hs_swe_rain_withcloud_precip_harder.pkl'
 dfin = pkl.load(open(obs_file, 'rb'))
 dfin.insert(2, 'Meas_SWE', 1000 * dfin['swe'].values)
 dfin.insert(3, 'Meas_snowdepth', dfin['hs'].values)
 #
-# obs_file = r"C:\Users\conwayjp\OneDrive - NIWA\projects\SIN_density_SIP\FSM2-master\FSM2-master\mueller_in_hs_swe_measured.csv"
+# obs_file = r"C:/Users/conwayjp/OneDrive - NIWA/projects/SIN_density_SIP/FSM2-master/FSM2-master/mueller_in_hs_swe_measured.csv"
 # dfin = pd.read_csv(obs_file, names=["Meas_year", "Meas_month", "Meas_day", "Meas_hour", "Meas_snowdepth", "Meas_SWE"])
 # hours, minutes, seconds = convert_decimal_hours_to_hours_min_secs(dfin.Meas_hour.values)
 # timestamp = [dt.datetime(y, m, d, h) for y, m, d, h in zip(dfin.Meas_year.values, dfin.Meas_month.values, dfin.Meas_day.values, hours)]
 # dfin.index = timestamp
 # dfin["Meas_SWE"] = 1000 * dfin["Meas_SWE"]
 
-# met_file = r"C:\Users\conwayjp\OneDrive - NIWA\projects\SIN_density_SIP\FSM2-master\FSM2-master\mueller_hut_met_20170501_20200101_withcloud_precip_harder.csv"
+# met_file = r"C:/Users/conwayjp/OneDrive - NIWA/projects/SIN_density_SIP/FSM2-master/FSM2-master/mueller_hut_met_20170501_20200101_withcloud_precip_harder.csv"
 # met_in = pd.read_csv(met_file, index_col=0, parse_dates=True)
 
 swe_threshold = 250  # mm
@@ -92,7 +97,7 @@ if model == 'fsm2':
     param_store['density'] = np.full(n_runs, np.nan)
     param_store['exchng'] = np.full(n_runs, np.nan)
     param_store['hydrol'] = np.full(n_runs, np.nan)
-elif model == 'clark':
+elif model == 'clark' or model == 'eti':
     for key in dict_in[list(dict_in.keys())[0]]['config'].keys():
         param_store[key] = np.full(n_runs, np.nan)
 
@@ -131,20 +136,21 @@ for i, run_id in enumerate(dict_in.keys()):
         param_store['density'][i] = dict_in[run_id]['exe'][0]
         param_store['exchng'][i] = dict_in[run_id]['exe'][1]
         param_store['hydrol'][i] = dict_in[run_id]['exe'][2]
-    elif model == 'clark':
+    elif model == 'clark' or model =='eti':
         for key in dict_in[run_id]['config'].keys():
             param_store[key][i] = dict_in[run_id]['config'][key]
 
 # plotting
 
-if model == 'fsm2':
+if model == 'fsm2' or model == 'eti':
     fig, axs = plt.subplots(4, 4)
     axs = axs.ravel()
     axs[4].semilogx()
-elif model == 'clark':
+elif model == 'clark' :
     fig, axs = plt.subplots(3, 4)
     axs = axs.ravel()
 
+fig.set_size_inches(8,8)
 for j, key in enumerate(param_store.keys()):
     axs[j].hist(param_store[key])
 # choose cut off for reducing population
