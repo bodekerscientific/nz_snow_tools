@@ -15,10 +15,10 @@ import matplotlib.dates as mdates
 
 np.random.seed(1)# seed the same random numbers to make reproducable
 
-model = 'eti'# 'eti' or 'clark'
+model = 'clark'# 'eti' or 'clark'
 n_runs = 2000
-ensemble_id = 'test_randomB'
-outfolder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/ETI_output'
+ensemble_id = 'test_randomD'
+outfolder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/clark_output'
 # ros = True
 # ta_m_tt = False
 # load input data for mueller hut

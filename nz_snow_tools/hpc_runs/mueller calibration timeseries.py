@@ -26,13 +26,13 @@ config['mf_mean'] = 5
 config['mf_amp'] = 5
 config['mf_alb'] = 2.5
 config['mf_alb_decay'] = 5
-config['mf_ros'] = 2.5  # default 2.5
+config['mf_ros'] = 2.5 # default 2.5
 config['mf_doy_max_ddf'] = 356  # default 356
-config['mf_doy_min_ddf'] = 173
+config['mf_doy_min_ddf'] = 210
 
 # dsc_snow melt parameters
-config['tf'] = 0.04 * 24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
-config['rf'] = 0.009 * 24  # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094
+config['tf'] = 0.05 * 24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
+config['rf'] = 0.0094 * 24  # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094 # ruschle before 1 Oct 0.157
 # dsc_snow albedo parameters
 config['tc'] = 10
 config['a_ice'] = 0.42
@@ -76,22 +76,24 @@ elif model == 'eti':
 # observed SWE
 obs_swe = aws_df.swe[start_t:end_t] * 1000  # measured swe - convert to mm w.e.
 plot_dt = inp_dt  # model stores initial state
+
+plt.figure(figsize=(4,3))
 plt.plot(plot_dt, st_swe[1:, 0], label='mod')
 # plt.plot(plot_dt, st_swe1[1:, 0], label='dsc_snow-param albedo')
 plt.plot(plot_dt, obs_swe, label='obs')
 # plt.xticks(range(0,len(st_swe[:, 0]),48*30),np.linspace(inp_doy[0],inp_doy[-1]+365+1,len(st_swe[:, 0])/(48*30.)+1,dtype=int))
 plt.gcf().autofmt_xdate()
-months = mdates.MonthLocator()  # every month
+months = mdates.MonthLocator(interval=3)  # every month
 # days = mdates.DayLocator(interval=1)  # every day interval = 7 every week
 monthsFmt = mdates.DateFormatter('%b')
 ax = plt.gca()
 ax.xaxis.set_major_locator(months)
 ax.xaxis.set_major_formatter(monthsFmt)
 
-plt.xlabel('month')
-plt.ylabel('SWE mm w.e.')
+plt.xlabel('Month')
+plt.ylabel('SWE (mm w.e.)')
 plt.legend()
-
+plt.tight_layout()
 plt.savefig(plot_folder + '/{}.png'.format(run_id),dpi=300)
 # plt.title('cumulative mass balance TF:{:2.3f}, RF: {:2.4f}, Tmelt:{:3.2f}'.format(config['tf'], config['rf'], config['tmelt']))
 

@@ -33,8 +33,8 @@ def arrays_to_datetimes(years, months, days, hours):
     return np.asarray(timestamp)
 
 
-ensemble_id = 'test_randomA'
-model = 'eti'#'clark'  # 'eti' 'fsm2'
+ensemble_id = 'test_randomD'
+model = 'clark'#'clark'  # 'eti' 'fsm2'
 hy = '2017-18'
 # hy = '2019-20'
 
