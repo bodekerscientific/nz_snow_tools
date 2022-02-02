@@ -15,10 +15,10 @@ import matplotlib.dates as mdates
 
 np.random.seed(1)# seed the same random numbers to make reproducable
 
-model = 'clark'# 'eti' or 'clark'
+model = 'eti'# 'eti' or 'clark'
 n_runs = 2000
-ensemble_id = 'test_randomD'
-outfolder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/clark_output'
+ensemble_id = 'test_randomC'
+outfolder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/eti_output'
 # ros = True
 # ta_m_tt = False
 # load input data for mueller hut
@@ -81,15 +81,15 @@ elif model == 'eti':
     config['a_ice'] = 0.42 # not used by model for seasonal snow
     # config['a_freshsnow'] = 0.90
     # config['a_firn'] = 0.62
-    config['alb_swe_thres'] = 20 # keep constant and equal to FSM2 value
+    config['alb_swe_thres'] = 10 # keep constant and equal to FSM2 value
     config['ros'] = False # include rain on snow melt
     config['ta_m_tt'] = False  # use tmelt as baseline when calculating degree days
 
     random_params = {
         'tacc': [272.16,278.16],
         'tmelt': [270.16, 279.16],
-        'tf': [1, 10], # range the same as clark model. default somewhere around 1
-        'rf':[0, 0.259], # range from 0 (temperature only model) to theoretical value 0.0108 * 24
+        'tf': [0.1, 10], # range the same as clark model. default somewhere around 1
+        'rf':[0, 0.5], # range from 0 (temperature only model) to theoretical value 0.0108 * 24
         # albedo parameters
         'tc': [10,21], # between values in Conway (2016) and (Oerlemans and Knap 1998)
         'a_freshsnow':[0.8, 0.95],

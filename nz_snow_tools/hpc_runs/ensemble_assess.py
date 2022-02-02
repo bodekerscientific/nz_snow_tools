@@ -33,8 +33,8 @@ def arrays_to_datetimes(years, months, days, hours):
     return np.asarray(timestamp)
 
 
-ensemble_id = 'test_randomD'
-model = 'clark'#'clark'  # 'eti' 'fsm2'
+ensemble_id = 'test_randomC'
+model = 'eti'#'clark'  # 'eti' 'fsm2'
 hy = '2017-18'
 # hy = '2019-20'
 
@@ -145,7 +145,7 @@ for i, run_id in enumerate(dict_in.keys()):
 if model == 'fsm2' or model == 'eti':
     fig, axs = plt.subplots(4, 4)
     axs = axs.ravel()
-    axs[4].semilogx()
+    # axs[8].semilogx()
 elif model == 'clark' :
     fig, axs = plt.subplots(3, 4)
     axs = axs.ravel()
