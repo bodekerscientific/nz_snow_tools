@@ -13,8 +13,16 @@ import xarray as xr
 from nz_snow_tools.util.utils import make_regular_timeseries, process_precip, process_temp_flex, calc_toa, daily_to_hourly_temp_grids_new, \
     daily_to_hourly_swin_grids_new
 
-# sys.path.append('C:/Users/conwayjp/Documents/code/git_niwa_local/cloudglacier')
-# from obj1.process_cloud_vcsn import process_daily_swin_to_cloud, ea_from_tc_rh
+
+def find_pressure_offset_elevation(elev_in, elev_out):
+    # find pressure correction (hPa) between two elevations
+    pres_in = 1013.25 * (1 - (1 - elev_in / 44307.69231) ** 5.253283)
+    pres_out = 1013.25 * (1 - (1 - elev_out / 44307.69231) ** 5.253283)
+    return pres_in - pres_out
+
+
+sys.path.append('C:/Users/conwayjp/Documents/code/git_niwa_local/cloudglacier')
+from obj1.process_cloud_vcsn import process_daily_swin_to_cloud, ea_from_tc_rh
 
 # if len(sys.argv) == 2:
 #     config_file = sys.argv[1]
@@ -29,7 +37,7 @@ from nz_snow_tools.util.utils import make_regular_timeseries, process_precip, pr
 # last_time = parser.parse(config['output_file']['last_timestamp'])
 
 met_out_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Nariefa/vcsn'
-data_id = 'brewster_test_mbm'
+data_id = 'brewster_test_mbm_00'
 
 # find lats and lons of closest points
 lat_to_take = [-44.075, -44.125]
@@ -105,15 +113,71 @@ inp_ws = ds_ws['wind'].sel(time=slice(first_time - dt.timedelta(days=1), last_ti
 updated_time = inp_ws.time + np.timedelta64(15, 'h')  # move timestamp to midnight at end of day.
 inp_ws = inp_ws.assign_coords(time=('time', updated_time.data))
 
+inp_elev = ds_tmax['elevation'].sel(longitude=lon_to_take, latitude=lat_to_take)
+
 # inp_tmax_orig = ds_tmax_orig['tmax'].sel(time=slice(first_time, last_time), longitude=lon_to_take, latitude=lat_to_take) # TODO need to take value from next day as the variable is the max value over previous 24 hours.
 # inp_tmin_orig = ds_tmin_orig['tmin'].sel(time=slice(first_time, last_time), longitude=lon_to_take, latitude=lat_to_take)
 
 # spatial interpolation and bias correction
+hi_res_elev = inp_elev
 hi_res_precip = inp_precip  #
-hi_res_tmax = inp_tmax  # TODO introduce bias correction
-hi_res_tmin = inp_tmin  # TODO introduce bias correction
+
+
+def bias_correct(inp_var, slope, intercept):
+    out_var = slope * inp_var + intercept
+    return out_var
+
+
+tmax_month = np.asarray(inp_tmax[:, 0, 0].to_pandas().index.month)
+# [[1876., 1382.],[1277., 1420.]]
+offset_intercept = (inp_elev.values - 1650) * 0.005
+
+hi_res_tmax = inp_tmax * np.nan  # use
+for i, dat in enumerate(inp_tmax):
+    # first correct for elevation offset
+    dat = bias_correct(dat, np.asarray([[1, 1], [1, 1]]), offset_intercept)
+    # then bias correct using seasonally varying parameters
+    if tmax_month[i] in [12, 1, 2]:
+        bc_slope = np.asarray([[0.9257, 0.8899], [0.8899, 0.8559]])
+        bc_intercept = np.asarray([[-2.894, -3.1839], [-3.303, -2.9239]])
+    elif tmax_month[i] in [3, 4, 5]:
+        bc_slope = np.asarray([[0.8351, 0.8028], [0.8008, 0.77]])
+        bc_intercept = np.asarray([[-0.9252, -1.2875], [-1.3958, -1.0849]])
+    elif tmax_month[i] in [6, 7, 8]:
+        bc_slope = np.asarray([[0.72532, 0.65456], [0.65319, 0.60089]])
+        bc_intercept = np.asarray([[-0.8548, -1.2282], [-1.265, -0.993]])
+    elif tmax_month[i] in [9, 10, 11]:
+        bc_slope = np.asarray([[0.87532, 0.84312], [0.84211, 0.81166]])
+        bc_intercept = np.asarray([[-2.892, -3.5727], [-3.716, -3.4256]])
+
+    hi_res_tmax[i] = bias_correct(dat, bc_slope, bc_intercept)
+
+tmin_month = np.asarray(inp_tmin[:, 0, 0].to_pandas().index.month)
+hi_res_tmin = inp_tmin * np.nan  # use
+for i, dat in enumerate(inp_tmin):
+    # first correct for elevation offset
+    dat = bias_correct(dat, np.asarray([[1, 1], [1, 1]]), offset_intercept)
+    # then bias correct using seasonally varying parameters
+    if tmin_month[i] in [12, 1, 2]:
+        bc_slope = np.asarray([[0.7831, 0.766], [0.7713, 0.7518]])
+        bc_intercept = np.asarray([[0.2102, 0.6664], [0.6157, 0.6296]])
+    elif tmin_month[i] in [3, 4, 5]:
+        bc_slope = np.asarray([[0.831, 0.8158], [0.8157, 0.7994]])
+        bc_intercept = np.asarray([[-0.6277, 0.2336], [0.3889, 0.2705]])
+    elif tmin_month[i] in [6, 7, 8]:
+        bc_slope = np.asarray([[0.82294, 0.80173], [0.80736, 0.78014]])
+        bc_intercept = np.asarray([[-2.06, -1.1636], [-0.9859, -1.0959]])
+    elif tmin_month[i] in [9, 10, 11]:
+        bc_slope = np.asarray([[0.88133, 0.86513], [0.87, 0.85207]])
+        bc_intercept = np.asarray([[-1.7425, -1.3664], [-1.2894, -1.3481]])
+
+    hi_res_tmin[i] = bias_correct(dat, bc_slope, bc_intercept)
+
 hi_res_rh = inp_rh  #
-hi_res_pres = inp_mslp  # TODO lapse to correct elevation
+p_offset = find_pressure_offset_elevation(0, inp_elev)
+hi_res_pres = inp_mslp + p_offset  #
+hi_res_pres.name = 'pres'
+hi_res_pres = hi_res_pres.assign_attrs({'name': 'pres', 'standard_name': 'air_pressure', 'units': 'hPa'})
 hi_res_swin = inp_swin  #
 hi_res_ws = inp_ws  #
 hi_res_lats = ds_rh['latitude'].data
@@ -132,13 +196,13 @@ hourly_precip = hourly_precip_full[
 # TODO assert that tmax and tmin timebounds are 24 hours offset.
 # send in day either side
 hourly_temp = daily_to_hourly_temp_grids_new(hi_res_tmax.data, hi_res_tmin.data, time_min=6, time_max=15)
-hourly_temp = hourly_temp[24:-24]# remove day either side
+hourly_temp = hourly_temp[24:-24]  # remove day either side
 
 hourly_rh = hi_res_rh.resample(time="1H").interpolate(kind='cubic')
 hourly_rh = hourly_rh[16:-9]  # trim to 1am on first day to midnight on last
 
-hourly_mslp = hi_res_pres.resample(time="1H").interpolate(kind='cubic')
-hourly_mslp = hourly_mslp[16:-9]  # trim to 1am on first day to midnight on last
+hourly_pres = hi_res_pres.resample(time="1H").interpolate(kind='cubic')
+hourly_pres = hourly_pres[16:-9]  # trim to 1am on first day to midnight on last
 
 hourly_vp = ea_from_tc_rh(hourly_temp - 273.16, hourly_rh)
 
@@ -147,30 +211,32 @@ daily_vp = hourly_vp.data.reshape((-1, 24, hourly_temp.shape[1], hourly_temp.sha
 daily_tk = hourly_temp.reshape((-1, 24, hourly_temp.shape[1], hourly_temp.shape[2])).sum(axis=1)
 daily_neff, daily_trc = process_daily_swin_to_cloud(hi_res_swin[:, 0, 0].to_pandas(), daily_vp[:, 0, 0], daily_tk[:, 0, 0], 1500, -45, 179)
 
-hourly_neff = (np.expand_dims(daily_neff,axis=1) * np.ones(24)).reshape(daily_neff.shape[0]*24)
-hourly_neff = xr.DataArray(hourly_neff,hourly_rh[:,0,0].coords,name='neff')
-hourly_swin = daily_to_hourly_swin_grids_new(hi_res_swin.data, hi_res_lats, hi_res_lons, out_dt_lt)  # TODO output cloud cover not solar radiation
+hourly_neff = (np.expand_dims(daily_neff, axis=1) * np.ones(24)).reshape(daily_neff.shape[0] * 24)
+hourly_neff = xr.DataArray(hourly_neff, hourly_rh[:, 0, 0].coords, name='neff')
+hourly_swin = daily_to_hourly_swin_grids_new(hi_res_swin.data, hi_res_lats, hi_res_lons, out_dt_lt)
 
 hourly_ws = hi_res_ws.resample(time="1H").bfill()[1:]  # fill in average value and remove first timestamp
 
 # merge into one dataset
-hourly_precip = xr.DataArray(hourly_precip,hourly_rh.coords,name='precip')
-hourly_temp = xr.DataArray(hourly_temp,hourly_rh.coords,name='tempK')
-hourly_swin = xr.DataArray(hourly_swin,hourly_rh.coords,name='swin')
+hourly_precip = xr.DataArray(hourly_precip, hourly_rh.coords, name='precip')
+hourly_temp = xr.DataArray(hourly_temp, hourly_rh.coords, name='tempK')
+hourly_swin = xr.DataArray(hourly_swin, hourly_rh.coords, name='swin')
 
-ds = xr.merge([hourly_precip,hourly_temp,hourly_rh,hourly_mslp,hourly_ws,hourly_neff,hourly_swin])
+ds = xr.merge([hourly_precip, hourly_temp, hourly_rh, hourly_pres, hourly_ws, hourly_neff, hourly_swin])
 # select one point and output to csv
-df = ds.sel(latitude=-44.075,longitude=169.425,method='nearest').to_pandas()
+df = ds.sel(latitude=-44.075, longitude=169.425, method='nearest').to_pandas()
 # tidy up
-df = df.drop(labels='inplace',axis='columns')
+df = df.drop(labels='inplace', axis='columns')
 
-#first add the timezone info, then convert to NZST
+# first add the timezone info, then convert to NZST
 df['NZST'] = df.index.tz_localize(tz='UTC').tz_convert(tz=dt.timezone(dt.timedelta(hours=12)))
 df = df.set_index('NZST')
 df['doy'] = df.index.day_of_year
 df['hour'] = df.index.hour
+df['month'] = df.index.month
 df['year'] = df.index.year
 
+df = df.reindex(columns=['year', 'month', 'doy', 'hour', 'precip', 'tempK', 'rh', 'pres', 'wind', 'neff', 'swin' ])
 df.to_csv(outfile)
 
 pickle.dump(day_weightings_full,
