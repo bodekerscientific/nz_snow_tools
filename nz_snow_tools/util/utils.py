@@ -6,10 +6,8 @@ from __future__ import division
 # # os.environ['PROJ_LIB']=r'C:\miniconda\envs\nz_snow27\Library\share'
 import datetime
 import numpy as np
-import shapefile
-from PIL import Image
 from matplotlib.path import Path
-from pyproj import Proj, transform
+
 
 
 ### Date utilities
@@ -220,6 +218,97 @@ def _interp_temp(scaling, max_temp, min_temp):
     return res
 
 
+
+def process_temp_flex(max_temp_daily, min_temp_daily,hr_min=8,hr_max=15):
+    """
+    Generate hourly fields
+
+    Sine curve through max/min. 2pm/8am for max, min as a first gues
+    :param model:
+    :return:
+    """
+
+    def hour_func_flex(dec_hours,hr_min,hr_max):
+        """
+        Piecewise fit to daily tmax and tmin using sine curves
+        """
+        r = hr_max-hr_min
+        r1 = 24 - r
+        f = np.piecewise(dec_hours, [dec_hours < hr_min, (dec_hours >= hr_min) & (dec_hours < hr_max), dec_hours >= hr_max], [
+            lambda x: np.cos(2. * np.pi / (2.*r1) * (x + r1 - hr_min)),  # 36 hour period starting 10 hours through
+            lambda x: np.cos(2. * np.pi / (2.*r) * (x - hr_max)),  # 12 hour period (only using rising 6 hours between 8 am and 2pm)
+            lambda x: np.cos(2. * np.pi / (2.*r1) * (x - hr_max))  # 36 hour period starting at 2pm
+        ])
+        return (f + 1.) / 2.  # Set the range to be 0 - 1 0 is tmin and 1 being tmax
+
+    scaling_factors = hour_func_flex(np.arange(1., 25.),hr_min,hr_max)
+
+    hourly_data = np.zeros((max_temp_daily.shape[0] * 24, max_temp_daily.shape[1]), dtype=np.float32)
+    hours = np.array(list(range(1, 25)) * max_temp_daily.shape[0])
+
+    # Calculate each piecewise element seperately as some need the previous days data
+    mask = hours < hr_min
+    max_temp_prev_day = np.concatenate((max_temp_daily[0][np.newaxis, :], max_temp_daily[:-1]))
+    hourly_data[mask] = _interp_temp(scaling_factors[:hr_min-1], max_temp_prev_day, min_temp_daily)
+
+    mask = (hours >= hr_min) & (hours < hr_max)
+    hourly_data[mask] = _interp_temp(scaling_factors[hr_min-1:hr_max-1], max_temp_daily, min_temp_daily)
+
+    mask = hours >= hr_max
+    min_temp_next_day = np.concatenate((min_temp_daily[1:], min_temp_daily[-1][np.newaxis, :]))
+    hourly_data[mask] = _interp_temp(scaling_factors[hr_max-1:], max_temp_daily, min_temp_next_day)
+
+    return hourly_data
+
+
+def daily_to_hourly_temp_grids_new(max_temp_grid, min_temp_grid, single_dt=False,dt_step = 3600,time_min=9,time_max=2):
+    """
+    run through and process daily data into hourly, one slice at a time.
+    :param max_temp_grid: input data with dimension [time,y,x]
+    :param min_temp_grid: input data with dimension [time,y,x]
+    :return: hourly data with dimension [time*24,y,x]
+    """
+    if dt_step != 3600:
+        print('only set up for hourly timestep - check dt_step')
+
+    if single_dt == True:  # assume is 2d and add a time dimension on the start
+        max_temp_grid = max_temp_grid.reshape([1, max_temp_grid.shape[0], max_temp_grid.shape[1]])
+        min_temp_grid = min_temp_grid.reshape([1, min_temp_grid.shape[0], min_temp_grid.shape[1]])
+    hourly_grid = np.empty([max_temp_grid.shape[0] * int(86400/dt_step), max_temp_grid.shape[1], max_temp_grid.shape[2]], dtype=np.float32) * np.nan
+    for i in range(max_temp_grid.shape[1]):
+        hourly_grid[:, i, :] = process_temp_flex(max_temp_grid[:, i, :], min_temp_grid[:, i, :],hr_min=time_min,hr_max=time_max)
+    return hourly_grid
+
+
+def daily_to_hourly_swin_grids_new(swin_grid, lats, lons, hourly_dt, single_dt=False):
+    """
+    converts daily mean SW into hourly using TOA rad, applying
+
+    :param hi_res_sw_rad: daily sw in data with dimension [time,y,x]
+    :return:
+    """
+    if single_dt == True:  # assume is 2d and add a time dimension on the start
+        swin_grid = swin_grid.reshape([1, swin_grid.shape[0], swin_grid.shape[1]])
+
+    num_steps_in_day = int(86400. / (hourly_dt[1] - hourly_dt[0]).total_seconds())
+    hourly_grid = np.ones([swin_grid.shape[0] * num_steps_in_day, swin_grid.shape[1], swin_grid.shape[2]])
+
+    lon_ref = np.mean(lons)
+    lat_ref = np.mean(lats)
+    # compute hourly TOA for reference in middle of domain #TODO explicit calculation for each grid point?
+    toa_ref = calc_toa(lat_ref, lon_ref, hourly_dt)
+    # compute daily average TOA and atmospheric transmissivity
+    daily_av_toa = []
+    for i in range(0, len(toa_ref), num_steps_in_day):
+        daily_av_toa.append(np.mean(toa_ref[i:i + num_steps_in_day]))
+    daily_trans = swin_grid / np.asarray(daily_av_toa)[:, np.newaxis, np.newaxis]
+    # calculate hourly sw from daily average transmisivity and hourly TOA
+    for ii, i in enumerate(range(0, len(toa_ref), num_steps_in_day)):
+        hourly_grid[i:i + num_steps_in_day] = hourly_grid[i:i + num_steps_in_day] * toa_ref[i:i + num_steps_in_day, np.newaxis, np.newaxis] * daily_trans[ii]
+
+    return hourly_grid
+
+
 # grid utilities
 
 def create_mask_from_shpfile(lat, lon, shp_path, idx=0):
@@ -241,6 +330,7 @@ def create_mask_from_shpfile(lat, lon, shp_path, idx=0):
     lon = np.asarray(lon)
 
     # load shapefile
+    import shapefile
     shp = shapefile.Reader(shp_path)
     shapes2 = shp.shapes()
     shppath = Path(shapes2[idx].points)
@@ -289,6 +379,7 @@ def create_mask_from_shpfile(lat, lon, shp_path, idx=0):
 def nztm_to_wgs84(in_y, in_x):
     """converts from NZTM to WGS84  Inputs and outputs can be arrays.
     """
+    from pyproj import Proj, transform
     inProj = Proj(init='epsg:2193')
     outProj = Proj(init='epsg:4326')
     out_x, out_y = transform(inProj, outProj, in_x, in_y)
@@ -298,6 +389,7 @@ def nztm_to_wgs84(in_y, in_x):
 def wgs84_to_nztm(in_y, in_x):
     """converts from WGS84  to NZTM Inputs and outputs can be arrays.
     """
+    from pyproj import Proj, transform
     inProj = Proj(init='epsg:4326')
     outProj = Proj(init='epsg:2193')
     out_x, out_y = transform(inProj, outProj, in_x, in_y)
@@ -393,6 +485,7 @@ def setup_nztm_dem(dem_file, extent_w=1.2e6, extent_e=1.4e6, extent_n=5.13e6, ex
     :param origin: option to specify whether you want the dem to have its origin in the 'bottomleft' (i.e. xy) or in the 'topleft' ie. ij
     :return:
     """
+    from PIL import Image
     if dem_file is not None:
         nztm_dem = Image.open(dem_file)
         if origin == 'bottomleft':
