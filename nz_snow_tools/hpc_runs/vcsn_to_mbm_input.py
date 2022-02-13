@@ -37,7 +37,7 @@ from obj1.process_cloud_vcsn import process_daily_swin_to_cloud, ea_from_tc_rh
 # last_time = parser.parse(config['output_file']['last_timestamp'])
 
 met_out_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Nariefa/vcsn'
-data_id = 'brewster_test_mbm_00'
+data_id = 'brewster_test_mbm_v2'
 
 # find lats and lons of closest points
 lat_to_take = [-44.075, -44.125]
@@ -134,8 +134,8 @@ offset_intercept = (inp_elev.values - 1650) * 0.005
 
 hi_res_tmax = inp_tmax * np.nan  # use
 for i, dat in enumerate(inp_tmax):
-    # first correct for elevation offset
-    dat = bias_correct(dat, np.asarray([[1, 1], [1, 1]]), offset_intercept)
+    # first correct for elevation offset and convert to C
+    dat = bias_correct(dat, np.asarray([[1, 1], [1, 1]]), offset_intercept) - 273.16
     # then bias correct using seasonally varying parameters
     if tmax_month[i] in [12, 1, 2]:
         bc_slope = np.asarray([[0.9257, 0.8899], [0.8899, 0.8559]])
@@ -149,14 +149,14 @@ for i, dat in enumerate(inp_tmax):
     elif tmax_month[i] in [9, 10, 11]:
         bc_slope = np.asarray([[0.87532, 0.84312], [0.84211, 0.81166]])
         bc_intercept = np.asarray([[-2.892, -3.5727], [-3.716, -3.4256]])
-
+    # bias correct
     hi_res_tmax[i] = bias_correct(dat, bc_slope, bc_intercept)
 
 tmin_month = np.asarray(inp_tmin[:, 0, 0].to_pandas().index.month)
 hi_res_tmin = inp_tmin * np.nan  # use
 for i, dat in enumerate(inp_tmin):
-    # first correct for elevation offset
-    dat = bias_correct(dat, np.asarray([[1, 1], [1, 1]]), offset_intercept)
+    # first correct for elevation offset and convert to C
+    dat = bias_correct(dat, np.asarray([[1, 1], [1, 1]]), offset_intercept) - 273.16
     # then bias correct using seasonally varying parameters
     if tmin_month[i] in [12, 1, 2]:
         bc_slope = np.asarray([[0.7831, 0.766], [0.7713, 0.7518]])
@@ -170,7 +170,7 @@ for i, dat in enumerate(inp_tmin):
     elif tmin_month[i] in [9, 10, 11]:
         bc_slope = np.asarray([[0.88133, 0.86513], [0.87, 0.85207]])
         bc_intercept = np.asarray([[-1.7425, -1.3664], [-1.2894, -1.3481]])
-
+    # bias correct
     hi_res_tmin[i] = bias_correct(dat, bc_slope, bc_intercept)
 
 hi_res_rh = inp_rh  #
@@ -204,25 +204,27 @@ hourly_rh = hourly_rh[16:-9]  # trim to 1am on first day to midnight on last
 hourly_pres = hi_res_pres.resample(time="1H").interpolate(kind='cubic')
 hourly_pres = hourly_pres[16:-9]  # trim to 1am on first day to midnight on last
 
-hourly_vp = ea_from_tc_rh(hourly_temp - 273.16, hourly_rh)
+hourly_vp = ea_from_tc_rh(hourly_temp, hourly_rh)
 
 # just compute cloudiness for one grid point
 daily_vp = hourly_vp.data.reshape((-1, 24, hourly_temp.shape[1], hourly_temp.shape[2])).sum(axis=1)
-daily_tk = hourly_temp.reshape((-1, 24, hourly_temp.shape[1], hourly_temp.shape[2])).sum(axis=1)
-daily_neff, daily_trc = process_daily_swin_to_cloud(hi_res_swin[:, 0, 0].to_pandas(), daily_vp[:, 0, 0], daily_tk[:, 0, 0], 1500, -45, 179)
+daily_tk = hourly_temp.reshape((-1, 24, hourly_temp.shape[1], hourly_temp.shape[2])).sum(axis=1) + 273.16
+daily_neff, daily_trc = process_daily_swin_to_cloud(hi_res_swin[:, 0, 0].to_pandas(), daily_vp[:, 0, 0], daily_tk[:, 0, 0], 1650, -45, 179)
 
 hourly_neff = (np.expand_dims(daily_neff, axis=1) * np.ones(24)).reshape(daily_neff.shape[0] * 24)
 hourly_neff = xr.DataArray(hourly_neff, hourly_rh[:, 0, 0].coords, name='neff')
+hourly_trc = (np.expand_dims(daily_trc, axis=1) * np.ones(24)).reshape(daily_trc.shape[0] * 24)
+hourly_trc = xr.DataArray(hourly_trc, hourly_rh[:, 0, 0].coords, name='trc')
 hourly_swin = daily_to_hourly_swin_grids_new(hi_res_swin.data, hi_res_lats, hi_res_lons, out_dt_lt)
 
 hourly_ws = hi_res_ws.resample(time="1H").bfill()[1:]  # fill in average value and remove first timestamp
 
 # merge into one dataset
 hourly_precip = xr.DataArray(hourly_precip, hourly_rh.coords, name='precip')
-hourly_temp = xr.DataArray(hourly_temp, hourly_rh.coords, name='tempK')
+hourly_temp = xr.DataArray(hourly_temp, hourly_rh.coords, name='tempC')
 hourly_swin = xr.DataArray(hourly_swin, hourly_rh.coords, name='swin')
 
-ds = xr.merge([hourly_precip, hourly_temp, hourly_rh, hourly_pres, hourly_ws, hourly_neff, hourly_swin])
+ds = xr.merge([hourly_precip, hourly_temp, hourly_rh, hourly_pres, hourly_ws, hourly_neff, hourly_swin, hourly_trc])
 # select one point and output to csv
 df = ds.sel(latitude=-44.075, longitude=169.425, method='nearest').to_pandas()
 # tidy up
@@ -236,7 +238,7 @@ df['hour'] = df.index.hour
 df['month'] = df.index.month
 df['year'] = df.index.year
 
-df = df.reindex(columns=['year', 'month', 'doy', 'hour', 'precip', 'tempK', 'rh', 'pres', 'wind', 'neff', 'swin' ])
+df = df.reindex(columns=['year', 'month', 'doy', 'hour', 'precip', 'tempC', 'rh', 'pres', 'wind', 'neff', 'swin', 'trc'])
 df.to_csv(outfile)
 
 pickle.dump(day_weightings_full,
