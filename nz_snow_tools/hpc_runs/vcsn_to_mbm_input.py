@@ -37,7 +37,8 @@ from obj1.process_cloud_vcsn import process_daily_swin_to_cloud, ea_from_tc_rh
 # last_time = parser.parse(config['output_file']['last_timestamp'])
 
 met_out_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Nariefa/vcsn'
-data_id = 'brewster_test_mbm_v2'
+data_id = 'brewster_test_mbm_v3'
+target_elevation = 1650 # elevation to generate temperature and pressure output at
 
 # find lats and lons of closest points
 lat_to_take = [-44.075, -44.125]
@@ -130,7 +131,7 @@ def bias_correct(inp_var, slope, intercept):
 
 tmax_month = np.asarray(inp_tmax[:, 0, 0].to_pandas().index.month)
 # [[1876., 1382.],[1277., 1420.]]
-offset_intercept = (inp_elev.values - 1650) * 0.005
+offset_intercept = (inp_elev.values - target_elevation) * 0.005
 
 hi_res_tmax = inp_tmax * np.nan  # use
 for i, dat in enumerate(inp_tmax):
@@ -174,7 +175,7 @@ for i, dat in enumerate(inp_tmin):
     hi_res_tmin[i] = bias_correct(dat, bc_slope, bc_intercept)
 
 hi_res_rh = inp_rh  #
-p_offset = find_pressure_offset_elevation(0, inp_elev)
+p_offset = find_pressure_offset_elevation(0, target_elevation)
 hi_res_pres = inp_mslp + p_offset  #
 hi_res_pres.name = 'pres'
 hi_res_pres = hi_res_pres.assign_attrs({'name': 'pres', 'standard_name': 'air_pressure', 'units': 'hPa'})
