@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 PACKAGE_NAME = "nz_snow_tools"
 AUTHOR = "Jono Conway"
-AUTHOR_EMAIL = "jono@bodekerscientific.com"
+AUTHOR_EMAIL = "jono.conway@niwa.co.nz"
 DESCRIPTION = "Tools to run and evaluate snow models"
 
 
@@ -23,7 +23,7 @@ setup(
     author=AUTHOR,
     author_email=AUTHOR_EMAIL,
     description=DESCRIPTION,
-    license="MIT",
+    license="GPL-3.0",
     packages=find_packages(exclude=["tests"]),
     long_description=read('README.rst'),
     url='https://github.com/bodekerscientific/nz_snow_tools',  # use the URL to the github repo
@@ -44,8 +44,6 @@ setup(
         'Intended Audience :: Developers',
         'Intended Audience :: Science/Research',
         'Intended Audience :: System Administrators',
-
-        'License :: OSI Approved :: MIT License',
 
         'Programming Language :: Python :: 2',
         'Programming Language :: Python :: 3',

@@ -11,33 +11,33 @@ import matplotlib.dates as mdates
 import pickle as pkl
 
 
-plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/clark_output'
+plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/eti_output'
 model = 'eti' #'eti' 'clark'
-run_id = 'eti - dsc spring plus2'
+run_id = 'eti - optA Tmelt276.16 TF.04,RF.0108, frs=0.85,os=.5'
 
 # configuration dictionary containing model parameters.
 config = {}
 config['num_secs_output'] = 3600
 config['tacc'] = 274.16 # default 274.15
-config['tmelt'] = 273.16 # default 273.15
+config['tmelt'] = 276.16 # default 273.15
 
 # clark2009 melt parameters
 config['mf_mean'] = 5 # default 5
-config['mf_amp'] = 5 # default 5
+config['mf_amp'] = 2.5 # default 5
 config['mf_alb'] = 2.5 # default 2.5
 config['mf_alb_decay'] = 5 # default 5 (clark) or 1 (topnet)
 config['mf_ros'] = 2.5 # default 2.5 (clark) or 0 (topnet)
 config['mf_doy_max_ddf'] = 356  # default 356
-config['mf_doy_min_ddf'] = 173 # default 173 (clark) or 210 (topnet)
+config['mf_doy_min_ddf'] = 210 # default 173 (clark) or 210 (topnet)
 
 # dsc_snow melt parameters
 config['tf'] = 0.04 * 24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
-config['rf'] = 0.009 * 24  # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094 # ruschle before 1 Oct 0.157. theoretical 0.0108
+config['rf'] = 0.0108 * 24  # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094 # ruschle before 1 Oct 0.157. theoretical 0.0108
 # dsc_snow albedo parameters
 config['tc'] = 10
 config['a_ice'] = 0.42
-config['a_freshsnow'] = 0.95
-config['a_firn'] = 0.62
+config['a_freshsnow'] = 0.85
+config['a_firn'] = 0.5
 config['dc'] = 11.0
 config['alb_swe_thres'] = 10
 config['ros'] = False
@@ -55,7 +55,7 @@ inp_hourdec = [i.hour for i in aws_df.index[start_t:end_t]]
 # make grids of input data
 grid_size = 1
 grid_id = np.arange(grid_size)
-inp_ta = aws_df.tc[start_t:end_t][:, np.newaxis] * np.ones(grid_size) + 273.16  +2 # 2 metre air temp in C
+inp_ta = aws_df.tc[start_t:end_t][:, np.newaxis] * np.ones(grid_size) + 273.16  # 2 metre air temp in C
 inp_precip = aws_df.precip[start_t:end_t][:, np.newaxis] * np.ones(grid_size)  # precip in mm
 inp_sw = aws_df.srad[start_t:end_t][:, np.newaxis] * np.ones(grid_size)
 
@@ -119,7 +119,7 @@ inp_hourdec = [i.hour for i in aws_df.index[start_t:end_t]]
 # make grids of input data
 grid_size = 1
 grid_id = np.arange(grid_size)
-inp_ta = aws_df.tc[start_t:end_t][:, np.newaxis] * np.ones(grid_size) + 273.16 +2 # 2 metre air temp in C
+inp_ta = aws_df.tc[start_t:end_t][:, np.newaxis] * np.ones(grid_size) + 273.16 # 2 metre air temp in C
 inp_precip = aws_df.precip[start_t:end_t][:, np.newaxis] * np.ones(grid_size)  # precip in mm
 inp_sw = aws_df.srad[start_t:end_t][:, np.newaxis] * np.ones(grid_size)
 

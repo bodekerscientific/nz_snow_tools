@@ -34,7 +34,7 @@ def arrays_to_datetimes(years, months, days, hours):
 
 
 ensemble_id = 'test_randomC'
-model = 'eti'#'clark'  # 'eti' 'fsm2'
+model = 'fsm2'#'clark'  # 'eti' 'fsm2'
 hy = '2017-18'
 # hy = '2019-20'
 
@@ -87,6 +87,11 @@ stats_store['ns'] = np.full(n_runs, np.nan)
 stats_store['bias'] = np.full(n_runs, np.nan)
 stats_store['rmsd'] = np.full(n_runs, np.nan)
 stats_store['mae'] = np.full(n_runs, np.nan)
+if model == 'fsm2':
+    stats_store['hs_ns'] = np.full(n_runs, np.nan)
+    stats_store['hs_bias'] = np.full(n_runs, np.nan)
+    stats_store['hs_rmsd'] = np.full(n_runs, np.nan)
+    stats_store['hs_mae'] = np.full(n_runs, np.nan)
 
 # construct store of model parameters
 param_store = {}
@@ -104,29 +109,49 @@ elif model == 'clark' or model == 'eti':
 
 if hy == '2017-18':
     obs_swe = dfin["Meas_SWE"].copy().truncate(after='2017-12-31 23:00:00')
+    if model == 'fsm2':
+        obs_hs = dfin["Meas_snowdepth"].copy().truncate(after='2017-12-31 23:00:00')
     # ["Meas_snowdepth"]
 if hy == '2019-20':
     obs_swe = dfin["Meas_SWE"].copy().truncate(before='2019-05-01 00:00:00', after='2019-11-12 00:00:00')
+    if model == 'fsm2':
+        obs_hs = dfin["Meas_snowdepth"].copy().truncate(before='2019-05-01 00:00:00', after='2019-11-12 00:00:00')
 
 obs_ind = ~np.isnan(obs_swe.values)
-obs_swe = obs_swe[~np.isnan(obs_swe)]
+obs_swe = obs_swe[obs_ind].values
+if model == 'fsm2':
+    obs_ind_hs = ~np.isnan(obs_hs.values)
+    obs_hs = obs_hs[obs_ind_hs].values
+
 for i, run_id in enumerate(dict_in.keys()):
     if hy == '2017-18':
         sim_swe = dict_in[run_id]['states_output'].swe.copy().truncate(after='2017-12-31 23:00:00')
+        if model == 'fsm2':
+            sim_hs = dict_in[run_id]['states_output'].snowdepth.copy().truncate(after='2017-12-31 23:00:00')
     if hy == '2019-20':
         sim_swe = dict_in[run_id]['states_output'].swe.copy().truncate(before='2019-05-01 00:00:00', after='2019-11-12 00:00:00')
+        if model == 'fsm2':
+            sim_hs = dict_in[run_id]['states_output'].snowdepth.copy().truncate(before='2019-05-01 00:00:00', after='2019-11-12 00:00:00')
+
     # assert np.all(sim_swe.index == obs_swe.index) #TODO fix index so both timezone aware
 
     # cut to just period with observed swe
     sim_swe = sim_swe[obs_ind]
     if model == 'fsm2':
         sim_swe = sim_swe.values
+        sim_hs = sim_hs[obs_ind_hs].values
 
     stats_store['ns'][i] = nash_sut(sim_swe, obs_swe)
     stats_store['bias'][i] = mean_bias(sim_swe, obs_swe)
     stats_store['rmsd'][i] = rmsd(sim_swe, obs_swe)
     stats_store['mae'][i] = mean_absolute_error(sim_swe, obs_swe)
     stats_store['run_id'][i] = run_id
+
+    if model == 'fsm2':
+        stats_store['hs_ns'][i] = nash_sut(sim_hs, obs_hs)
+        stats_store['hs_bias'][i] = mean_bias(sim_hs, obs_hs)
+        stats_store['hs_rmsd'][i] = rmsd(sim_hs, obs_hs)
+        stats_store['hs_mae'][i] = mean_absolute_error(sim_hs, obs_hs)
 
     if model == 'fsm2':
         sim_nml = dict_in[run_id]['namelist']
