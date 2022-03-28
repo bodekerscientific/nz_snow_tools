@@ -96,7 +96,7 @@ ds_precip = xr.open_dataset(vcsn_precip_file)
 
 # update precip and wind variables from bias corrected files
 
-ds_precip_QMAP = xr.load_dataset(r"C:\Users\conwayjp\OneDrive - NIWA\projects\MarsdenFS2018\Nariefa\vcsn\precip_QMAP.nc")
+ds_precip_QMAP = xr.load_dataset(r"C:\Users\conwayjp\OneDrive - NIWA\projects\MarsdenFS2018\Nariefa\vcsn\to share\precip_QMAP.nc")
 
 precip_QMAP = np.zeros((ds_precip_QMAP['precip'][0, :].shape[0], 2, 2)) # set up array with extra dimensions then copy data in
 for i in range(2):
@@ -256,9 +256,9 @@ df['doy'] = df.index.day_of_year
 df['hour'] = df.index.hour
 df['month'] = df.index.month
 df['year'] = df.index.year
-
+df.rename(columns={'wind_bc':'wind'}, inplace=True)
 df = df.reindex(columns=['year', 'month', 'doy', 'hour', 'precip', 'tempC', 'rh', 'pres', 'wind', 'neff', 'swin', 'trc'])
-df.to_csv(outfile)
+df.round(4).to_csv(outfile)
 
 pickle.dump(day_weightings_full,
             open(met_out_folder + '/met_inp_{}_{}_{}_daywts.pkl'.format(data_id, first_time.strftime('%Y%m%d%H%M'), last_time.strftime('%Y%m%d%H%M')),
