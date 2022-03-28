@@ -37,7 +37,7 @@ from obj1.process_cloud_vcsn import process_daily_swin_to_cloud, ea_from_tc_rh
 # last_time = parser.parse(config['output_file']['last_timestamp'])
 
 met_out_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/MarsdenFS2018/Nariefa/vcsn'
-data_id = 'brewster_test_mbm_v3'
+data_id = 'brewster_test_mbm_v4'
 target_elevation = 1650 # elevation to generate temperature and pressure output at
 
 # find lats and lons of closest points
@@ -93,9 +93,27 @@ ds_precip = xr.open_dataset(vcsn_precip_file)
 # ds_tmax_orig = xr.open_dataset(vcsn_tmax_original)
 # ds_tmin_orig = xr.open_dataset(vcsn_tmin_original)
 
+
+# update precip and wind variables from bias corrected files
+
+ds_precip_QMAP = xr.load_dataset(r"C:\Users\conwayjp\OneDrive - NIWA\projects\MarsdenFS2018\Nariefa\vcsn\precip_QMAP.nc")
+
+precip_QMAP = np.zeros((ds_precip_QMAP['precip'][0, :].shape[0], 2, 2)) # set up array with extra dimensions then copy data in
+for i in range(2):
+    for j in range(2):
+        precip_QMAP[:, i, j] = ds_precip_QMAP['precip'][0, :]
+ds_precip = ds_precip.assign(rain_bc=ds_precip['rain'].copy(data=precip_QMAP)) # create bias corrected variable with same dimensions as original
+
+ds_wind_QMAP = xr.load_dataset(r"C:\Users\conwayjp\OneDrive - NIWA\projects\MarsdenFS2018\Nariefa\vcsn\to share\wind_QMAP.nc")
+wind_QMAP = np.zeros((ds_ws['wind'].shape[0], 2, 2)) # set up array with extra dimensions then copy data in
+for i in range(2):
+    for j in range(2):
+        wind_QMAP[10226:, i, j] = ds_wind_QMAP['wind'][0, :]
+ds_ws = ds_ws.assign(wind_bc=ds_ws['wind'].copy(data=wind_QMAP))# create bias corrected variable with same dimensions as original
+
 # load variables
 # take day either side for tmax,tmin,rh,mslp, as well as offsetting tmax forward one day and also taking one extra day for precip. SW and ws are already midnight-midnight
-inp_precip = ds_precip['rain'].sel(time=slice(first_time, last_time + dt.timedelta(days=1)), longitude=lon_to_take,
+inp_precip = ds_precip['rain_bc'].sel(time=slice(first_time, last_time + dt.timedelta(days=1)), longitude=lon_to_take,
                                    latitude=lat_to_take)  # also take value from next day as is total over previous 24 hours
 inp_tmax = ds_tmax['tmax'].sel(time=slice(first_time, last_time + dt.timedelta(days=2)), longitude=lon_to_take,
                                latitude=lat_to_take)  # take value from next day as is the max value over previous 24 hours.
@@ -109,7 +127,7 @@ inp_swin = ds_swin['srad'].sel(time=slice(first_time, last_time), longitude=lon_
                                latitude=lat_to_take)  # data actually averages from midnight to midnight, so modify timestamp
 updated_time = inp_swin.time + np.timedelta64(15, 'h')
 inp_swin = inp_swin.assign_coords(time=('time', updated_time.data))
-inp_ws = ds_ws['wind'].sel(time=slice(first_time - dt.timedelta(days=1), last_time), longitude=lon_to_take,
+inp_ws = ds_ws['wind_bc'].sel(time=slice(first_time - dt.timedelta(days=1), last_time), longitude=lon_to_take,
                            latitude=lat_to_take)  # take extra day on start to make interpolation easier. data actually averages from midnight to midnight, so modify timestamp
 updated_time = inp_ws.time + np.timedelta64(15, 'h')  # move timestamp to midnight at end of day.
 inp_ws = inp_ws.assign_coords(time=('time', updated_time.data))
@@ -208,8 +226,8 @@ hourly_pres = hourly_pres[16:-9]  # trim to 1am on first day to midnight on last
 hourly_vp = ea_from_tc_rh(hourly_temp, hourly_rh)
 
 # just compute cloudiness for one grid point
-daily_vp = hourly_vp.data.reshape((-1, 24, hourly_temp.shape[1], hourly_temp.shape[2])).sum(axis=1)
-daily_tk = hourly_temp.reshape((-1, 24, hourly_temp.shape[1], hourly_temp.shape[2])).sum(axis=1) + 273.16
+daily_vp = hourly_vp.data.reshape((-1, 24, hourly_temp.shape[1], hourly_temp.shape[2])).mean(axis=1)
+daily_tk = hourly_temp.reshape((-1, 24, hourly_temp.shape[1], hourly_temp.shape[2])).mean(axis=1) + 273.16
 daily_neff, daily_trc = process_daily_swin_to_cloud(hi_res_swin[:, 0, 0].to_pandas(), daily_vp[:, 0, 0], daily_tk[:, 0, 0], 1650, -45, 179)
 
 hourly_neff = (np.expand_dims(daily_neff, axis=1) * np.ones(24)).reshape(daily_neff.shape[0] * 24)
