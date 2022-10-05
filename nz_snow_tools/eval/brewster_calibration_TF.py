@@ -9,7 +9,7 @@ import datetime as dt
 from nz_snow_tools.util.utils import resample_to_fsca, nash_sut, mean_bias, rmsd, mean_absolute_error, coef_determ
 
 seb_dat = np.genfromtxt(
-   r'S:\Scratch\Jono\Final Brewster Datasets\SEB_output\cdf - code2p0_MC_meas_noQPS_single_fixed output_fixed_B\modelOUT_br1_headings.txt', skip_header=3)
+   r'C:\Users\conwayjp\OneDrive - NIWA\projects\Brewster\Final Brewster Datasets\SEB_output\cdf - code2p0_MC_meas_noQPS_single_fixed output_fixed_B\modelOUT_br1_headings.txt', skip_header=3)
 sw_net = seb_dat[:, 14 - 1]
 lw_net = seb_dat[:, 17 - 1]
 qs = seb_dat[:, 19 - 1]

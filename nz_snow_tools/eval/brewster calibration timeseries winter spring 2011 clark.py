@@ -13,30 +13,16 @@ import matplotlib.dates as mdates
 config = {}
 config['num_secs_output']=1800
 config['tacc'] = 274.16
-config['tmelt'] = 276.16
+config['tmelt'] = 273.16
 
 # clark2009 melt parameters
-config['mf_mean'] = 5.0
-config['mf_amp'] = 5.0
-config['mf_alb'] = 2.5
-config['mf_alb_decay'] = 5.0
-config['mf_ros'] = 2.5 # default 2.5
+config['mf_mean'] = 4
+config['mf_amp'] = 2.5
+config['mf_alb'] = 1
+config['mf_alb_decay'] = 1.0
+config['mf_ros'] = 5 # default 2.5
 config['mf_doy_max_ddf'] = 356 # default 356
-config['mf_doy_min_ddf'] = 210 # default 210
-
-# dsc_snow melt parameters
-config['tf'] = 0.05*24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
-config['rf'] = 0.0108*24 # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094
-
-# albedo parameters
-config['dc'] = 11.0
-config['tc'] = 10
-config['a_ice'] = 0.42
-config['a_freshsnow'] = 0.90
-config['a_firn'] = 0.62
-config['alb_swe_thres'] = 10
-config['ros'] = True
-config['ta_m_tt'] = False
+config['mf_doy_min_ddf'] = 183 # default 210
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
@@ -79,17 +65,8 @@ init_d_snow = np.ones(inp_ta.shape[1:]) * 30  # give initial value of days since
 st_swe, st_melt, st_acc, st_alb = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='clark2009', **config)
 
-st_swe1, st_melt1, st_acc1, st_alb1 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
-                                           init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-
-config['inp_alb'] = inp_dat[start_t:end_t, 16][:, np.newaxis] * np.ones(grid_size)
-st_swe3, st_melt3, st_acc3, st_alb3 = snow_main_simple(inp_ta, inp_precip, inp_doy, inp_hourdec, dtstep=1800, init_swe=init_swe,
-                                           init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='dsc_snow', **config)
-
 plot_dt = inp_dt[start_t-1:end_t] # model stores initial state
-# plt.plot(plot_dt,st_swe[:, 0],label='clark2009')
-plt.plot(plot_dt,st_swe1[:, 0],label='dsc_snow-param albedo')
-plt.plot(plot_dt,st_swe3[:, 0],label='dsc_snow-obs albedo')
+plt.plot(plot_dt,st_swe[:, 0],label='clark2009')
 plt.plot(plot_dt,seb_mb, label='SEB')
 plt.plot(plot_dt,inp_sfc*492,label='sfc*492')
 plt.plot([dt.datetime(2011,7,18),dt.datetime(2011,10,27),dt.datetime(2011,11,13)],[577,1448,1291],'o',label='stake_mb') # measured accumualation to 27th November 2011
@@ -105,7 +82,7 @@ ax.xaxis.set_major_formatter(monthsFmt)
 plt.xlabel('month')
 plt.ylabel('SWE mm w.e.')
 plt.legend()
-plt.title('cumulative mass balance TF:{}, RF: {}, Tmelt:{}'.format(config['tf'],config['rf'],config['tmelt']))
-plt.savefig('C:/Users/conwayjp/OneDrive - NIWA/projects/SIN/Winter Spring 2011 TF{}RF{}Tmelt{}_ros.png'.format(config['tf'],config['rf'],config['tmelt']))
+plt.title('{},{},{},{},{},{},{},{},{}'.format(config['tacc'],config['tmelt'],config['mf_mean'],config['mf_amp'],config['mf_alb'],config['mf_alb_decay'],config['mf_ros'],config['mf_doy_max_ddf'],config['mf_doy_min_ddf']))
+plt.savefig('C:/Users/conwayjp/OneDrive - NIWA/projects/SIN/Brewster winter Spring 2011 {}_{}_{}_{}_{}_{}_{}_{}_{}.png'.format(config['tacc'],config['tmelt'],config['mf_mean'],config['mf_amp'],config['mf_alb'],config['mf_alb_decay'],config['mf_ros'],config['mf_doy_max_ddf'],config['mf_doy_min_ddf']))
 plt.close()
 

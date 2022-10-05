@@ -71,6 +71,15 @@ rotated_coords = rot_pole_crs.transform_points(ccrs.epsg(2193), xx, yy)
 rlats = rotated_coords[:, :, 1]
 rlons = rotated_coords[:, :, 0]
 rlons[rlons < 0] = rlons[rlons < 0] + 360
+#
+# elif config['output_grid']['dem_name'] == 'nzcsm_mauiA':
+#     nztm_dem, \
+#     x_centres, \
+#     y_centres, \
+#     lat_array, \
+#     lon_array \
+#         = None #TODO set up nzcsm grid so that can output data from different tranches here.
+
 
 # set up output times
 first_time = parser.parse(config['output_file']['first_timestamp'])

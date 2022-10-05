@@ -726,3 +726,87 @@ def u_v_from_ws_wd(ws,wd):
     u = -ws * np.sin(np.deg2rad(wd))
     v = -ws * np.cos(np.deg2rad(wd))
     return u, v
+
+def blockfun(datain, blocksize, filter=None, method='mean', keep_nan=False):
+    """
+    function to block average data using nan mean. can filter out bad values, and can upsample data. use negative blocksize to upsample data.
+    :param datain_copy: array with data to average. data is avearged along First dimension
+    :param blocksize: interger specifying the number of elements to average. if positive, must be a multiple of the length of datain. if negative, data is upsampled.
+    :param filter: values to filter out. must have same length as first dimension of datain. all values with filter == True are set to nan
+    :param method 'mean' or 'sum'
+    :param keep_nan True = preserves nans in input, so will return nan if any nan's within the block.
+    :return:
+    """
+
+    # datain = np.ones([192,2])
+    # blocksize = 96
+    datain_copy = datain.copy()
+    #
+    #     if datain_copy.ndim > 1:
+    #         datain_copy[filter, :] = np.nan
+    #     else:
+    #         datain_copy[filter] = np.nan
+    filter_array = np.full(datain_copy.shape, True)
+    if filter is not None:
+        if datain_copy.ndim > 1:
+            filter_array[filter, :] = False
+        else:
+            filter_array[filter] = False
+
+    num_rows = datain_copy.shape[0]
+
+    if blocksize > 0:  # downsample
+        if datain_copy.ndim > 1:
+            num_col = datain_copy.shape[1]
+            dataout = np.ones([int(num_rows / blocksize), num_col])
+            for ii, i in enumerate(range(0, num_rows, blocksize)):
+                for j in range(num_col):
+                    block = datain_copy[i:i + blocksize, j]
+                    block = block[filter_array[i:i + blocksize, j]]
+                    if method == 'mean':
+                        if keep_nan:
+                            dataout[ii, j] = np.mean(block)
+                        else:
+                            dataout[ii, j] = np.nanmean(block)
+                    elif method == 'sum':
+                        if keep_nan:
+                            dataout[ii, j] = np.sum(block)
+                        else:
+                            dataout[ii, j] = np.nansum(block)
+        else:
+            dataout = np.ones([int(num_rows / blocksize), ])
+            for ii, i in enumerate(range(0, num_rows, blocksize)):
+                block = datain_copy[i:i + blocksize]
+                block = block[filter_array[i:i + blocksize]]
+                if method == 'mean':
+                    if keep_nan:
+                        dataout[ii] = np.mean(block)
+                    else:
+                        dataout[ii] = np.nanmean(block)
+
+                elif method == 'sum':
+                    if keep_nan:
+                        dataout[ii] = np.sum(block)
+                    else:
+                        dataout[ii] = np.nansum(block)
+
+    elif blocksize < 0:  # upsample ignoring the filter
+
+        blocksize_copy = blocksize * -1
+
+        if datain_copy.ndim > 1:
+            dataout = np.ones([int(num_rows * blocksize_copy), datain_copy.shape[1]])
+            for i in range(num_rows):
+                if method == 'mean':
+                    dataout[i * blocksize_copy: i * blocksize_copy + blocksize_copy, :] = datain_copy[i, :]
+                elif method == 'sum':
+                    dataout[i * blocksize_copy: i * blocksize_copy + blocksize_copy, :] = datain_copy[i, :] / blocksize_copy
+        else:
+            dataout = np.ones([int(num_rows * blocksize_copy), ])
+            for i in range(num_rows):
+                if method == 'mean':
+                    dataout[i * blocksize_copy: i * blocksize_copy + blocksize_copy] = datain_copy[i]
+                if method == 'sum':
+                    dataout[i * blocksize_copy: i * blocksize_copy + blocksize_copy] = datain_copy[i] / blocksize_copy
+
+    return dataout
