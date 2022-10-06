@@ -13,16 +13,16 @@ import matplotlib.dates as mdates
 config = {}
 config['num_secs_output']=1800
 config['tacc'] = 274.16
-config['tmelt'] = 273.16
+config['tmelt'] = 274.16
 
 # clark2009 melt parameters
-config['mf_mean'] = 4
+config['mf_mean'] = 5
 config['mf_amp'] = 2.5
-config['mf_alb'] = 1
-config['mf_alb_decay'] = 1.0
+config['mf_alb'] = 2.5
+config['mf_alb_decay'] = 5
 config['mf_ros'] = 5 # default 2.5
 config['mf_doy_max_ddf'] = 356 # default 356
-config['mf_doy_min_ddf'] = 183 # default 210
+config['mf_doy_min_ddf'] = 173 # default 210
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
