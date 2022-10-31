@@ -9,14 +9,15 @@ from nz_snow_tools.util.utils import convert_datetime_julian_day
 from nz_snow_tools.util.utils import setup_nztm_dem, trim_data_to_mask, trim_lat_lon_bounds
 
 #TODO # todos indicate which parameters need to change to switch between VCSN and NZCSM
-hydro_years_to_take = np.arange(2018, 2020 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
-plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/NZ/august2021' #TODO
+hydro_years_to_take = np.arange(2001, 2022 + 1)  # [2013 + 1]  # range(2001, 2013 + 1)
+plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow II/VCSN_grid_snow/plots' #TODO
 # plot_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 # model_analysis_area = 145378  # sq km.
-catchment = 'NZ'  # string identifying catchment modelled #TODO
+catchment = 'SI'  # string identifying catchment modelled #TODO
 mask_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 dem_folder = 'C:/Users/conwayjp/OneDrive - NIWA/Data/GIS_DATA/Topography/DEM_NZSOS'
-modis_dem = 'modis_nz_dem_250m' #TODO
+modis_dem = 'modis_si_dem_250m' #TODO
+trim_modis_to_mask = False #TODO trim -only when using NZ only runs - modis DEM is not masked.
 
 if modis_dem == 'modis_si_dem_250m':
 
@@ -40,36 +41,39 @@ elif modis_dem == 'modis_nz_dem_250m':
                                                      modis_dem))  # just load the mask the chooses land points from the dem. snow data has modis hy2018_2020 landpoints mask applied in NZ_evaluation_otf
     # mask = np.load("C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis/modis_mask_hy2018_2020_landpoints.npy")
 
-lat_array, lon_array, nztm_dem, y_centres, x_centres = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
+if trim_modis_to_mask:
+    lat_array, lon_array, nztm_dem, y_centres, x_centres = trim_lat_lon_bounds(mask, lat_array, lon_array, nztm_dem, y_centres, x_centres)
 
 # # modis options
 modis_sc_threshold = 50  # value of fsca (in percent) that is counted as being snow covered
 modis_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
 # modis_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz'
 
+# [ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m] = pickle.load(open(
+#     modis_output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, modis_output_dem,
+#                                                                           modis_sc_threshold), 'rb'))
 [ann_ts_av_sca_m, ann_ts_av_sca_thres_m, ann_dt_m, ann_scd_m] = pickle.load(open(
-    modis_output_folder + '/summary_MODIS_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], catchment, modis_output_dem,
-                                                                          modis_sc_threshold), 'rb'))
+    r"C:\Users\conwayjp\OneDrive - NIWA\projects\DSC Snow\MODIS\summary_MODIS_2000_2016_SI_nztm250m_thres50.pkl", 'rb'),encoding='latin1')
+
 # model options
 
-run_id = 'cl09_default_ros'  ## 'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' ##TODO
+run_id = 'clark_opt_muellerA_minus1'  ## 'cl09_tmelt275'#'cl09_default' #'cl09_tmelt275_ros' ##TODO
 which_model = 'clark2009'  #TODO
 # run_id = 'dsc_default'  #'dsc_mueller_TF2p4_tmelt278_ros'  #
 # which_model = 'dsc_snow'  # 'clark2009'  # 'dsc_snow'#
-met_inp = 'nzcsm7-12'  # 'vcsn_norton'#'nzcsm7-12'#vcsn_norton' #nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology #TODO
-
-output_dem = 'nz_dem_250m' #TODO
-model_swe_sc_threshold = 30  # threshold for treating a grid cell as snow covered (mm w.e)#TODO
-model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2101/snow reanalysis'
+met_inp = 'vcsn_norton_rainBC'  # 'vcsn_norton'#'nzcsm7-12'#vcsn_norton' #nzcsm7-12'  # 'vcsn_norton' #   # identifier for input meteorology #TODO
+trim_model_to_modis = False # trim model data to modis SI dem?
+output_dem = 'si_dem_250m' #TODO
+model_swe_sc_threshold = 5  # threshold for treating a grid cell as snow covered (mm w.e)#TODO
+model_output_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/DSC Snow II/VCSN_grid_snow/for Todd'
 # model_output_folder = '/nesi/nobackup/niwa00004/jonoconway/snow_sims_nz/nzcsm'
 
 
 [ann_ts_av_swe, ann_ts_av_sca_thres, ann_dt, ann_scd, ann_av_swe, ann_max_swe, ann_metadata] = pickle.load(open(
     model_output_folder + '/summary_MODEL_{}_{}_{}_{}_{}_{}_{}_thres{}.pkl'.format(hydro_years_to_take[0], hydro_years_to_take[-1], met_inp, which_model,
                                                                                    catchment, output_dem, run_id, model_swe_sc_threshold), 'rb'))
-# cut down model data to trimmed modis SI domain.
-
-if modis_dem == 'modis_si_dem_250m':
+# cut down model data to trimmed modis SI domain. but only for NZ domain that is cut down and not SI only simulations.
+if trim_model_to_modis:
     ann_scd = [trim_data_to_mask(a, mask) for a in ann_scd]
     ann_max_swe = [trim_data_to_mask(a, mask) for a in ann_max_swe]
     ann_av_swe = [trim_data_to_mask(a, mask) for a in ann_av_swe]
@@ -119,19 +123,19 @@ subsets = {
         'xlim': [1.27e6, 1.3e6],
         'ylim': [5.015e6, 5.045e6]
     },
-    'Central-Nth-Island': {
-        'xlim': [1.66e6, 1.91e6],
-        'ylim': [5.41e6, 5.69e6]
-    },
+    # 'Central-Nth-Island': {
+    #     'xlim': [1.66e6, 1.91e6],
+    #     'ylim': [5.41e6, 5.69e6]
+    # },
     'South-Island': {
         'xlim': [1.08e6, 1.72e6],
         'ylim': [4.82e6, 5.52e6]
     },
-
-    'Ruapehu': {
-        'xlim': [1.81e6, 1.84e6],
-        'ylim': [5.64e6, 5.67e6]
-    }
+    #
+    # 'Ruapehu': {
+    #     'xlim': [1.81e6, 1.84e6],
+    #     'ylim': [5.64e6, 5.67e6]
+    # }
 
 }
 
@@ -483,53 +487,53 @@ for name in subsets.keys():
                                                                                       run_id,
                                                                                       met_inp, which_model, catchment), dpi=300)
 
-# plot years separately
-for i, year_to_take in enumerate(hydro_years_to_take):
-    fig1 = plt.figure(figsize=[4, 4])
-    print('loading data for year {}'.format(year_to_take))
-    model_scd_1year = ann_scd[i]
-    CS1 = plt.contourf(x_centres, y_centres, model_scd_1year, levels=bin_edges, cmap=copy.copy(plt.cm.get_cmap('magma_r')), extend='max')
-    # CS1.cmap.set_bad('grey')
-    CS1.cmap.set_over([0.47, 0.72, 0.77])
-    # CS1.cmap.set_under('none')
-    plt.gca().set_aspect('equal')
-    # plt.imshow(modis_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='magma_r')
-    plt.xticks([])
-    plt.yticks([])
-    cbar = plt.colorbar()
-    cbar.set_label('Snow cover duration (days)', rotation=90)
-    plt.xticks(np.arange(12e5, 21e5, 2e5))
-    plt.yticks(np.arange(48e5, 63e5, 2e5))
-    plt.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
-    plt.ylabel('NZTM northing')
-    plt.xlabel('NZTM easting')
-    plt.title('Snow cover duration HY{}'.format(year_to_take))
-    plt.tight_layout()
-    plt.savefig(plot_folder + '/SCD model HY{} thres{} {} {} {} {}.png'.format(year_to_take, model_swe_sc_threshold, run_id, met_inp, which_model, catchment),
-                dpi=300)
-
-for i, year_to_take in enumerate(hydro_years_to_take):
-    fig1 = plt.figure(figsize=[4, 4])
-    print('loading data for year {}'.format(year_to_take))
-    modis_scd_1year = ann_scd_m[i]
-    CS1 = plt.contourf(x_centres, y_centres, modis_scd_1year, levels=bin_edges, cmap=copy.copy(plt.cm.get_cmap('magma_r')), extend='max')
-    # CS1.cmap.set_bad('grey')
-    CS1.cmap.set_over([0.47, 0.72, 0.77])
-    # CS1.cmap.set_under('none')
-    plt.gca().set_aspect('equal')
-    # plt.imshow(modis_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='magma_r')
-    plt.xticks([])
-    plt.yticks([])
-    cbar = plt.colorbar()
-    cbar.set_label('Snow cover duration (days)', rotation=90)
-    plt.xticks(np.arange(12e5, 21e5, 2e5))
-    plt.yticks(np.arange(48e5, 63e5, 2e5))
-    plt.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
-    plt.ylabel('NZTM northing')
-    plt.xlabel('NZTM easting')
-    plt.title('Snow cover duration HY{}'.format(year_to_take))
-    plt.tight_layout()
-    plt.savefig(plot_folder + '/SCD modis HY{} thres{} {} {}.png'.format(year_to_take, modis_sc_threshold, run_id, catchment), dpi=300)
+# # plot years separately
+# for i, year_to_take in enumerate(hydro_years_to_take):
+#     fig1 = plt.figure(figsize=[4, 4])
+#     print('loading data for year {}'.format(year_to_take))
+#     model_scd_1year = ann_scd[i]
+#     CS1 = plt.contourf(x_centres, y_centres, model_scd_1year, levels=bin_edges, cmap=copy.copy(plt.cm.get_cmap('magma_r')), extend='max')
+#     # CS1.cmap.set_bad('grey')
+#     CS1.cmap.set_over([0.47, 0.72, 0.77])
+#     # CS1.cmap.set_under('none')
+#     plt.gca().set_aspect('equal')
+#     # plt.imshow(modis_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='magma_r')
+#     plt.xticks([])
+#     plt.yticks([])
+#     cbar = plt.colorbar()
+#     cbar.set_label('Snow cover duration (days)', rotation=90)
+#     plt.xticks(np.arange(12e5, 21e5, 2e5))
+#     plt.yticks(np.arange(48e5, 63e5, 2e5))
+#     plt.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
+#     plt.ylabel('NZTM northing')
+#     plt.xlabel('NZTM easting')
+#     plt.title('Snow cover duration HY{}'.format(year_to_take))
+#     plt.tight_layout()
+#     plt.savefig(plot_folder + '/SCD model HY{} thres{} {} {} {} {}.png'.format(year_to_take, model_swe_sc_threshold, run_id, met_inp, which_model, catchment),
+#                 dpi=300)
+#
+# for i, year_to_take in enumerate(hydro_years_to_take):
+#     fig1 = plt.figure(figsize=[4, 4])
+#     print('loading data for year {}'.format(year_to_take))
+#     modis_scd_1year = ann_scd_m[i]
+#     CS1 = plt.contourf(x_centres, y_centres, modis_scd_1year, levels=bin_edges, cmap=copy.copy(plt.cm.get_cmap('magma_r')), extend='max')
+#     # CS1.cmap.set_bad('grey')
+#     CS1.cmap.set_over([0.47, 0.72, 0.77])
+#     # CS1.cmap.set_under('none')
+#     plt.gca().set_aspect('equal')
+#     # plt.imshow(modis_scd, origin=0, interpolation='none', vmin=0, vmax=365, cmap='magma_r')
+#     plt.xticks([])
+#     plt.yticks([])
+#     cbar = plt.colorbar()
+#     cbar.set_label('Snow cover duration (days)', rotation=90)
+#     plt.xticks(np.arange(12e5, 21e5, 2e5))
+#     plt.yticks(np.arange(48e5, 63e5, 2e5))
+#     plt.ticklabel_format(axis='both', style='sci', scilimits=(0, 0))
+#     plt.ylabel('NZTM northing')
+#     plt.xlabel('NZTM easting')
+#     plt.title('Snow cover duration HY{}'.format(year_to_take))
+#     plt.tight_layout()
+#     plt.savefig(plot_folder + '/SCD modis HY{} thres{} {} {}.png'.format(year_to_take, modis_sc_threshold, run_id, catchment), dpi=300)
 
 # plot modis scd vs elevation
 fig1 = plt.figure(figsize=[4, 4])
