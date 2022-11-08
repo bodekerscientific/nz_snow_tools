@@ -20,6 +20,7 @@ import os
 dem = 'modis_nz_dem_250m' # identifier for modis grid - extent specified below
 mask_folder = '/nesi/nobackup/niwa00026/Observation/Snow_RemoteSensing/catchment_masks'  # location of numpy catchment mask. must be writeable if mask_created == False
 catchment_shp_folder = '/nesi/nobackup/niwa00026/Observation/Snow_RemoteSensing/Catchments'  # shapefile containing polyline or polygon of catchment in WGS84
+shapefile_proj = 'NZTM' #  projection of shapefile either NZTM of WGS84
 
 # read names of shapefiles
 contents = os.listdir(catchment_shp_folder)
@@ -53,8 +54,12 @@ for catchment in shps:
         mask_shpfile = catchment_shp_folder + '/{}'.format(catchment)
     else:
         mask_shpfile = catchment_shp_folder + '/{}.shp'.format(catchment)
-    if dem == 'modis_nz_dem_250m':
+
+    if shapefile_proj == 'NZTM':
         mask = create_mask_from_shpfile(y_centres, x_centres, mask_shpfile)
-    else:
+    elif shapefile_proj == 'WGS84':
         mask = create_mask_from_shpfile(lat_array, lon_array, mask_shpfile)
+    else:
+        print('incorrect shapefile projection')
+
     np.save(mask_folder + '/{}_{}.npy'.format(catchment, dem), mask)
