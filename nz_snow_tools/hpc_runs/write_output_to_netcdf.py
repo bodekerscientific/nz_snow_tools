@@ -79,7 +79,7 @@ def write_fields_to_netcdf(outfile, t_scd, t_lat, t_lon, t_northing, t_easting, 
         data=t_scd.astype('f4'),
         dims=['northing', 'easting'],
         attrs={'long_name': 'annual snow cover duration',
-               'units': 'days', })
+               'units': 'days per year', })
     da_lat = xr.DataArray(
         data=t_lat.astype('f4'),
         dims=['northing', 'easting'],

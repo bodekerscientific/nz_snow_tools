@@ -380,8 +380,8 @@ def nztm_to_wgs84(in_y, in_x):
     """converts from NZTM to WGS84  Inputs and outputs can be arrays.
     """
     from pyproj import Proj, transform
-    inProj = Proj(init='epsg:2193')
-    outProj = Proj(init='epsg:4326')
+    inProj = Proj('epsg:2193')
+    outProj = Proj('epsg:4326')
     out_x, out_y = transform(inProj, outProj, in_x, in_y)
     return out_y, out_x
 
@@ -390,8 +390,8 @@ def wgs84_to_nztm(in_y, in_x):
     """converts from WGS84  to NZTM Inputs and outputs can be arrays.
     """
     from pyproj import Proj, transform
-    inProj = Proj(init='epsg:4326')
-    outProj = Proj(init='epsg:2193')
+    inProj = Proj('epsg:4326')
+    outProj = Proj('epsg:2193')
     out_x, out_y = transform(inProj, outProj, in_x, in_y)
     return out_y, out_x
 
