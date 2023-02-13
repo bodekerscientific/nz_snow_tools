@@ -80,6 +80,23 @@ variables:
       units: "m s-1"
       standard_name: "wind_speed"
       long_name: "wind speed at 10m derived from eastward and northward components"
+  wind_direction:
+    convert_uv: True
+    input_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/states_nzcsm_FR7-12_kupeA.nc"
+    input_var_name_u: "sfc_zonal_wind"
+    input_var_name_v: "sfc_merid_wind"
+    input_time_var: "time0"
+    output_name: "sfc_wind_direction"
+    output_meta:
+      units: "degrees"
+      standard_name: "wind_from_direction"
+      long_name: "wind direction in degrees east of True North derived from interpolated eastward and northward components"
+
+#climate_change_offsets:
+#  air_temp:
+#    absolute_change: 1.5
+#  total_precip:
+#    percentage_change: 10
 
 input_grid:
   dem_file: "/nesi/project/niwa00004/jonoconway/nzcsm_tn_compilation/7-12/states_nzcsm_FR7-12_kupeA.nc"
