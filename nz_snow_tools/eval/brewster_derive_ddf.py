@@ -7,9 +7,9 @@ import matplotlib.dates as mdates
 from nz_snow_tools.util.utils import blockfun
 
 # set temperature threshold with which to calculate degree days
-tmelt = 275.15
+tmelt = 274.15
 thres_melt = 1 # threshold (mm / day) to filter out days with small melt
-thres_dd = 0.5 # threshold (K / day) to filter out days with small dd
+thres_dd = 1 # threshold (K / day) to filter out days with small dd
 
 # load brewster glacier data
 inp_dat = np.genfromtxt(
@@ -56,3 +56,60 @@ plt.ylabel('ddf (mm w.e. C^-1 day^-1)')
 plt.xlabel('day of year')
 plt.title('ddf derived from Brewster SEB/SMB model - melt thres={}K'.format(tmelt))
 plt.savefig(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2201\snow_model_ensembles\deriving ddf from SEB output\brewster_ddf_tmelt{}.png'.format(tmelt))
+
+
+#snow surface only
+daily_snow = blockfun(seb_dat[:,12],48,method='mean') > .6 # use measured albedo > 0.6 to indicate snow
+ind3  = np.logical_and(ind,daily_snow)
+ind4 = np.logical_and(ind3,daily_rain==0)
+ind5 = np.logical_and(ind3,daily_rain>0)
+plt.figure()
+plt.scatter(daily_doy[ind4],daily_melt[ind4]/daily_dd[ind4],label='dry days',facecolors='none',edgecolors='k')
+# plt.plot(daily_doy[ind],daily_surface_melt[ind]/daily_dd[ind],'ok')
+plt.scatter(daily_doy[ind5],daily_melt[ind5]/daily_dd[ind5],c=np.log(daily_rain[ind5]),label='rain days')
+plt.legend()
+plt.ylabel('ddf (mm w.e. C^-1 day^-1)')
+plt.xlabel('day of year')
+plt.title('ddf derived from Brewster SEB/SMB model - melt thres={}K'.format(tmelt))
+plt.savefig(r'C:\Users\conwayjp\OneDrive - NIWA\projects\CARH2201\snow_model_ensembles\deriving ddf from SEB output\brewster_ddf_snowonly_tmelt{}.png'.format(tmelt))
+
+
+plt.figure()
+plt.scatter(daily_dd[daily_snow],daily_melt[daily_snow])
+ind_ros = np.logical_and(daily_snow,daily_rain>0)
+plt.scatter(daily_dd[ind_ros],daily_melt[ind_ros])
+plt.show()
+
+daily_ddf = daily_melt/daily_dd
+spring = daily_doy > 244
+winter = np.logical_and(daily_doy>152,daily_doy<244)
+
+ind7 = np.logical_and(ind4,spring)
+ind8 = np.logical_and(ind5,spring)
+ind9 = np.logical_and(ind4,winter)
+ind10 = np.logical_and(ind5,winter)
+
+ind11 = np.logical_and(ind3,spring)
+ind12 = np.logical_and(ind3,winter)
+#
+print('all time ddf {:0.2f}'.format(daily_ddf[ind2].mean()))
+print('all time snow ddf {:0.2f}'.format(daily_ddf[ind3].mean()))
+
+print('all time snow ddf - no rain {:0.2f}'.format(daily_ddf[ind4].mean()))
+print('all time snow ddf -ros {:0.2f}'.format(daily_ddf[ind5].mean()))
+
+print('spring snow ddf - no rain {:0.2f}'.format(daily_ddf[ind7].mean()))
+print('spring snow ddf -ros {:0.2f}'.format(daily_ddf[ind8].mean()))
+
+print('winter snow ddf - no rain {:0.2f}'.format(daily_ddf[ind9].mean()))
+print('winter snow ddf -ros {:0.2f}'.format(daily_ddf[ind10].mean()))
+
+daily_ddf[ind4].mean() # all time snow ddf - dry
+daily_ddf[ind5].mean() # all time snow ddf - rain
+
+daily_ddf[ind7].mean() # spring snow ddf - dry
+daily_ddf[ind8].mean() # spring snow ddf - rain
+
+daily_ddf[ind9].mean() # winter snow ddf - dry
+daily_ddf[ind10].mean() # winter snow ddf - rain
+

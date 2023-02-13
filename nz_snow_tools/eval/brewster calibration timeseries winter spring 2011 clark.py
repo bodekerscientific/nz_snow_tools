@@ -4,23 +4,24 @@ code to call the snow model for a simple test case using brewster glacier data
 
 import numpy as np
 from nz_snow_tools.snow.clark2009_snow_model import snow_main_simple
-from nz_snow_tools.util.utils import make_regular_timeseries
+from nz_snow_tools.util.utils import make_regular_timeseries, convert_datetime_julian_day
 import matplotlib.pylab as plt
 import datetime as dt
 import matplotlib.dates as mdates
 
+
 # configuration dictionary containing model parameters.
 config = {}
 config['num_secs_output']=1800
-config['tacc'] = 274.16
-config['tmelt'] = 274.16
+config['tacc'] = 274.15
+config['tmelt'] = 273.15
 
 # clark2009 melt parameters
-config['mf_mean'] = 5
+config['mf_mean'] = 4
 config['mf_amp'] = 2.5
-config['mf_alb'] = 2.5
+config['mf_alb'] = 1.5
 config['mf_alb_decay'] = 5
-config['mf_ros'] = 5 # default 2.5
+config['mf_ros'] = 4 # default 2.5
 config['mf_doy_max_ddf'] = 356 # default 356
 config['mf_doy_min_ddf'] = 173 # default 210
 
@@ -37,7 +38,7 @@ inp_hourdec = inp_dat[start_t:end_t, 3]
 grid_size = 1
 grid_id = np.arange(grid_size)
 inp_ta = inp_dat[start_t:end_t, 7][:, np.newaxis] * np.ones(grid_size) + 273.16  # 2 metre air temp in C
-inp_precip = inp_dat[start_t:end_t, 21][:, np.newaxis] * np.ones(grid_size)  # precip in mm
+inp_precip = inp_dat[start_t:end_t, 21][:, np.newaxis] * np.ones(grid_size) # precip in mm
 inp_sw = inp_dat[start_t:end_t, 15][:, np.newaxis] * np.ones(grid_size)
 inp_sfc = inp_dat[start_t-1:end_t, 19] # surface height change
 inp_sfc -= inp_sfc[0]# reset to 0 at beginning of period
@@ -66,9 +67,20 @@ st_swe, st_melt, st_acc, st_alb = snow_main_simple(inp_ta, inp_precip, inp_doy, 
                                            init_d_snow=init_d_snow, inp_sw=inp_sw, which_melt='clark2009', **config)
 
 plot_dt = inp_dt[start_t-1:end_t] # model stores initial state
-plt.plot(plot_dt,st_swe[:, 0],label='clark2009')
+
+
+def objective(x_t, a_t, b_t, c_t, d_t):
+    return (a_t - d_t) / (1 + b_t ** (x_t - c_t)) + d_t
+
+
+plot_doy = np.asarray(convert_datetime_julian_day(plot_dt))
+plot_doy[plot_doy<90]+=365
+plot_dens = objective(plot_doy,567.1,0.925,270.3,383.5)
+
 plt.plot(plot_dt,seb_mb, label='SEB')
-plt.plot(plot_dt,inp_sfc*492,label='sfc*492')
+plt.plot(plot_dt,st_swe[:, 0],label='clark2009')
+# plt.plot(plot_dt,inp_sfc*492,label='sfc*492')
+plt.plot(plot_dt,inp_sfc*plot_dens,label='sfc*calc_dens')
 plt.plot([dt.datetime(2011,7,18),dt.datetime(2011,10,27),dt.datetime(2011,11,13)],[577,1448,1291],'o',label='stake_mb') # measured accumualation to 27th November 2011
 #plt.xticks(range(0,len(st_swe[:, 0]),48*30),np.linspace(inp_doy[0],inp_doy[-1]+365+1,len(st_swe[:, 0])/(48*30.)+1,dtype=int))
 plt.gcf().autofmt_xdate()

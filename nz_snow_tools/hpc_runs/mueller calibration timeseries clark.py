@@ -19,14 +19,14 @@ model = 'clark'
 config = {}
 config['num_secs_output'] = 3600
 config['tacc'] = 274.15 # default 274.15
-config['tmelt'] = 274.15 # default 273.15
+config['tmelt'] = 273.15 # default 273.15
 
 # clark2009 melt parameters
-config['mf_mean'] = 4 # default 5
+config['mf_mean'] = 4# default 5
 config['mf_amp'] = 2.5 # default 5
 config['mf_alb'] = 1.5 # default 2.5
 config['mf_alb_decay'] = 5 # default 5 (clark) or 1 (topnet) # timescale for adjustment (after this time effect will be 37% of full effect)
-config['mf_ros'] = 5 # default 2.5 (clark) or 0 (topnet)
+config['mf_ros'] = 4 # default 2.5 (clark) or 0 (topnet)
 config['mf_doy_max_ddf'] = 356  # default 356
 config['mf_doy_min_ddf'] = 173 # default 173 (clark) or 210 (topnet)
 #
@@ -47,7 +47,7 @@ config['mf_doy_min_ddf'] = 173 # default 173 (clark) or 210 (topnet)
 infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/SIN_density_SIP/input_met/mueller_hut_met_20170501_20200401_with_hs_swe_rain_withcloud_precip_harder_update1.pkl'
 aws_df = pkl.load(open(infile, 'rb'))
 start_t = 0
-end_t = None
+end_t = 15840
 inp_dt = [i.to_pydatetime() for i in aws_df.index[start_t:end_t]]
 inp_doy = [i.dayofyear for i in aws_df.index[start_t:end_t]]
 inp_hourdec = [i.hour for i in aws_df.index[start_t:end_t]]
@@ -78,10 +78,11 @@ elif model == 'eti':
 obs_swe = aws_df.swe[start_t:end_t] * 1000  # measured swe - convert to mm w.e.
 plot_dt = inp_dt  # model stores initial state
 
-plt.figure(figsize=(8,6))
+plt.figure(figsize=(5.5,4))
+plt.plot(plot_dt, obs_swe, label='obs')
 plt.plot(plot_dt, st_swe[1:, 0], label='mod')
 # plt.plot(plot_dt, st_swe1[1:, 0], label='dsc_snow-param albedo')
-plt.plot(plot_dt, obs_swe, label='obs')
+
 # plt.xticks(range(0,len(st_swe[:, 0]),48*30),np.linspace(inp_doy[0],inp_doy[-1]+365+1,len(st_swe[:, 0])/(48*30.)+1,dtype=int))
 # plt.gcf().autofmt_xdate()
 months = mdates.MonthLocator(interval=3)  # every month
@@ -114,14 +115,19 @@ print('SWE {:.1f}'.format(swe))
 print('SWE +1K {:.1f}'.format(swe1))
 print('dSWE {:.1f}'.format(swe-swe1))
 
-scd = np.sum(st_swe > 10)/24/3
-scd1 = np.sum(st_swe1 > 10)/24/3
+scd = np.sum(st_swe > 10)/24/2
+scd1 = np.sum(st_swe1 > 10)/24/2
 
 print('SCD {:.1f}'.format(scd))
 print('SCD +1K {:.1f}'.format(scd1))
 print('dSCD {:.1f}'.format(scd-scd1))
 print('SWE sensitivity {:.1f}'.format((1 - (swe1/swe))*100))
 print('SCD sensitivity {:.1f}'.format((scd-scd1)/scd*100))
+
+print('{:.1f}'.format((1 - (swe1/swe))*100))
+print('{:.1f}'.format((1 - (scd1/scd))*100))
+print('{:.1f}'.format((swe-swe1)))
+print('{:.1f}'.format((scd-scd1)))
 
 # simulation for 400 m lower
 
