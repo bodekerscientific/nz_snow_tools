@@ -13,13 +13,13 @@ import pickle as pkl
 
 plot_folder = 'C:/Users/conwayjp/OneDrive - NIWA/projects/CARH2201/snow_model_ensembles/eti_output'
 model = 'eti' #'eti' 'clark'
-run_id = 'eti - optA Tmelt276.16 TF.04,RF.0108, frs=0.85,os=.5'
-
+# run_id = 'eti - optA Tmelt276.16 TF.04,RF.0108, frs=0.85,os=.5, alb_swe_thres = 0'
+run_id = 'eti - opt Tmelt275.16, TF 0.083, RF.0108,frs=0.90,os=.60, alb_swe_thres = 0, no ROS'
 # configuration dictionary containing model parameters.
 config = {}
 config['num_secs_output'] = 3600
 config['tacc'] = 274.16 # default 274.15
-config['tmelt'] = 276.16 # default 273.15
+config['tmelt'] = 275.16 # default 273.15
 
 # clark2009 melt parameters
 config['mf_mean'] = 5 # default 5
@@ -31,20 +31,20 @@ config['mf_doy_max_ddf'] = 356  # default 356
 config['mf_doy_min_ddf'] = 210 # default 173 (clark) or 210 (topnet)
 
 # dsc_snow melt parameters
-config['tf'] = 0.04 * 24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
+config['tf'] = 0.0833 * 24  # hamish 0.13. ruschle 0.04, pelliciotti 0.05
 config['rf'] = 0.0108 * 24  # hamish 0.0075,ruschle 0.009, pelliciotti 0.0094 # ruschle before 1 Oct 0.157. theoretical 0.0108
 # dsc_snow albedo parameters
 config['tc'] = 10
 config['a_ice'] = 0.42
-config['a_freshsnow'] = 0.85
-config['a_firn'] = 0.5
+config['a_freshsnow'] = 0.90
+config['a_firn'] = 0.60
 config['dc'] = 11.0
-config['alb_swe_thres'] = 10
+config['alb_swe_thres'] = 0
 config['ros'] = False
 config['ta_m_tt'] = False
 
 # load input data for mueller hut
-infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/SIN_density_SIP/input_met/mueller_hut_met_20170501_20200401_with_hs_swe_rain_withcloud_precip_harder_update1.pkl'
+infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/FWWR_SIN/data processing/point_model_inputs/mueller_hut/mueller_hut_met_20170501_20200401_with_hs_swe_rain_withcloud_precip_harder_update1.pkl'
 aws_df = pkl.load(open(infile, 'rb'))
 start_t = 0
 end_t = None
@@ -108,7 +108,7 @@ plt.savefig(plot_folder + '/{}.png'.format(run_id),dpi=300)
 
 
 # load input data for mueller hut
-infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/SIN_density_SIP/input_met/mueller_hut_met_20170501_20200401_with_hs_swe_rain_withcloud_precip_harder_update1_plus1K.pkl'
+infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/FWWR_SIN/data processing/point_model_inputs/mueller_hut/mueller_hut_met_20170501_20200401_with_hs_swe_rain_withcloud_precip_harder_update1_plus1K.pkl'
 aws_df = pkl.load(open(infile, 'rb'))
 start_t = 0
 end_t = None
