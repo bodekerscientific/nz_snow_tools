@@ -727,6 +727,17 @@ def u_v_from_ws_wd(ws,wd):
     v = -ws * np.cos(np.deg2rad(wd))
     return u, v
 
+
+def ea_from_tc_rh(tc, rh, pres_hpa=None):
+    # vapour pressure in hPa calculated according to Buck
+    # Rh should be with respect to water, not ice.
+    if pres_hpa == None:
+        ea = 6.1121 * np.exp(17.502 * tc / (240.97 + tc)) * rh / 100
+    else:
+        ea = (1.0007 + (3.46 * 1e-6 * pres_hpa)) * 6.1121 * np.exp(17.502 * tc / (240.97 + tc)) * rh / 100
+    return ea
+
+
 def blockfun(datain, blocksize, filter=None, method='mean', keep_nan=False):
     """
     function to block average data using nan mean. can filter out bad values, and can upsample data. use negative blocksize to upsample data.

@@ -372,11 +372,4 @@ def read_met_input(inp_nc_file, i):
     return inp_ta, inp_p, inp_sw
 
 
-def ea_from_tc_rh(tc, rh, pres_hpa=None):
-    # vapour pressure in hPa calculated according to Buck
-    # Rh should be with respect to water, not ice.
-    if pres_hpa == None:
-        ea = 6.1121 * np.exp(17.502 * tc / (240.97 + tc)) * rh / 100
-    else:
-        ea = (1.0007 + (3.46 * 1e-6 * pres_hpa)) * 6.1121 * np.exp(17.502 * tc / (240.97 + tc)) * rh / 100
-    return ea
+
