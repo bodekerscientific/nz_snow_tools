@@ -125,10 +125,10 @@ def load_subset_modis_annual(catchment, year_to_take, modis_folder, modis_dem, m
 
     # read date and convert into hydrological year
 
-    if year_to_take == 2012:  # hack to get 2012 working (bad timestamp)
-        modis_dt = nc.num2date(np.arange(55927, 56293), 'days since 1858-11-17 00:00:00')
-    else:
-        modis_dt = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
+    # if year_to_take == 2012:  # hack to get 2012 working (bad timestamp)
+    #     modis_dt = nc.num2date(np.arange(55927, 56293), 'days since 1858-11-17 00:00:00')
+    # else:
+    modis_dt = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units)
 
     # mask out values outside of catchment
     trimmed_fsca[:, trimmed_mask == 0] = np.nan
@@ -153,7 +153,7 @@ def load_subset_modis_hydroyear_allnz(catchment, year_to_take, modis_folder, mod
         print('not set up grids except modis_nz_dem_250m')
     # read date and find times for hydroloigcal year
     modis_dt = nc.num2date(nc_file.variables['time'][:], nc_file.variables['time'].units, only_use_cftime_datetimes=False,
-                         only_use_python_datetimes=True)
+                           only_use_python_datetimes=True)
     ind_dt = np.logical_and(modis_dt >= dt.datetime(year_to_take - 1, 4, 1), modis_dt < dt.datetime(year_to_take, 4, 1))
     ndsi = nc_file.variables['NDSI_Snow_Cover_Cloudfree'][ind_dt]  # .astype('float32')  # nsdi in %
 
