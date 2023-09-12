@@ -7,6 +7,7 @@ from __future__ import division
 import datetime
 import numpy as np
 from matplotlib.path import Path
+from pyproj import Transformer
 
 
 
@@ -329,32 +330,6 @@ def create_mask_from_shpfile(lat, lon, shp_path, idx=0):
     lat = np.asarray(lat)
     lon = np.asarray(lon)
 
-    # load shapefile
-    import shapefile
-    shp = shapefile.Reader(shp_path)
-    shapes2 = shp.shapes()
-    shppath = Path(shapes2[idx].points)
-
-    # check to find errors at start of file, and remove points
-    diffs = np.sqrt(np.diff(shppath.vertices[:], axis=0)[:, 0] ** 2 + np.diff(shppath.vertices[:], axis=0)[:, 1] ** 2)
-    where_large_diff = np.where(diffs > 5 * np.mean(diffs))[0]
-    if where_large_diff.size > 0:  # if large jumps in distance
-        # find indexes of parts
-        part_idx = np.concatenate([shapes2[idx].parts[:],np.array((len(shapes2[idx].points),))])
-        keep_idx = np.full(len(shapes2[idx].points),True)
-        # check to see if any parts correspond to a large jump
-        for i, start_idx in enumerate(shapes2[idx].parts[:]):
-            if start_idx - 1 in where_large_diff:
-                # remove points from this part
-                keep_idx[part_idx[i]:part_idx[i+1]] = False
-        # remove bad points
-        shppath.vertices = shppath.vertices[keep_idx, :]
-        print('trimmed {} points from shapefile {}'.format(sum(~keep_idx), shp_path))
-
-    # plt.scatter(shppath.vertices[:,0],shppath.vertices[:,1])
-    # plt.scatter(shppath.vertices[:200,0],shppath.vertices[:200,1],color='r')
-    # plt.scatter(shppath.vertices[200:,0],shppath.vertices[200:,1],color='g') # green points plot over red, so first red points are duplicate and can be excluded
-
     if lat.ndim == 1 and lon.ndim == 1:  # create array of lat and lon
         nx, ny = len(lon), len(lat)
         longarray, latarray = np.meshgrid(lon, lat)
@@ -370,29 +345,72 @@ def create_mask_from_shpfile(lat, lon, shp_path, idx=0):
     x, y = longarray.flatten(), latarray.flatten()
     points = np.vstack((x, y)).T
 
-    # create the mask array
-    grid = shppath.contains_points(points)
-    grid = grid.reshape((ny, nx))
+    if '.shp' in shp_path:
+        # load shapefile
+        import shapefile
+        shp = shapefile.Reader(shp_path)
+        shapes2 = shp.shapes()
+        shppath = Path(shapes2[idx].points)
+
+        # check to find errors at start of file, and remove points
+        diffs = np.sqrt(np.diff(shppath.vertices[:], axis=0)[:, 0] ** 2 + np.diff(shppath.vertices[:], axis=0)[:, 1] ** 2)
+        where_large_diff = np.where(diffs > 5 * np.mean(diffs))[0]
+        if where_large_diff.size > 0:  # if large jumps in distance
+            # find indexes of parts
+            part_idx = np.concatenate([shapes2[idx].parts[:],np.array((len(shapes2[idx].points),))])
+            keep_idx = np.full(len(shapes2[idx].points),True)
+            # check to see if any parts correspond to a large jump
+            for i, start_idx in enumerate(shapes2[idx].parts[:]):
+                if start_idx - 1 in where_large_diff:
+                    # remove points from this part
+                    keep_idx[part_idx[i]:part_idx[i+1]] = False
+            # remove bad points
+            shppath.vertices = shppath.vertices[keep_idx, :]
+            print('trimmed {} points from shapefile {}'.format(sum(~keep_idx), shp_path))
+
+        # plt.scatter(shppath.vertices[:,0],shppath.vertices[:,1])
+        # plt.scatter(shppath.vertices[:200,0],shppath.vertices[:200,1],color='r')
+        # plt.scatter(shppath.vertices[200:,0],shppath.vertices[200:,1],color='g') # green points plot over red, so first red points are duplicate and can be excluded
+
+        # create the mask array
+        grid = shppath.contains_points(points)
+        grid = grid.reshape((ny, nx))
+
+    elif '.gpkg' in shp_path:
+        import geopandas as gpd
+        from shapely.geometry import Point
+        import fiona
+
+        if 'catchment' in fiona.listlayers(shp_path):
+            shp = gpd.read_file(shp_path,layer='catchment')
+        elif len(fiona.listlayers(shp_path)) == 0:
+            shp = gpd.read_file(shp_path)
+        else:
+            print('multiple layers with no catchment layer in geopackage file {}'.format(shp_path))
+
+        grid = np.asarray([Point(p).intersects(shp.geometry[0]) for p in points])
+
+        # nx, ny = len(lon), len(lat)
+        grid = grid.reshape((ny, nx))
+
     return grid
 
 
 def nztm_to_wgs84(in_y, in_x):
     """converts from NZTM to WGS84  Inputs and outputs can be arrays.
+    updated to pyproj2 style https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrade-transformer
     """
-    from pyproj import Proj, transform
-    inProj = Proj('epsg:2193')
-    outProj = Proj('epsg:4326')
-    out_x, out_y = transform(inProj, outProj, in_x, in_y)
+    transformer = Transformer.from_crs('EPSG:2193', 'EPSG:4326')
+    out_x, out_y = transformer.transform(in_x, in_y)
     return out_y, out_x
 
 
 def wgs84_to_nztm(in_y, in_x):
     """converts from WGS84  to NZTM Inputs and outputs can be arrays.
+    updated to pyproj2 style https://pyproj4.github.io/pyproj/stable/gotchas.html#upgrade-transformer
     """
-    from pyproj import Proj, transform
-    inProj = Proj('epsg:4326')
-    outProj = Proj('epsg:2193')
-    out_x, out_y = transform(inProj, outProj, in_x, in_y)
+    transformer = Transformer.from_crs('EPSG:4326','EPSG:2193')
+    out_x, out_y = transformer.transform(in_x, in_y)
     return out_y, out_x
 
 
