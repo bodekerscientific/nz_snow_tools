@@ -1,14 +1,10 @@
 """
-code to call the snow model for a simple test case using brewster glacier data
+code to plot output from FSM2
 """
 
 import numpy as np
-from nz_snow_tools.snow.clark2009_snow_model import snow_main_simple
-from nz_snow_tools.util.utils import make_regular_timeseries
 import matplotlib.pylab as plt
 import datetime as dt
-import matplotlib.dates as mdates
-import pickle as pkl
 import pandas as pd
 
 
@@ -32,7 +28,7 @@ output_filename = 'Lark_coldstartstat.txt'
 run_id = 'lark fsm2 default'
 
 # load input data for mueller hut
-infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/FWWR_SIN/precip_larkins/larkins_met_20170501_20191204_with_hs_swe_rain_precip_harder_cloud_lw.csv'
+infile = 'C:/Users/conwayjp/OneDrive - NIWA/projects/FWWR_SIN/data processing/precip_larkins/larkins_met_20170501_20191204_with_hs_swe_rain_precip_harder_cloud_lw.csv'
 aws_df = pd.read_csv(infile, parse_dates=True, index_col='Timestamp')
 start_t = 0
 end_t = None
@@ -101,7 +97,7 @@ plt.plot(aws_df.sw_cs_ghi.index, aws_df.sw_cs_ghi.values)
 plt.plot(aws_df.swin.index, aws_df.swin.values)
 plt.gcf().autofmt_xdate()
 
-fsm_inp = pd.read_csv('C:/Users/conwayjp/OneDrive - NIWA/projects/FWWR_SIN/precip_larkins/larkins_met_20170501_20191204_FSM2.txt', delimiter='\t',
+fsm_inp = pd.read_csv('C:/Users/conwayjp/OneDrive - NIWA/projects/FWWR_SIN/data processing/precip_larkins/larkins_met_20170501_20191204_FSM2.txt', delimiter='\t',
                       names=['year', 'month', 'day', 'hour', 'swin', 'lwmod', 'snowfall_rate_harder', 'rainfall_rate_harder', 'tk', 'rh', 'ws', 'pressure'])
 timestamp = [dt.datetime(y, m, d, h) for y, m, d, h in zip(fsm_inp.year.values, fsm_inp.month.values, fsm_inp.day.values,fsm_inp.hour)]
 fsm_inp.index = timestamp

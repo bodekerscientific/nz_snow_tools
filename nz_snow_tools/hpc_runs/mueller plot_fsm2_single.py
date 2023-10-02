@@ -1,10 +1,8 @@
 """
-code to call the snow model for a simple test case using brewster glacier data
+code to plot output from FSM2
 """
 
 import numpy as np
-from nz_snow_tools.snow.clark2009_snow_model import snow_main_simple
-from nz_snow_tools.util.utils import make_regular_timeseries
 import matplotlib.pylab as plt
 import datetime as dt
 import matplotlib.dates as mdates
